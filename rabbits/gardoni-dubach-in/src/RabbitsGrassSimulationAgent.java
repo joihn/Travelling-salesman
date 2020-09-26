@@ -23,7 +23,7 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	private final int ID;
 	private RabbitsGrassSimulationSpace rgSpace;
 
-	private final double randomDirChange = 0.7;
+	private final double randomDirChange = 0.3;
 
 	public RabbitsGrassSimulationAgent(int initEnergy){
 		x = -1;
@@ -88,7 +88,9 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 		int newY = 0;
 
 		for(int i=0;i<maxiter;i++){
-			direction = (direction+1)%4;
+			if (i>0){
+				direction = (direction+1)%4;
+			}
 			int[] DxDy = getDxDy(direction);
 			int dx = DxDy[0];
 			int dy = DxDy[1];
