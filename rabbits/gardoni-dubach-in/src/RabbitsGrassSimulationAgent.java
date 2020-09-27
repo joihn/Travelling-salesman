@@ -26,8 +26,8 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	private final double randomDirChange = 0.3;
 
 	public RabbitsGrassSimulationAgent(int initEnergy){
-		x = -1;
-		y = -1;
+		x = 0;
+		y = 0;
 		energy = initEnergy;
 		setDirection();
 		IDNumber++;
@@ -151,13 +151,12 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	}
 
 	public boolean tryMove(int newX, int newY){
-		System.out.println("oldX: "+x+", oldY: "+ y + ", newX: "+ newX + ", newY: "+ newY);
+		//System.out.println("oldX: "+x+", oldY: "+ y + ", newX: "+ newX + ", newY: "+ newY);
 		return rgSpace.moveAgentAt(x,y,newX,newY);
 	}
 
 	public void report(){
-		System.out.println(	getID() + " at x: " + x + ", y: " + y +
-							" has energy level " + getEnergy() + ".");
+		//System.out.println(	getID() + " at x: " + x + ", y: " + y +" has energy level " + getEnergy() + ".");
 	}
 
 }

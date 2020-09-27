@@ -114,7 +114,7 @@ public class RabbitsGrassSimulationSpace {
     public boolean addRabbit(RabbitsGrassSimulationAgent rabbit){
         boolean addSuccess = false;
         int count = 0;
-        int countLimit = 10;
+        int countLimit = 20;
         // random initialisation of rabbit position (int rabbitSpace and each agent itself)
         while((addSuccess==false)&&(count<countLimit)){
             int x = (int) (Math.random()*(rabbitSpace.getSizeX()));

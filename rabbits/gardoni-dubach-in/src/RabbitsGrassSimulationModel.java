@@ -129,6 +129,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 			}
 			for (int i = 0; i < agentList.size();i++){
 				RabbitsGrassSimulationAgent rgAgent = (RabbitsGrassSimulationAgent) agentList.get(i);
+				System.out.println("Agent at x:"+rgAgent.getX()+", y: "+ rgAgent.getY());
 				rgAgent.report();
 			}
 		}
@@ -148,8 +149,9 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 							addNewAgent();
 							rgAgent.setEnergy(initEnergy); // decrease the parents energy level to init value
 						}
+
 					}
-					System.out.println("=============");
+
 					int deadAgents = reapDeadAgents();
 					rgSpace.growGrass(grassGrowthRate); // grass growth
 
@@ -175,8 +177,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 			}
 
 			schedule.scheduleActionAtInterval(5,new RabbitGrassUpdateRabbitsInSpace());
-
-
 		}
 
 		public void buildDisplay(){
@@ -204,8 +204,10 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		// add a new Agent object to the agentList
 		private void addNewAgent(){
 			RabbitsGrassSimulationAgent rabbit = new RabbitsGrassSimulationAgent(initEnergy);
-			agentList.add(rabbit);
-			rgSpace.addRabbit(rabbit);
+			if(rgSpace.addRabbit(rabbit)){
+				agentList.add(rabbit);
+			}
+			//System.out.println("Added new agent at x:"+rabbit.getX()+", Y: "+ rabbit.getY());
 		}
 
 		// count the number of agents that are alive (used for the diagram)
