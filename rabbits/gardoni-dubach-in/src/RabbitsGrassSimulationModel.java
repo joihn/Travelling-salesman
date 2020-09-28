@@ -154,7 +154,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 					int deadAgents = reapDeadAgents();
 					rgSpace.growGrass(grassGrowthRate); // grass growth
 
-					// todo implement reproduction of rabbits
 					displaySurf.updateDisplay();
 				}
 
@@ -186,7 +185,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 				map.mapColor(i, new Color(0,(int)(i*8+127),0));
 			}
 			map.mapColor(0,Color.white); // default color
-			// TODO check different objects
 			Value2DDisplay displayGrass = new Value2DDisplay(rgSpace.getCurrentGrassSpace(),map);
 
 			Object2DDisplay displayAgents = new Object2DDisplay(rgSpace.getCurrentAgentSpace());
