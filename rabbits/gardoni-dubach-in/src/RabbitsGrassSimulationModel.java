@@ -84,7 +84,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		}
 
 		public void setup() {
-			System.out.println("Running setup");
 			rgSpace = null; // cleanup the model space
 
 			agentList = new ArrayList();
@@ -207,7 +206,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 			if(rgSpace.addRabbit(rabbit)){
 				agentList.add(rabbit);
 			}
-			//System.out.println("Added new agent at x:"+rabbit.getX()+", Y: "+ rabbit.getY());
 		}
 
 		// count the number of agents that are alive (used for the diagram)

@@ -151,12 +151,10 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	}
 
 	public boolean tryMove(int newX, int newY){
-		//System.out.println("oldX: "+x+", oldY: "+ y + ", newX: "+ newX + ", newY: "+ newY);
 		return rgSpace.moveAgentAt(x,y,newX,newY);
 	}
 
 	public void report(){
-		//System.out.println(	getID() + " at x: " + x + ", y: " + y +" has energy level " + getEnergy() + ".");
 	}
 
 }
