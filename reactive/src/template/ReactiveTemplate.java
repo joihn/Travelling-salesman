@@ -32,6 +32,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		this.pPickup = discount;
 		this.numActions = 0;
 		this.myAgent = agent;
+
+
 	}
 
 	@Override
