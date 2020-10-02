@@ -45,7 +45,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		// fields for simulation parameters
 		private int gridSize = INITSIZE;
 		private int numInitRabbits = NUMRABBITS;
-		private int numInitGrass = NUMGRASSES;
+ 		private int numInitGrass = NUMGRASSES;
 		private double grassGrowthRate = INITGRASSGROWTHRATE;
 		private int birthThreshold = INITBIRTHTHRESHOLD;
 		private int initEnergy = AGENTINITENERGY;
