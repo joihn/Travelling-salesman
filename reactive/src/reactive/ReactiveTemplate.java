@@ -1,4 +1,4 @@
-package template;
+package reactive;
 
 import java.util.Random;
 import java.util.HashMap;
