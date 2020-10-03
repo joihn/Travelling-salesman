@@ -75,6 +75,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		// create ArrayList of States
 		states = new ArrayList<State>();
 
+		actionTable = new HashMap<State,ArrayList<String>>();
 		for (City cityFrom : topo) {
 			for (City cityTo : topo) {
 				// include the state where cityTo==cityFrom -> N*(N+1)
@@ -83,29 +84,42 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			}
 			State state = new State(cityFrom, null);
 			states.add(state);
+
+			System.out.println("Added state (" + state.currentCity + ", " + state.goalCity+")");
 		}
 
 // create ArrayList of Actions: Each element is a city that
 		for (State state : states) {
 			ArrayList<String> availableActions = new ArrayList<String>();
 			// state has a task
-			if (state.goalCity != null) {
-				String action = "deliver";
-				availableActions.add(action);
-			} else { // the agent has no task yet
-				for (City neighborCity : state.currentCity.neighbors()) {
-					String action = neighborCity.name;
-					availableActions.add(action);
-				}
-				String action = "pickup";
+			String action = new String();
+			// move to neighbour is always possible (even during a task)
+			for (City neighborCity : state.currentCity.neighbors()) {
+				action = neighborCity.name;
 				availableActions.add(action);
 			}
+
+			if (state.goalCity != null) {
+				// agent has a task
+				if (state.goalCity == state.currentCity){
+					action = "deliver";
+				} else {
+					action = state.goalCity.name;
+				}
+			} else {
+				// the agent has no task yet
+				action = "pickup";
+			}
+			availableActions.add(action);
 			actionTable.put(state, availableActions);
 
 		}
 	}
 
 	private void createTransitionTable() {
+
+		transitionTable = new HashMap<State_Action,ArrayList<FutureState_Prob>>();
+
 		for (State currentState : states) { // loop over all possible initial states
 			ArrayList<String> avAction = actionTable.get(currentState); // extract possible actions at initial state
 			for (String action : avAction) {
@@ -118,7 +132,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 					if (state_action.currentState != nextState){ // exclude that the agent ends up in the same state
 						// initialize transition probability to 0
 						FutureState_Prob futStateProb = new FutureState_Prob(nextState,0);
-
 
 						if (action == "pickup"){
 							// pickup case (100% probability)
@@ -172,10 +185,13 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	}
 
 	public void createReward(TaskDistribution td, Topology tp, Vehicle vehicle){
+		rewardTable = new HashMap<State_Action, Double>();
+
 		for(State state : states){
-			Double reward = new Double(0);
+
 			for(String action : actionTable.get(state)){
-				if ((action != "pickup") || (action != "deliver")){
+				Double reward = new Double(0);
+				if ((action != "pickup") && (action != "deliver")){
 					// action is move to some city
 					City cityStepTo = getCityFromString(action, tp);
 
@@ -189,6 +205,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				}
 				State_Action stateAction = new State_Action(state, action);
 				rewardTable.put(stateAction, reward);
+
+				System.out.println("RT: Add (" + state.currentCity.name + ", " + state.goalCity.name + ") Action " + action);
 			}
 		}
 	}
