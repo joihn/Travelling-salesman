@@ -81,11 +81,12 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				// include the state where cityTo==cityFrom -> N*(N+1)
 				State state = new State(cityFrom, cityTo);
 				states.add(state);
+				//System.out.println("Added state (" + state.currentCity + ", " + state.goalCity+")");
 			}
 			State state = new State(cityFrom, null);
 			states.add(state);
 
-			System.out.println("Added state (" + state.currentCity + ", " + state.goalCity+")");
+			//System.out.println("Added state (" + state.currentCity + ", " + state.goalCity+")");
 		}
 
 // create ArrayList of Actions: Each element is a city that
@@ -111,6 +112,11 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				action = "pickup";
 			}
 			availableActions.add(action);
+
+			for (String act : availableActions){
+				System.out.println("State: ("+state.currentCity+","+state.goalCity + ") action: " + act);
+			}
+
 			actionTable.put(state, availableActions);
 
 		}
@@ -206,7 +212,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				State_Action stateAction = new State_Action(state, action);
 				rewardTable.put(stateAction, reward);
 
-				System.out.println("RT: Add (" + state.currentCity.name + ", " + state.goalCity.name + ") Action " + action);
+				//System.out.println("RT: Add (" + state.currentCity.name + ", " + state.goalCity.name + ") Action " + action);
 			}
 		}
 	}
