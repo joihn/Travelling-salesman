@@ -8,8 +8,6 @@ import logist.simulation.Vehicle;
 import logist.agent.Agent;
 import logist.behavior.ReactiveBehavior;
 import logist.plan.Action;
-import logist.plan.Action.Move;
-import logist.plan.Action.Pickup;
 import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.topology.Topology;
@@ -40,11 +38,11 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 	class State {
 		public City currentCity;
-		public City goalCity;
+		public City potentialPackageDest;
 
-		private State(City currCity, City nexCity) {
+		private State(City currCity, City potentialPackageDest_) {
 			currentCity = currCity;
-			goalCity = nexCity;
+			potentialPackageDest = potentialPackageDest_;
 		}
 	}
 
@@ -79,9 +77,9 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		actionTable = new HashMap<State,ArrayList<String>>();
 		for (City cityFrom : topo) {
-			for (City cityTo : topo) {
+			for (City potentialPackageDest : topo) {
 				// include the state where cityTo==cityFrom -> N*(N+1)
-				State state = new State(cityFrom, cityTo);
+				State state = new State(cityFrom, potentialPackageDest);
 				states.add(state);
 				//System.out.println("Added state (" + state.currentCity + ", " + state.goalCity+")");
 			}
@@ -103,12 +101,12 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				availableActions.add(action);
 			}
 
-			if (state.goalCity != null) {
+			if (state.potentialPackageDest != null) {
 				// agent has a task
-				if (state.goalCity == state.currentCity){
+				if (state.potentialPackageDest == state.currentCity){
 					action = "deliver";
 				} else {
-					action = state.goalCity.name;
+					action = state.potentialPackageDest.name;
 				}
 			} else {
 				// the agent has no task yet
@@ -147,8 +145,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 						if (action == "pickup"){
 							// pickup case (100% probability)
 							if ((state_action.currentState.currentCity == nextState.currentCity)&&
-									(nextState.goalCity != null)&&
-									(state_action.currentState.goalCity == null)) {
+									(nextState.potentialPackageDest != null)&&
+									(state_action.currentState.potentialPackageDest == null)) {
 
 								futStateProb.futureState = nextState;
 								futStateProb.probability = 1;
@@ -157,8 +155,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 						} else if (state_action.action == "deliver"){
 							// deliver a task: reset goal city to null with 100% probability if the movement is correct
 							if ((state_action.currentState.currentCity == nextState.currentCity)&&
-									(nextState.goalCity == null)&&
-									(state_action.currentState.currentCity == state_action.currentState.goalCity)){
+									(nextState.potentialPackageDest == null)&&
+									(state_action.currentState.currentCity == state_action.currentState.potentialPackageDest)){
 
 								futStateProb.futureState = nextState;
 								futStateProb.probability = 1;
@@ -210,7 +208,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 					// action is move to some city
 					City cityStepTo = getCityFromString(action, tp);
 
-					if(state.goalCity!=null){
+					if(state.potentialPackageDest !=null){
 						// agent has a task
 						reward += td.reward(state.currentCity,cityStepTo ) - state.currentCity.distanceTo(cityStepTo)*vehicle.costPerKm();
 					} else {
@@ -342,7 +340,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			int i = 0;
 			for (State currentStateIter : states) { // loop over all possible initial states
 
-				if (currentStateIter.currentCity == vehicle.getCurrentCity() && destination == currentStateIter.goalCity) {
+				if (currentStateIter.currentCity == vehicle.getCurrentCity() && destination == currentStateIter.potentialPackageDest) {
 					currentState = currentStateIter;
 					i++;
 				}
