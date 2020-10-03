@@ -23,6 +23,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	private int numActions;
 	private Agent myAgent;
 
+	private ArrayList<State_Action> stateActionList;
 	private HashMap<State_Action, ArrayList<FutureState_Prob>> transitionTable;
 	private HashMap<State,ArrayList<String>> actionTable;
 
@@ -90,6 +91,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 
 // create ArrayList of Actions: Each element is a city that
+
 		for (State state : states) {
 			ArrayList<String> availableActions = new ArrayList<String>();
 			// state has a task
@@ -125,11 +127,13 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	private void createTransitionTable() {
 
 		transitionTable = new HashMap<State_Action,ArrayList<FutureState_Prob>>();
+		stateActionList = new ArrayList<State_Action>();
 
 		for (State currentState : states) { // loop over all possible initial states
 			ArrayList<String> avAction = actionTable.get(currentState); // extract possible actions at initial state
 			for (String action : avAction) {
 				State_Action state_action = new State_Action(currentState, action); // loop over all possible actions
+				stateActionList.add(state_action);
 
 				ArrayList<FutureState_Prob> futureStates_Prob = new ArrayList<FutureState_Prob>();
 
@@ -190,12 +194,16 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 	}
 
-	public void createReward(TaskDistribution td, Topology tp, Vehicle vehicle){
+	public HashMap<State_Action, Double> createReward(TaskDistribution td, Topology tp, Vehicle vehicle){
 		rewardTable = new HashMap<State_Action, Double>();
 
-		for(State state : states){
+		//for(State state : states){
 
-			for(String action : actionTable.get(state)){
+		//	for(String action : actionTable.get(state)){
+		for (State_Action stateAction : stateActionList){
+				String action = stateAction.action;
+				State state = stateAction.currentState;
+
 				Double reward = new Double(0);
 				if ((action != "pickup") && (action != "deliver")){
 					// action is move to some city
@@ -209,12 +217,11 @@ public class ReactiveTemplate implements ReactiveBehavior {
 						reward -= state.currentCity.distanceTo(cityStepTo)*vehicle.costPerKm();
 					}
 				}
-				State_Action stateAction = new State_Action(state, action);
-				rewardTable.put(stateAction, reward);
 
-				//System.out.println("RT: Add (" + state.currentCity.name + ", " + state.goalCity.name + ") Action " + action);
-			}
+				rewardTable.put(stateAction, reward);
 		}
+
+		return rewardTable;
 	}
 
 	public City getCityFromString(String cityName, Topology tp){
@@ -232,13 +239,18 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		HashMap<State, Double> V = new HashMap<State,Double>();
 
 		HashMap<State_Action,Double> Q = new HashMap<State_Action,Double>();
+
+
 		// initialization
-		for(State state : states){
-			V.put(state, new Double(0));
-			for(String action : actionTable.get(state)){
-				State_Action stateAction = new State_Action(state,action);
-				if (rewardTable.get(stateAction)>V.get(state)){
-					V.put(state,rewardTable.get(stateAction));
+		//for(State state : states){
+		//	V.put(state, new Double(0));
+		for(State_Action stateAction : stateActionList){
+			V.put(stateAction.currentState, new Double(0));
+
+			for(String action : actionTable.get(stateAction.currentState)){
+
+				if (rewardTable.get(stateAction)>V.get(stateAction.currentState)){
+					V.put(stateAction.currentState,rewardTable.get(stateAction));
 				}
 			}
 		}
@@ -248,33 +260,29 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		int cnt = 0;
 
 		HashMap<State, Double> V0 = new HashMap<State, Double>(V);
+		actionLookupTable = new HashMap<State, String>();
 
 		while(cnt<niter){
-			for(State state : states){
-				for(String action : actionTable.get(state)){
-					State_Action stateAction = new State_Action(state,action);
-					Double futureReward = new Double(0);
-					for(FutureState_Prob futureStateProb : transitionTable.get(stateAction)){
-						futureReward += futureStateProb.probability*V.get(futureStateProb.futureState);
-					}
-					Q.put(stateAction, rewardTable.get(stateAction)+discount*futureReward);
+			for(State_Action stateAction : stateActionList){
+				Double futureReward = new Double(0);
+				for(FutureState_Prob futureStateProb : transitionTable.get(stateAction)){
+					futureReward += futureStateProb.probability*V.get(futureStateProb.futureState);
 				}
-				// extract best action
-
+				Q.put(stateAction, rewardTable.get(stateAction)+discount*futureReward);
+			}
+			// extract best action
+			for(State_Action stateAction : stateActionList){
 				Double maxQ = new Double(0);
-				for(String action : actionTable.get(state)){
-					State_Action stateAction = new State_Action(state,action);
-					if(Q.get(stateAction)>maxQ){
-						maxQ = Q.get(stateAction);
-						actionLookupTable.put(state,stateAction.action);
-					}
+				if(Q.get(stateAction)>maxQ){
+					maxQ = Q.get(stateAction);
+					actionLookupTable.put(stateAction.currentState,stateAction.action);
+					V.put(stateAction.currentState,maxQ);
 				}
-				V.put(state,maxQ);
-
 			}
 			cnt++;
 
 		}
+		System.out.print("Finished Optimization");
 
 	}
 
@@ -291,6 +299,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		this.numActions = 0;
 		this.myAgent = agent;
 
+
+
 		Vehicle vehicle = agent.vehicles().get(0);
 		if(agent.vehicles().size()>1){
 			System.out.println("WARNING: Agent has more than 1 vehicle");
@@ -298,7 +308,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		createActionTable(topology); // initialize states list and actionTable
 		createTransitionTable();
-		createReward(td, topology, vehicle);
+		createReward(td, topology, vehicle); // TODO
 		RLA();
 	}
 
