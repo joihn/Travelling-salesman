@@ -19,15 +19,19 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 	private Random random;
 	private double pPickup;
+
 	private int numActions;
 	private Agent myAgent;
 
 	private HashMap<State_Action, ArrayList<FutureState_Prob>> transitionTable;
 	private HashMap<State,ArrayList<String>> actionTable;
 
-	private HashMap<State, Double> rewardTable;
+	private HashMap<State_Action, Double> rewardTable;
+
+	private HashMap<State, String> actionLookupTable;
 
 	private int nCities;
+	private double discount = 0.9;
 	private double mvtSuccessRate = 0.95;
 
 	private ArrayList<State> states;
@@ -141,14 +145,19 @@ public class ReactiveTemplate implements ReactiveBehavior {
 							if (state_action.action == nextState.currentCity.name){
 								// probability of correct movements
 								futStateProb.futureState = nextState;
-								futStateProb.probability = mvtSuccessRate;
+								if (currentState.currentCity.neighbors().size() == 1){
+									futStateProb.probability = 1;
+								} else {
+									futStateProb.probability = mvtSuccessRate;
+								}
 
 							} else if (state_action.currentState.currentCity.hasNeighbor(nextState.currentCity)) {
 								// state_action.action is not equal to nextState.current city -> move to another city then intended
 
 								// probability of false movements is nonzero for neighbour cities of current city
 								// distribute (1-mvtSuccessRate) uniformly on all neighbors of current state
-								double prob = (1-mvtSuccessRate)/state_action.currentState.currentCity.neighbors().size();
+								// TODO: check that no division by 0 occurs here
+								double prob = (1-mvtSuccessRate)/(state_action.currentState.currentCity.neighbors().size()-1);
 								futStateProb.futureState = nextState;
 								futStateProb.probability = prob;
 							}
@@ -178,6 +187,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 						reward -= state.currentCity.distanceTo(cityStepTo)*vehicle.costPerKm();
 					}
 				}
+				State_Action stateAction = new State_Action(state, action);
+				rewardTable.put(stateAction, reward);
 			}
 		}
 	}
@@ -193,7 +204,55 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		return null; // TODO check how to raise an exception
 	}
 
+	public void RLA(){
+		HashMap<State, Double> V = new HashMap<State,Double>();
 
+		HashMap<State_Action,Double> Q = new HashMap<State_Action,Double>();
+		// initialization
+		for(State state : states){
+			V.put(state, new Double(0));
+			for(String action : actionTable.get(state)){
+				State_Action stateAction = new State_Action(state,action);
+				if (rewardTable.get(stateAction)>V.get(state)){
+					V.put(state,rewardTable.get(stateAction));
+				}
+			}
+		}
+
+		// optimize
+		int niter = 10000;
+		int cnt = 0;
+
+		HashMap<State, Double> V0 = new HashMap<State, Double>(V);
+
+		while(cnt<niter){
+			for(State state : states){
+				for(String action : actionTable.get(state)){
+					State_Action stateAction = new State_Action(state,action);
+					Double futureReward = new Double(0);
+					for(FutureState_Prob futureStateProb : transitionTable.get(stateAction)){
+						futureReward += futureStateProb.probability*V.get(futureStateProb.futureState);
+					}
+					Q.put(stateAction, rewardTable.get(stateAction)+discount*futureReward);
+				}
+				// extract best action
+
+				Double maxQ = new Double(0);
+				for(String action : actionTable.get(state)){
+					State_Action stateAction = new State_Action(state,action);
+					if(Q.get(stateAction)>maxQ){
+						maxQ = Q.get(stateAction);
+						actionLookupTable.put(state,stateAction.action);
+					}
+				}
+				V.put(state,maxQ);
+
+			}
+			cnt++;
+
+		}
+
+	}
 
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
@@ -204,14 +263,19 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				0.95);
 
 		this.random = new Random();
-		this.pPickup = discount;
+		this.pPickup = discount; // TODO pay attention that there are not 2 discount variables
 		this.numActions = 0;
 		this.myAgent = agent;
 
+		Vehicle vehicle = agent.vehicles().get(0);
+		if(agent.vehicles().size()>1){
+			System.out.println("WARNING: Agent has more than 1 vehicle");
+		}
+
 		createActionTable(topology); // initialize states list and actionTable
 		createTransitionTable();
-		//nCities = topology.size();
-
+		createReward(td, topology, vehicle);
+		RLA();
 	}
 
 	@Override
