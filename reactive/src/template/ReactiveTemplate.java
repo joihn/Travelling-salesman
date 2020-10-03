@@ -25,6 +25,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	private HashMap<State_Action, ArrayList<FutureState_Prob>> transitionTable;
 	private HashMap<State,ArrayList<String>> actionTable;
 
+	private HashMap<State, Double> rewardTable;
+
 	private int nCities;
 	private double mvtSuccessRate = 0.95;
 
@@ -60,7 +62,11 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 	}
 
-
+	/** createActionTable creates:
+	 * - a list of all possible states
+	 * - a list of all possible action at a given state
+	 * - stores the result in a HashMap called actionTable
+	 **/
 	private void createActionTable(Topology topo) {
 		// create ArrayList of States
 		states = new ArrayList<State>();
@@ -156,16 +162,36 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 	}
 
-	public static void
+	public void createReward(TaskDistribution td, Topology tp, Vehicle vehicle){
+		for(State state : states){
+			Double reward = new Double(0);
+			for(String action : actionTable.get(state)){
+				if ((action != "pickup") || (action != "deliver")){
+					// action is move to some city
+					City cityStepTo = getCityFromString(action, tp);
 
+					if(state.goalCity!=null){
+						// agent has a task
+						reward += td.reward(state.currentCity,cityStepTo ) - state.currentCity.distanceTo(cityStepTo)*vehicle.costPerKm();
+					} else {
+						// agent moves without task
+						reward -= state.currentCity.distanceTo(cityStepTo)*vehicle.costPerKm();
+					}
+				}
+			}
+		}
+	}
 
-
-
-
-		// TODO create a method that returns the city object given the city name
-
-
-	// TODO transition matrix
+	public City getCityFromString(String cityName, Topology tp){
+		for(City city : tp){
+			if (cityName == city.name){
+				return city;
+			}
+		}
+		// action string corresponds to no city Name
+		System.out.println("WARNING: action string matches none of the city names");
+		return null; // TODO check how to raise an exception
+	}
 
 
 
