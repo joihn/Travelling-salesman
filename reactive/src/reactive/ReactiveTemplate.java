@@ -120,7 +120,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 	}
 
-	private void createTransitionTable() {
+	private void createTransitionTable(Topology topo) {
 
 		transitionTable = new HashMap<State_Action,ArrayList<FutureState_Prob>>();
 		stateActionList = new ArrayList<State_Action>();
@@ -128,23 +128,79 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		for (State currentState : states) { // loop over all possible initial states
 			ArrayList<String> avAction = actionTable.get(currentState); // extract possible actions at initial state
 			for (String action : avAction) {
+				ArrayList<FutureState_Prob> futureStates_Prob = new ArrayList<FutureState_Prob>();
+
 				State_Action state_action = new State_Action(currentState, action); // loop over all possible actions
 				stateActionList.add(state_action);
 
-				ArrayList<FutureState_Prob> futureStates_Prob = new ArrayList<FutureState_Prob>();
-
 				for(State nextState : states){ // loop over all possible next states
-
-
 					// initialize transition probability to 0
 					FutureState_Prob futStateProb = new FutureState_Prob(nextState,0);
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					/* TODO change the logic in the transition table:
 					*       state where currentCity == potentialPackageCity should be possibly excluded (-> modify states ArrayList)
 					* 		- probability where currentState.currentCity == nextState.currentCity is zero (DO THAT HERE!)
 					*		 (it is not possible to stay in the same town)
 					*/
-					// forbiding in-possible state next state couple
+
+					// TODO: remove this (until next todo)
+					if (state_action.currentState.currentCity == state_action.currentState.potentialPackageDest){
+						System.out.println("WARNING: currentCity equals nextCity in currentState-> should not get here");
+					}
+					if (nextState.currentCity == nextState.potentialPackageDest){
+						System.out.println("WARNING: currentCity equals nextCity in nextState-> should not get here");
+					}
+					// TODO: remove until here
+
+
+					if(state_action.action == "pickup"){
+						// handle pickup cases
+
+						if(nextState.currentCity == state_action.currentState.potentialPackageDest){
+							if(nextState.potentialPackageDest != null){
+								// assume you end up at the destination city and after delivery
+								// there is directly a task available again
+								// TODO check if this is true (seems a bit fishy)
+								futStateProb.probability = td.probability(nextState.currentCity,nextState.potentialPackageDest);
+							} else {
+								// agent ends up at the delivery city but there is no task available after delivery
+								// the probability that there is no task in city i equals p = 1- sum_j td.p(i,j)
+								double cumsum = 0;
+								for(City city : topo.cities()){
+									if (city != nextState.currentCity){
+										cumsum += td.probability(nextState.currentCity, city);
+									}
+								}
+								futStateProb.probability = 1-cumsum;
+							}
+						} else {
+							// currentCity of the nextState is not equal to the package destination
+							// it is impossible to end up in such a state after delivery
+							futStateProb.probability = 0;
+						}
+					} else {
+						// handle move cases
+						if(nextState.potentialPackageDest != null){
+							// in the next state is a package available
+							futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest);
+						} else {
+							// the next state has no task appearing
+							// this happens at a probability p = 1-sum_j td.p(i.j) (compare above)
+							// TODO check if this is true (seems a bit fishy)
+							double cumsum = 0;
+							for(City city : topo.cities()){
+								if (city != nextState.currentCity){
+									cumsum += td.probability(nextState.currentCity, city);
+								}
+							}
+							futStateProb.probability = 1-cumsum;
+						}
+					}
+					futureStates_Prob.add(futStateProb);
+
+
+					// TODO remove the code from here on
+					/*
+					if()
 					if 		(state_action.currentState.currentCity==state_action.currentState.potentialPackageDest ||  // destination os the same as current town
 							state_action.currentState.currentCity==nextState.currentCity ||                            // staying on the spot is forbiden
 							nextState.currentCity==nextState.potentialPackageDest                                    // destination is the same as current town; next state
@@ -152,16 +208,18 @@ public class ReactiveTemplate implements ReactiveBehavior {
 							 ) {
 						futStateProb.probability = 0.0;
 					}
+					*/
+					/*
 					else { //action stuff :D
 
 						if (state_action.action == "pickup") // you pick up
 						{              // there is package    														// you end up at destination
 							if (state_action.currentState.potentialPackageDest != null && nextState.currentCity == state_action.currentState.potentialPackageDest) {
-								futStateProb.probability = 1.0; // TODO is this probability equal to one?
+								futStateProb.probability = 1.0;
 							}
 						} else { // you don't pickup = you move to EXPLORE :D
 
-														// exploring step must be in neighboorhood								this neighboor has a task available FROM HIM
+														// exploring step must be in neighboorhood		this neighboor has a task available FROM HIM
 							if (state_action.currentState.currentCity.neighbors().contains(nextState.currentCity) && nextState.potentialPackageDest != null) {
 								//iterate trough neighboor
 								// we will do this for ALLL neighboor separately
@@ -178,10 +236,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 						}
 					}
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					futureStates_Prob.add(futStateProb);
+					*/
+					// TODO remove code until here
 				}
 				transitionTable.put(state_action,futureStates_Prob);
 
