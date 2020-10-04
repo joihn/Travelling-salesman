@@ -3,6 +3,8 @@ package reactive;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import logist.simulation.Vehicle;
 import logist.agent.Agent;
@@ -12,6 +14,8 @@ import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.topology.Topology;
 import logist.topology.Topology.City;
+
+
 
 public class ReactiveTemplate implements ReactiveBehavior {
 
@@ -31,8 +35,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	private HashMap<String, City> cityStringLookupTable;
 	City finalDestinationForOnlineTravelling=null;
 	private int nCities;
-	private double discount = 0.9;
-	private double mvtSuccessRate = 0.95;
+	private double discount = 0.0; // will be modified in setup
 
 	private ArrayList<State> states;
 
@@ -245,6 +248,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		// optimize
 		int niter = 10000;
 		int cnt = 0;
+		System.out.print("========   the discount is : " + discount);
 
 		HashMap<State, Double> V0 = new HashMap<State, Double>(V);
 		actionLookupTable = new HashMap<State, String>();
@@ -282,13 +286,14 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
 
+
 		// Reads the discount factor from the agents.xml file.
 		// If the property is not present it defaults to 0.95
-		Double discount = agent.readProperty("discount-factor", Double.class,
+		discount = agent.readProperty("discount-factor", Double.class,
 				0.95);
 
 		this.random = new Random();
-		this.pPickup = discount; // TODO pay attention that there are not 2 discount variables
+		this.pPickup = discount; // TODO pay attention that there are not 2 discount variables !!
 		this.numActions = 0;
 		this.myAgent = agent;
 		this.td=td;
@@ -341,17 +346,17 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			if (numActions >= 1) {
 				System.out.println("The total profit after " + numActions + " actions is " + myAgent.getTotalProfit() + " (average profit: " + (myAgent.getTotalProfit() / (double) numActions) + ")");
 			}
-			numActions++;
+
 			//System.out.println("Currently acting");
 
 			String currentBestAction = actionLookupTable.get(currentState); //TODO remove error
 
 			if (currentBestAction == "pickup") {
-				System.out.println("will try to pickup");
+				//System.out.println("will try to pickup");
 				action = new Action.Pickup(availableTask);
 				//finalDestinationForOnlineTravelling = availableTask.deliveryCity; // will go to delivery
 			} else if (currentBestAction!=null){ // action is a city
-				System.out.println("will try to move");
+				//System.out.println("will try to move");
 				City goalCity = cityStringLookupTable.get(currentBestAction);
 
 				if (vehicle.getCurrentCity().neighbors().contains(goalCity)) {
@@ -374,8 +379,22 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			}
 		}
 
+		//logging to file
+		String currentCountry="switzerland";
+		try{
+			FileWriter logger = null;
+			logger = new FileWriter("perfLog/"+currentCountry+".csv", true);
+			Double rewardPerKm = ((double) myAgent.getTotalReward() / (double)myAgent.getTotalDistance());
+			logger.append(myAgent.name()+ ";" + numActions+ ";" + myAgent.getTotalReward() + ";" + myAgent.getTotalDistance() +";" + rewardPerKm +"\n");
+			logger.flush();
+			logger.close();
+		}catch(IOException theError){
+			System.out.println("error writing log !");
+			theError.printStackTrace();
+		}
 
 
+		numActions++;
 		return action;
 	}
 
