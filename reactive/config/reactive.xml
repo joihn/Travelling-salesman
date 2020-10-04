@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- the default configuration for the reactive exercise -->
-<configuration name="ex1" mode="reactive">
+<configuration name="ex1" mode="reactive-random">
 
 	<!-- load settings -->
 	<settings import="config/settings_default.xml" />	

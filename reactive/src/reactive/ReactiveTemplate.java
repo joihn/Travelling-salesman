@@ -62,7 +62,10 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	class State_Action{
 		public State currentState;
 		public String action;
-
+		/**
+		 * @param s 	state object (current location, potentialPackageDestination)
+		 * @param act	action is a String corresponding to the name of the city where the agents goes
+		 */
 		private State_Action(State s, String act) {
 			currentState = s;
 			action = act;
@@ -77,49 +80,43 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	private void createActionTable(Topology topo) {
 		// create ArrayList of States
 		states = new ArrayList<State>();
-
 		actionTable = new HashMap<State,ArrayList<String>>();
+
+		// create ArrayList of all possible states
 		for (City cityFrom : topo) {
 			for (City potentialPackageDest : topo) {
-				// include the state where cityTo==cityFrom -> N*(N+1)
-				// TODO exclude this stupid case -> check that  cityFrom != potentialPackageDest!
-				State state = new State(cityFrom, potentialPackageDest);
-				states.add(state);
-				//System.out.println("Added state (" + state.currentCity + ", " + state.goalCity+")");
+				// exclude the case where the Destination equals the current City!
+				if (cityFrom != potentialPackageDest){
+					State state = new State(cityFrom, potentialPackageDest);
+					states.add(state);
+				}
 			}
 			State state = new State(cityFrom, null);
 			states.add(state);
-
-			//System.out.println("Added state (" + state.currentCity + ", " + state.goalCity+")");
 		}
 
-// create ArrayList of Actions: Each element is a city that
-
+		// create ArrayList of possible actions at each possible state
 		for (State state : states) {
 			ArrayList<String> availableActions = new ArrayList<String>();
-			// state has a task
 			String action = new String();
-			// move to neighbour is always possible (even during a task)
-			for (City neighborCity : state.currentCity.neighbors()) {
-				/* TODO check that neighbourCity != potentialPackage destination
-				 * 		-> don't have 2x the action to move to this city
-				 */
-				action = neighborCity.name;
+			if (state.potentialPackageDest != null){
+				// at this state a task is available -> add action to take the task
+				action = "pickup";
 				availableActions.add(action);
 			}
-
-			if (state.potentialPackageDest != null) {
-				// there is an available package
-				action = "pickup";
+			for (City neighborCity : state.currentCity.neighbors()) {
+				// if destination is a neighbor it can be reached through action "pickup" already
+				if(neighborCity != state.potentialPackageDest){
+					action = neighborCity.name;
+					availableActions.add(action);
+				}
 			}
-			availableActions.add(action);
-
-//			for (String act : availableActions){
-//				System.out.println("State: ("+state.currentCity+","+state.goalCity + ") action: " + act);
-//			}
-
 			actionTable.put(state, availableActions);
-
+		}
+		for(State stat : states){
+			for(String act : actionTable.get(stat)){
+				System.out.println("State: ("+stat.currentCity+", "+stat.potentialPackageDest+"), action: " + act);
+			}
 		}
 	}
 
@@ -192,36 +189,31 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 	}
 
-	public HashMap<State_Action, Double> createReward(TaskDistribution td, Topology tp, Vehicle vehicle){
+	public void createReward(TaskDistribution td, Topology tp, Vehicle vehicle){
 		rewardTable = new HashMap<State_Action, Double>();
 
-		//for(State state : states){
-
-		//	for(String action : actionTable.get(state)){
 		for (State_Action stateAction : stateActionList){
-				String action = stateAction.action;
-				State state = stateAction.currentState;
+			String action = stateAction.action;
+			State state = stateAction.currentState;
 
-				Double reward = new Double(0);
-				if (action == "pickup" ){
-					// action is move to some city
-					City destinationOfAcceptedPackage = state.potentialPackageDest;
+			Double reward = new Double(0);
+			if (action == "pickup") {
+				// reward for agent on delivery (agent can only take action delivery if a taskDestination is defined
+				City taskDestination = state.potentialPackageDest;
 
-					if(state.potentialPackageDest !=null){
-						// agent has a task
-						reward += td.reward(state.currentCity,destinationOfAcceptedPackage ) - state.currentCity.distanceTo(destinationOfAcceptedPackage)*vehicle.costPerKm();
-					} else {
-						// agent move to neighboor
-						// TODO if potentialPackageDest is null, pickup cannot be performed (code should never get here!)
-						reward -= state.currentCity.distanceTo(getCityFromString(action, tp))*vehicle.costPerKm();
-						// TODO negative reward should be executed if action is move to another neighbour
-					}
+				if (state.potentialPackageDest != null) {
+					// reward = task reward - cost of delivery
+					reward += td.reward(state.currentCity, taskDestination) - state.currentCity.distanceTo(taskDestination) * vehicle.costPerKm();
+				} else {
+					// if potentialPackageDest is null, pickup cannot be performed (code should never get here!)
+					System.out.println("WARNING: 'pickup' should be impossible at state with undefined Destination");
 				}
-
-				rewardTable.put(stateAction, reward);
+			} else {
+				// reward is negative if no task is taken and the vehicle moves arount empty
+				reward -= state.currentCity.distanceTo(getCityFromString(action, tp))*vehicle.costPerKm();
+			}
+			rewardTable.put(stateAction, reward);
 		}
-
-		return rewardTable; // TODO remove return here -> change the function to void
 	}
 
 	public City getCityFromString(String cityName, Topology tp){
@@ -317,7 +309,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		createActionTable(topology); // initialize states list and actionTable
 		createTransitionTable();
-		createReward(td, topology, vehicle); // TODO
+		createReward(td, topology, vehicle);
 		RLA();
 		//fill up the cityStringLookupTable for us in "act"
 		cityStringLookupTableFiller(topology);
