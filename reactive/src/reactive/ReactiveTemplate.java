@@ -8,8 +8,6 @@ import logist.simulation.Vehicle;
 import logist.agent.Agent;
 import logist.behavior.ReactiveBehavior;
 import logist.plan.Action;
-import logist.plan.Action.Move;
-import logist.plan.Action.Pickup;
 import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.topology.Topology;
@@ -30,7 +28,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	private HashMap<State_Action, Double> rewardTable;
 
 	private HashMap<State, String> actionLookupTable;
-
+	private HashMap<String, City> cityStringLookupTable;
+	City finalDestinationForOnlineTravelling=null;
 	private int nCities;
 	private double discount = 0.9;
 	private double mvtSuccessRate = 0.95;
@@ -39,11 +38,11 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 	class State {
 		public City currentCity;
-		public City goalCity;
+		public City potentialPackageDest;
 
-		private State(City currCity, City nexCity) {
+		private State(City currCity, City potentialPackageDest_) {
 			currentCity = currCity;
-			goalCity = nexCity;
+			potentialPackageDest = potentialPackageDest_;
 		}
 	}
 
@@ -78,9 +77,9 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		actionTable = new HashMap<State,ArrayList<String>>();
 		for (City cityFrom : topo) {
-			for (City cityTo : topo) {
+			for (City potentialPackageDest : topo) {
 				// include the state where cityTo==cityFrom -> N*(N+1)
-				State state = new State(cityFrom, cityTo);
+				State state = new State(cityFrom, potentialPackageDest);
 				states.add(state);
 				//System.out.println("Added state (" + state.currentCity + ", " + state.goalCity+")");
 			}
@@ -102,12 +101,12 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				availableActions.add(action);
 			}
 
-			if (state.goalCity != null) {
+			if (state.potentialPackageDest != null) {
 				// agent has a task
-				if (state.goalCity == state.currentCity){
+				if (state.potentialPackageDest == state.currentCity){
 					action = "deliver";
 				} else {
-					action = state.goalCity.name;
+					action = state.potentialPackageDest.name;
 				}
 			} else {
 				// the agent has no task yet
@@ -115,9 +114,9 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			}
 			availableActions.add(action);
 
-			for (String act : availableActions){
-				System.out.println("State: ("+state.currentCity+","+state.goalCity + ") action: " + act);
-			}
+//			for (String act : availableActions){
+//				System.out.println("State: ("+state.currentCity+","+state.goalCity + ") action: " + act);
+//			}
 
 			actionTable.put(state, availableActions);
 
@@ -146,8 +145,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 						if (action == "pickup"){
 							// pickup case (100% probability)
 							if ((state_action.currentState.currentCity == nextState.currentCity)&&
-									(nextState.goalCity != null)&&
-									(state_action.currentState.goalCity == null)) {
+									(nextState.potentialPackageDest != null)&&
+									(state_action.currentState.potentialPackageDest == null)) {
 
 								futStateProb.futureState = nextState;
 								futStateProb.probability = 1;
@@ -156,8 +155,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 						} else if (state_action.action == "deliver"){
 							// deliver a task: reset goal city to null with 100% probability if the movement is correct
 							if ((state_action.currentState.currentCity == nextState.currentCity)&&
-									(nextState.goalCity == null)&&
-									(state_action.currentState.currentCity == state_action.currentState.goalCity)){
+									(nextState.potentialPackageDest == null)&&
+									(state_action.currentState.currentCity == state_action.currentState.potentialPackageDest)){
 
 								futStateProb.futureState = nextState;
 								futStateProb.probability = 1;
@@ -209,7 +208,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 					// action is move to some city
 					City cityStepTo = getCityFromString(action, tp);
 
-					if(state.goalCity!=null){
+					if(state.potentialPackageDest !=null){
 						// agent has a task
 						reward += td.reward(state.currentCity,cityStepTo ) - state.currentCity.distanceTo(cityStepTo)*vehicle.costPerKm();
 					} else {
@@ -285,7 +284,13 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		System.out.print("Finished Optimization");
 
 	}
+	public void cityStringLookupTableFiller(Topology topology){
+		cityStringLookupTable = new HashMap<String, City>();
+		for(City city : topology){
 
+			cityStringLookupTable.put(city.name, city);
+		}
+	}
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
 
@@ -310,25 +315,86 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		createTransitionTable();
 		createReward(td, topology, vehicle); // TODO
 		RLA();
+		//fill up the cityStringLookupTable for us in "act"
+		cityStringLookupTableFiller(topology);
 	}
 
 	@Override
 	public Action act(Vehicle vehicle, Task availableTask) {
-		Action action;
+		Action action=null;
 
-		if (availableTask == null || random.nextDouble() > pPickup) {
-			City currentCity = vehicle.getCurrentCity();
-			action = new Move(currentCity.randomNeighbor(random));
-		} else {
-			action = new Pickup(availableTask);
+		if (finalDestinationForOnlineTravelling==null) {
+			// identify the current state
+			// info :
+			// current city
+			// if there is an available task
+			//    if yes, the destination a this task
+			City destination;
+			if (availableTask != null) {
+				destination = availableTask.deliveryCity;
+			} else {
+				destination = null; // if no package available, destination is null
+			}
+
+			State currentState = new State(vehicle.getCurrentCity(), null);
+			int i = 0;
+			for (State currentStateIter : states) { // loop over all possible initial states
+
+				if (currentStateIter.currentCity == vehicle.getCurrentCity() && destination == currentStateIter.potentialPackageDest) {
+					currentState = currentStateIter;
+					i++;
+				}
+
+			}
+			if (i != 1) {
+				System.out.println("WARING, didn't find the correct amount of current states");
+			}
+
+			if (numActions >= 1) {
+				System.out.println("The total profit after " + numActions + " actions is " + myAgent.getTotalProfit() + " (average profit: " + (myAgent.getTotalProfit() / (double) numActions) + ")");
+			}
+			numActions++;
+			//System.out.println("Currently acting");
+
+			String currentBestAction = actionLookupTable.get(currentState); //TODO remove error
+
+			if (currentBestAction == "pickup") {
+				System.out.println("will try to pickup");
+				action = new Action.Pickup(availableTask);
+			} else if (currentBestAction == "deliver") {
+				Task theCarriedTask = null;
+				System.out.println("will try to FAAAAKE deliver package");
+				//			for(Task j: vehicle.getCurrentTasks()) {
+				//				theCarriedTask = j;
+				//				break;
+				//			}
+				//			action= new Action.Delivery(theCarriedTask);
+			} else if (action!=null){ // action is a city
+				System.out.println("will try to move");
+				City goalCity = cityStringLookupTable.get(currentBestAction);
+
+				if (vehicle.getCurrentCity().neighbors().contains(goalCity)) {
+					action = new Action.Move(goalCity);
+					System.out.println("neighboor was my final destination HEHEHE! ");
+				} else {
+					finalDestinationForOnlineTravelling = goalCity; //TODO set to null
+					new Action.Move(vehicle.getCurrentCity().pathTo(goalCity).get(0));
+				}
+
+			}else{ // action is null !! :( gotta fix that
+				City choosenNeighboor=vehicle.getCurrentCity().neighbors().get(0); //TODO get closed one instead of first
+				action= new Action.Move(choosenNeighboor);
+			}
+		}else{ // travelling along the way for the final destination
+			City next_step = vehicle.getCurrentCity().pathTo(finalDestinationForOnlineTravelling).get(0);
+			action = new Action.Move(next_step);
+			if (next_step==finalDestinationForOnlineTravelling){
+				finalDestinationForOnlineTravelling=null;
+			}
 		}
-		
-		if (numActions >= 1) {
-			System.out.println("The total profit after "+numActions+" actions is "+myAgent.getTotalProfit()+" (average profit: "+(myAgent.getTotalProfit() / (double)numActions)+")");
-		}
-		numActions++;
-		System.out.println("Currently acting");
-		
+
+
+
 		return action;
 	}
 
