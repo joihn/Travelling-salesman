@@ -364,7 +364,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 
 		createActionTable(topology); // initialize states list and actionTable
-		createTransitionTable();
+		createTransitionTable(topology);
 		createReward(td, topology, vehicle);
 		RLA();
 		//fill up the cityStringLookupTable for us in "act"
