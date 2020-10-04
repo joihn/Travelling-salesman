@@ -3,6 +3,8 @@ package reactive;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import logist.simulation.Vehicle;
 import logist.agent.Agent;
@@ -13,6 +15,8 @@ import logist.task.TaskDistribution;
 import logist.topology.Topology;
 import logist.topology.Topology.City;
 
+
+
 public class ReactiveTemplate implements ReactiveBehavior {
 
 	private Random random;
@@ -20,7 +24,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 	private int numActions;
 	private Agent myAgent;
-
+	private TaskDistribution td;
 	private ArrayList<State_Action> stateActionList;
 	private HashMap<State_Action, ArrayList<FutureState_Prob>> transitionTable;
 	private HashMap<State,ArrayList<String>> actionTable;
@@ -31,8 +35,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	private HashMap<String, City> cityStringLookupTable;
 	City finalDestinationForOnlineTravelling=null;
 	private int nCities;
-	private double discount = 0.9;
-	private double mvtSuccessRate = 0.95;
+	private double discount = 0.0; // will be modified in setup
 
 	private ArrayList<State> states;
 
@@ -78,7 +81,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		actionTable = new HashMap<State,ArrayList<String>>();
 		for (City cityFrom : topo) {
 			for (City potentialPackageDest : topo) {
-				// include the state where cityTo==cityFrom -> N*(N+1)
+				// include the state where cityTo==cityFrom -> N*(N+1)  //TODO exclude this stupid case
 				State state = new State(cityFrom, potentialPackageDest);
 				states.add(state);
 				//System.out.println("Added state (" + state.currentCity + ", " + state.goalCity+")");
@@ -102,14 +105,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			}
 
 			if (state.potentialPackageDest != null) {
-				// agent has a task
-				if (state.potentialPackageDest == state.currentCity){
-					action = "deliver";
-				} else {
-					action = state.potentialPackageDest.name;
-				}
-			} else {
-				// the agent has no task yet
+				// there is an available package
 				action = "pickup";
 			}
 			availableActions.add(action);
@@ -138,57 +134,52 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 				for(State nextState : states){ // loop over all possible next states
 
-					if (state_action.currentState != nextState){ // exclude that the agent ends up in the same state
-						// initialize transition probability to 0
-						FutureState_Prob futStateProb = new FutureState_Prob(nextState,0);
 
-						if (action == "pickup"){
-							// pickup case (100% probability)
-							if ((state_action.currentState.currentCity == nextState.currentCity)&&
-									(nextState.potentialPackageDest != null)&&
-									(state_action.currentState.potentialPackageDest == null)) {
+					// initialize transition probability to 0
+					FutureState_Prob futStateProb = new FutureState_Prob(nextState,0);
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-								futStateProb.futureState = nextState;
-								futStateProb.probability = 1;
-							}
-
-						} else if (state_action.action == "deliver"){
-							// deliver a task: reset goal city to null with 100% probability if the movement is correct
-							if ((state_action.currentState.currentCity == nextState.currentCity)&&
-									(nextState.potentialPackageDest == null)&&
-									(state_action.currentState.currentCity == state_action.currentState.potentialPackageDest)){
-
-								futStateProb.futureState = nextState;
-								futStateProb.probability = 1;
-							}
-
-						} else {
-							// action is move to another city
-							if (state_action.action == nextState.currentCity.name){
-								// probability of correct movements
-								futStateProb.futureState = nextState;
-								if (currentState.currentCity.neighbors().size() == 1){
-									futStateProb.probability = 1;
-								} else {
-									futStateProb.probability = mvtSuccessRate;
-								}
-
-							} else if (state_action.currentState.currentCity.hasNeighbor(nextState.currentCity)) {
-								// state_action.action is not equal to nextState.current city -> move to another city then intended
-
-								// probability of false movements is nonzero for neighbour cities of current city
-								// distribute (1-mvtSuccessRate) uniformly on all neighbors of current state
-								// TODO: check that no division by 0 occurs here
-								double prob = (1-mvtSuccessRate)/(state_action.currentState.currentCity.neighbors().size()-1);
-								futStateProb.futureState = nextState;
-								futStateProb.probability = prob;
-							}
-						}
-
-						futureStates_Prob.add(futStateProb);
+					// forbiding in-possible state next state couple
+					if 		(state_action.currentState.currentCity==state_action.currentState.potentialPackageDest ||  // destination os the same as current town
+							state_action.currentState.currentCity==nextState.currentCity ||                            // staying on the spot is forbiden
+							nextState.currentCity==nextState.potentialPackageDest                                    // destination is the same as current town; next state
+							//state_action.currentState.potentialPackageDest != nextState.currentCity                  // will implemented forbiding useless move later
+							 ) {
+						futStateProb.probability = 0.0;
 					}
-					transitionTable.put(state_action,futureStates_Prob);
+					else { //action stuff :D
+
+						if (state_action.action == "pickup") // you pick up
+						{              // there is package    														// you end up at destination
+							if (state_action.currentState.potentialPackageDest != null && nextState.currentCity == state_action.currentState.potentialPackageDest) {
+								futStateProb.probability = 1.0;
+							}
+						} else { // you don't pickup = you move to EXPLORE :D
+
+							//							// exploring step must be in neighboorhood								this neighboor has a task available FROM HIM
+//							if (state_action.currentState.currentCity.neighbors().contains(nextState.currentCity) && nextState.potentialPackageDest != null) {
+//								//iterate trough neighboor
+//								// we will do this for ALLL neighboor separately
+//								futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest);
+//							}
+
+
+							//this step city  has a task available FROM HIM
+							if (nextState.potentialPackageDest != null) {
+								//iterate trough neighboor
+
+								futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest);
+							}
+
+						}
+					}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					futureStates_Prob.add(futStateProb);
 				}
+				transitionTable.put(state_action,futureStates_Prob);
+
 			}
 		}
 	}
@@ -204,16 +195,16 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				State state = stateAction.currentState;
 
 				Double reward = new Double(0);
-				if ((action != "pickup") && (action != "deliver")){
+				if (action == "pickup" ){
 					// action is move to some city
-					City cityStepTo = getCityFromString(action, tp);
+					City destinationOfAcceptedPackage = state.potentialPackageDest;
 
 					if(state.potentialPackageDest !=null){
 						// agent has a task
-						reward += td.reward(state.currentCity,cityStepTo ) - state.currentCity.distanceTo(cityStepTo)*vehicle.costPerKm();
+						reward += td.reward(state.currentCity,destinationOfAcceptedPackage ) - state.currentCity.distanceTo(destinationOfAcceptedPackage)*vehicle.costPerKm();
 					} else {
-						// agent moves without task
-						reward -= state.currentCity.distanceTo(cityStepTo)*vehicle.costPerKm();
+						// agent move to neighboor
+						reward -= state.currentCity.distanceTo(getCityFromString(action, tp))*vehicle.costPerKm();
 					}
 				}
 
@@ -257,6 +248,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		// optimize
 		int niter = 10000;
 		int cnt = 0;
+		System.out.print("========   the discount is : " + discount);
 
 		HashMap<State, Double> V0 = new HashMap<State, Double>(V);
 		actionLookupTable = new HashMap<State, String>();
@@ -294,16 +286,17 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
 
+
 		// Reads the discount factor from the agents.xml file.
 		// If the property is not present it defaults to 0.95
-		Double discount = agent.readProperty("discount-factor", Double.class,
+		discount = agent.readProperty("discount-factor", Double.class,
 				0.95);
 
 		this.random = new Random();
-		this.pPickup = discount; // TODO pay attention that there are not 2 discount variables
+		this.pPickup = discount; // TODO can proabbly delete this
 		this.numActions = 0;
 		this.myAgent = agent;
-
+		this.td=td;
 
 
 		Vehicle vehicle = agent.vehicles().get(0);
@@ -325,7 +318,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		if (finalDestinationForOnlineTravelling==null) {
 			// identify the current state
-			// info :
+
+			// info avialble for this task :
 			// current city
 			// if there is an available task
 			//    if yes, the destination a this task
@@ -347,42 +341,37 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 			}
 			if (i != 1) {
-				System.out.println("WARING, didn't find the correct amount of current states");
+				System.out.println("WARING, didn't find the correct amount of current states, it should be 1");
 			}
 
 			if (numActions >= 1) {
 				System.out.println("The total profit after " + numActions + " actions is " + myAgent.getTotalProfit() + " (average profit: " + (myAgent.getTotalProfit() / (double) numActions) + ")");
 			}
-			numActions++;
+
 			//System.out.println("Currently acting");
 
 			String currentBestAction = actionLookupTable.get(currentState); //TODO remove error
 
 			if (currentBestAction == "pickup") {
-				System.out.println("will try to pickup");
+				//System.out.println("will try to pickup");
 				action = new Action.Pickup(availableTask);
-			} else if (currentBestAction == "deliver") {
-				Task theCarriedTask = null;
-				System.out.println("will try to FAAAAKE deliver package");
-				//			for(Task j: vehicle.getCurrentTasks()) {
-				//				theCarriedTask = j;
-				//				break;
-				//			}
-				//			action= new Action.Delivery(theCarriedTask);
-			} else if (action!=null){ // action is a city
-				System.out.println("will try to move");
+				//finalDestinationForOnlineTravelling = availableTask.deliveryCity; // will go to delivery
+			} else if (currentBestAction!=null){ // action is a city
+				//System.out.println("will try to move");
 				City goalCity = cityStringLookupTable.get(currentBestAction);
 
 				if (vehicle.getCurrentCity().neighbors().contains(goalCity)) {
 					action = new Action.Move(goalCity);
 					System.out.println("neighboor was my final destination HEHEHE! ");
 				} else {
-					finalDestinationForOnlineTravelling = goalCity; //TODO set to null
+					finalDestinationForOnlineTravelling = goalCity;
 					new Action.Move(vehicle.getCurrentCity().pathTo(goalCity).get(0));
 				}
 
-			}else{ // action is null !! :( gotta fix that
-				City choosenNeighboor=vehicle.getCurrentCity().neighbors().get(0); //TODO get closed one instead of first
+			}else{ // action is null !! :( gotta do something instead !
+				City choosenNeighboor=vehicle.getCurrentCity().neighbors().get(0); //TODO get closed city instead of first
+				System.out.println("WARINGN POLICY DIDN'T FIND ANYTHING ");
+
 				action= new Action.Move(choosenNeighboor);
 			}
 		}else{ // travelling along the way for the final destination
@@ -393,8 +382,22 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			}
 		}
 
+		//logging to file
+		String currentCountry="switzerland";
+		try{
+			FileWriter logger = null;
+			logger = new FileWriter("perfLog/"+currentCountry+".csv", true);
+			Double rewardPerKm = ((double) myAgent.getTotalReward() / (double)myAgent.getTotalDistance());
+			logger.append(myAgent.name()+ ";" + numActions+ ";" + myAgent.getTotalReward() + ";" + myAgent.getTotalDistance() +";" + rewardPerKm +"\n");
+			logger.flush();
+			logger.close();
+		}catch(IOException theError){
+			System.out.println("error writing log !");
+			theError.printStackTrace();
+		}
 
 
+		numActions++;
 		return action;
 	}
 
