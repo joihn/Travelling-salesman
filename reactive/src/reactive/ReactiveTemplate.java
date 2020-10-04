@@ -163,30 +163,21 @@ public class ReactiveTemplate implements ReactiveBehavior {
 								futStateProb.probability = 1.0; // TODO is this probability equal to one?
 							}
 						} else { // you don't pickup = you move to EXPLORE :D
-							/* TODO:	implement moves to neighbour:
-							 *			read action
-							 * 			if (futureStateProb.state.name == action):
-							 * 				probability = mvtPrecision
-							 * 			else
-							 * 				if ('action' in neighbours()):
-							 * 					probability = (1-mvtPrecision)/(N-1)
-							 * 				else
-							 * 					probability = (+-mvtPrecision)/N
-							 */
-							//							// exploring step must be in neighboorhood								this neighboor has a task available FROM HIM
-//							if (state_action.currentState.currentCity.neighbors().contains(nextState.currentCity) && nextState.potentialPackageDest != null) {
-//								//iterate trough neighboor
-//								// we will do this for ALLL neighboor separately
-//								futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest);
-//							}
 
-
-							//this step city  has a task available FROM HIM
-							if (nextState.potentialPackageDest != null) {
+														// exploring step must be in neighboorhood								this neighboor has a task available FROM HIM
+							if (state_action.currentState.currentCity.neighbors().contains(nextState.currentCity) && nextState.potentialPackageDest != null) {
 								//iterate trough neighboor
-								// TODO what is this? Transition probability has NOTHING to do with a task appearing!?
+								// we will do this for ALLL neighboor separately
 								futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest);
 							}
+
+//							goto everyone, not only neigbhoor
+//							//this step city  has a task available FROM HIM
+//							if (nextState.potentialPackageDest != null) {
+//								//iterate trough neighboor
+//
+//								futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest);
+//							}
 
 						}
 					}
@@ -303,7 +294,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			cityStringLookupTable.put(city.name, city);
 		}
 	}
-
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
 
@@ -422,6 +412,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		numActions++;
 		return action;
 	}
+
+
 
 
 }

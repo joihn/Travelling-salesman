@@ -27,9 +27,9 @@ agentNames = dataF.agent.unique()
 
 #%%
 def get_column(df, agent_name, column, limit_time):
-    column = np.zeros(limit_time)
-    column[:] = df[df.agent==agent_name].head(limit_time)[column]
-    return column
+    columna = np.zeros(limit_time)
+    columna[:] = df[df.agent==agent_name].head(limit_time)[column]
+    return columna
 
 
 
@@ -43,5 +43,5 @@ def plot(column, dataF,limit_time):
     ax.set_ylabel(column)
     plt.show()
 #%% // plotting the stuff
-plot('reward', dataF, 100)
-plot('reward_per_km', dataF, 100)
+plot('reward', dataF, 300)
+plot('reward_per_km', dataF, 300)
