@@ -333,6 +333,4 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	}
 
 
-
-
 }
