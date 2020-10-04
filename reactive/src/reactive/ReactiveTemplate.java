@@ -224,16 +224,16 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				State state = stateAction.currentState;
 
 				Double reward = new Double(0);
-				if ((action != "pickup") && (action != "deliver")){
+				if (action == "pickup" ){
 					// action is move to some city
-					City cityStepTo = getCityFromString(action, tp);
+					City destinationOfAcceptedPackage = state.potentialPackageDest;
 
 					if(state.potentialPackageDest !=null){
 						// agent has a task
-						reward += td.reward(state.currentCity,cityStepTo ) - state.currentCity.distanceTo(cityStepTo)*vehicle.costPerKm();
+						reward += td.reward(state.currentCity,destinationOfAcceptedPackage ) - state.currentCity.distanceTo(destinationOfAcceptedPackage)*vehicle.costPerKm();
 					} else {
-						// agent moves without task
-						reward -= state.currentCity.distanceTo(cityStepTo)*vehicle.costPerKm();
+						// agent move to neighboor
+						reward -= state.currentCity.distanceTo(getCityFromString(action, tp))*vehicle.costPerKm();
 					}
 				}
 
@@ -381,15 +381,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			if (currentBestAction == "pickup") {
 				System.out.println("will try to pickup");
 				action = new Action.Pickup(availableTask);
-			} else if (currentBestAction == "deliver") {
-				Task theCarriedTask = null;
-				System.out.println("will try to FAAAAKE deliver package");
-				//			for(Task j: vehicle.getCurrentTasks()) {
-				//				theCarriedTask = j;
-				//				break;
-				//			}
-				//			action= new Action.Delivery(theCarriedTask);
-			} else if (action!=null){ // action is a city
+				//finalDestinationForOnlineTravelling = availableTask.deliveryCity; // will go to delivery
+			} else if (currentBestAction!=null){ // action is a city
 				System.out.println("will try to move");
 				City goalCity = cityStringLookupTable.get(currentBestAction);
 
@@ -397,7 +390,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 					action = new Action.Move(goalCity);
 					System.out.println("neighboor was my final destination HEHEHE! ");
 				} else {
-					finalDestinationForOnlineTravelling = goalCity; //TODO set to null
+					finalDestinationForOnlineTravelling = goalCity;
 					new Action.Move(vehicle.getCurrentCity().pathTo(goalCity).get(0));
 				}
 
