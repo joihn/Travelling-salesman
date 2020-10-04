@@ -20,7 +20,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 	private int numActions;
 	private Agent myAgent;
-
+	private TaskDistribution td;
 	private ArrayList<State_Action> stateActionList;
 	private HashMap<State_Action, ArrayList<FutureState_Prob>> transitionTable;
 	private HashMap<State,ArrayList<String>> actionTable;
@@ -78,7 +78,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		actionTable = new HashMap<State,ArrayList<String>>();
 		for (City cityFrom : topo) {
 			for (City potentialPackageDest : topo) {
-				// include the state where cityTo==cityFrom -> N*(N+1)
+				// include the state where cityTo==cityFrom -> N*(N+1)  //TODO exclude this stupid case
 				State state = new State(cityFrom, potentialPackageDest);
 				states.add(state);
 				//System.out.println("Added state (" + state.currentCity + ", " + state.goalCity+")");
@@ -102,14 +102,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			}
 
 			if (state.potentialPackageDest != null) {
-				// agent has a task
-				if (state.potentialPackageDest == state.currentCity){
-					action = "deliver";
-				} else {
-					action = state.potentialPackageDest.name;
-				}
-			} else {
-				// the agent has no task yet
+				// there is an available package
 				action = "pickup";
 			}
 			availableActions.add(action);
@@ -138,57 +131,84 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 				for(State nextState : states){ // loop over all possible next states
 
-					if (state_action.currentState != nextState){ // exclude that the agent ends up in the same state
-						// initialize transition probability to 0
-						FutureState_Prob futStateProb = new FutureState_Prob(nextState,0);
 
-						if (action == "pickup"){
-							// pickup case (100% probability)
-							if ((state_action.currentState.currentCity == nextState.currentCity)&&
-									(nextState.potentialPackageDest != null)&&
-									(state_action.currentState.potentialPackageDest == null)) {
+					// initialize transition probability to 0
+					FutureState_Prob futStateProb = new FutureState_Prob(nextState,0);
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-								futStateProb.futureState = nextState;
-								futStateProb.probability = 1;
-							}
-
-						} else if (state_action.action == "deliver"){
-							// deliver a task: reset goal city to null with 100% probability if the movement is correct
-							if ((state_action.currentState.currentCity == nextState.currentCity)&&
-									(nextState.potentialPackageDest == null)&&
-									(state_action.currentState.currentCity == state_action.currentState.potentialPackageDest)){
-
-								futStateProb.futureState = nextState;
-								futStateProb.probability = 1;
-							}
-
-						} else {
-							// action is move to another city
-							if (state_action.action == nextState.currentCity.name){
-								// probability of correct movements
-								futStateProb.futureState = nextState;
-								if (currentState.currentCity.neighbors().size() == 1){
-									futStateProb.probability = 1;
-								} else {
-									futStateProb.probability = mvtSuccessRate;
-								}
-
-							} else if (state_action.currentState.currentCity.hasNeighbor(nextState.currentCity)) {
-								// state_action.action is not equal to nextState.current city -> move to another city then intended
-
-								// probability of false movements is nonzero for neighbour cities of current city
-								// distribute (1-mvtSuccessRate) uniformly on all neighbors of current state
-								// TODO: check that no division by 0 occurs here
-								double prob = (1-mvtSuccessRate)/(state_action.currentState.currentCity.neighbors().size()-1);
-								futStateProb.futureState = nextState;
-								futStateProb.probability = prob;
-							}
-						}
-
-						futureStates_Prob.add(futStateProb);
+					// forbiding in-possible state next state couple
+					if 		(state_action.currentState.currentCity==state_action.currentState.potentialPackageDest ||  // destination os the same as current town
+							state_action.currentState.currentCity==nextState.currentCity ||                            // staying on the spot is forbiden
+							nextState.currentCity==nextState.potentialPackageDest                                    // destination is the same as current town; next state
+							//state_action.currentState.potentialPackageDest != nextState.currentCity                  // will implemented forbiding useless move later
+							 ) {
+						futStateProb.probability = 0.0;
 					}
-					transitionTable.put(state_action,futureStates_Prob);
+					else { //action stuff :D
+
+						if (state_action.action == "pickup") // you pick up
+						{              // there is package    														// you end up at destination
+							if (state_action.currentState.potentialPackageDest != null && nextState.currentCity == state_action.currentState.potentialPackageDest) {
+								futStateProb.probability = 1.0;
+							}
+						} else { // you don't pickup = you move to EXPLORE :D
+							// exploring step must be in neighboorhood								this neighboor has a task available FROM HIM
+							if (state_action.currentState.currentCity.neighbors().contains(nextState.currentCity) && nextState.potentialPackageDest != null) {
+								//iterate trough neighboor
+								// we will do this for ALLL neighboor separately
+								futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest);
+							}
+
+						}
+					}
+
+////						if (action == "pickup"){
+//							// pickup case (100% probability)
+//							if ((state_action.currentState.currentCity == nextState.currentCity)&&
+//									(nextState.potentialPackageDest != null)&&
+//									(state_action.currentState.potentialPackageDest == null)) {
+//
+//								futStateProb.futureState = nextState;
+//								futStateProb.probability = 1;
+//							}
+//
+//						} else if (state_action.action == "deliver"){
+//							// deliver a task: reset goal city to null with 100% probability if the movement is correct
+//							if ((state_action.currentState.currentCity == nextState.currentCity)&&
+//									(nextState.potentialPackageDest == null)&&
+//									(state_action.currentState.currentCity == state_action.currentState.potentialPackageDest)){
+//
+//								futStateProb.futureState = nextState;
+//								futStateProb.probability = 1;
+//							}
+//
+//						} else {
+//							// action is move to another city
+//							if (state_action.action == nextState.currentCity.name){
+//								// probability of correct movements
+//								futStateProb.futureState = nextState;
+//								if (currentState.currentCity.neighbors().size() == 1){
+//									futStateProb.probability = 1;
+//								} else {
+//									futStateProb.probability = mvtSuccessRate;
+//								}
+//
+//							} else if (state_action.currentState.currentCity.hasNeighbor(nextState.currentCity)) {
+//								// state_action.action is not equal to nextState.current city -> move to another city then intended
+//
+//								// probability of false movements is nonzero for neighbour cities of current city
+//								// distribute (1-mvtSuccessRate) uniformly on all neighbors of current state
+//								// TODO: check that no division by 0 occurs here
+//								double prob = (1-mvtSuccessRate)/(state_action.currentState.currentCity.neighbors().size()-1);
+//								futStateProb.futureState = nextState;
+//								futStateProb.probability = prob;
+//							}
+//						}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					futureStates_Prob.add(futStateProb);
 				}
+				transitionTable.put(state_action,futureStates_Prob);
+
 			}
 		}
 	}
@@ -303,7 +323,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		this.pPickup = discount; // TODO pay attention that there are not 2 discount variables
 		this.numActions = 0;
 		this.myAgent = agent;
-
+		this.td=td;
 
 
 		Vehicle vehicle = agent.vehicles().get(0);
