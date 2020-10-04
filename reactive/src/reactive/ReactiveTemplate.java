@@ -293,7 +293,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				0.95);
 
 		this.random = new Random();
-		this.pPickup = discount; // TODO pay attention that there are not 2 discount variables !!
+		this.pPickup = discount; // TODO can proabbly delete this
 		this.numActions = 0;
 		this.myAgent = agent;
 		this.td=td;
@@ -318,7 +318,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		if (finalDestinationForOnlineTravelling==null) {
 			// identify the current state
-			// info :
+
+			// info avialble for this task :
 			// current city
 			// if there is an available task
 			//    if yes, the destination a this task
@@ -340,7 +341,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 			}
 			if (i != 1) {
-				System.out.println("WARING, didn't find the correct amount of current states");
+				System.out.println("WARING, didn't find the correct amount of current states, it should be 1");
 			}
 
 			if (numActions >= 1) {
@@ -367,8 +368,10 @@ public class ReactiveTemplate implements ReactiveBehavior {
 					new Action.Move(vehicle.getCurrentCity().pathTo(goalCity).get(0));
 				}
 
-			}else{ // action is null !! :( gotta fix that
-				City choosenNeighboor=vehicle.getCurrentCity().neighbors().get(0); //TODO get closed one instead of first
+			}else{ // action is null !! :( gotta do something instead !
+				City choosenNeighboor=vehicle.getCurrentCity().neighbors().get(0); //TODO get closed city instead of first
+				System.out.println("WARINGN POLICY DIDN'T FIND ANYTHING ");
+
 				action= new Action.Move(choosenNeighboor);
 			}
 		}else{ // travelling along the way for the final destination
