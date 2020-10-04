@@ -18,7 +18,7 @@ import logist.topology.Topology.City;
 
 
 public class ReactiveTemplate implements ReactiveBehavior {
-
+	// TODO add mvtPrecision --> why is this not here anymore?
 	private Random random;
 	private double pPickup;
 
@@ -81,7 +81,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		actionTable = new HashMap<State,ArrayList<String>>();
 		for (City cityFrom : topo) {
 			for (City potentialPackageDest : topo) {
-				// include the state where cityTo==cityFrom -> N*(N+1)  //TODO exclude this stupid case
+				// include the state where cityTo==cityFrom -> N*(N+1)
+				// TODO exclude this stupid case -> check that  cityFrom != potentialPackageDest!
 				State state = new State(cityFrom, potentialPackageDest);
 				states.add(state);
 				//System.out.println("Added state (" + state.currentCity + ", " + state.goalCity+")");
@@ -100,6 +101,9 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			String action = new String();
 			// move to neighbour is always possible (even during a task)
 			for (City neighborCity : state.currentCity.neighbors()) {
+				/* TODO check that neighbourCity != potentialPackage destination
+				 * 		-> don't have 2x the action to move to this city
+				 */
 				action = neighborCity.name;
 				availableActions.add(action);
 			}
@@ -138,7 +142,11 @@ public class ReactiveTemplate implements ReactiveBehavior {
 					// initialize transition probability to 0
 					FutureState_Prob futStateProb = new FutureState_Prob(nextState,0);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+					/* TODO change the logic in the transition table:
+					*       state where currentCity == potentialPackageCity should be possibly excluded (-> modify states ArrayList)
+					* 		- probability where currentState.currentCity == nextState.currentCity is zero (DO THAT HERE!)
+					*		 (it is not possible to stay in the same town)
+					*/
 					// forbiding in-possible state next state couple
 					if 		(state_action.currentState.currentCity==state_action.currentState.potentialPackageDest ||  // destination os the same as current town
 							state_action.currentState.currentCity==nextState.currentCity ||                            // staying on the spot is forbiden
@@ -152,10 +160,19 @@ public class ReactiveTemplate implements ReactiveBehavior {
 						if (state_action.action == "pickup") // you pick up
 						{              // there is package    														// you end up at destination
 							if (state_action.currentState.potentialPackageDest != null && nextState.currentCity == state_action.currentState.potentialPackageDest) {
-								futStateProb.probability = 1.0;
+								futStateProb.probability = 1.0; // TODO is this probability equal to one?
 							}
 						} else { // you don't pickup = you move to EXPLORE :D
-
+							/* TODO:	implement moves to neighbour:
+							 *			read action
+							 * 			if (futureStateProb.state.name == action):
+							 * 				probability = mvtPrecision
+							 * 			else
+							 * 				if ('action' in neighbours()):
+							 * 					probability = (1-mvtPrecision)/(N-1)
+							 * 				else
+							 * 					probability = (+-mvtPrecision)/N
+							 */
 							//							// exploring step must be in neighboorhood								this neighboor has a task available FROM HIM
 //							if (state_action.currentState.currentCity.neighbors().contains(nextState.currentCity) && nextState.potentialPackageDest != null) {
 //								//iterate trough neighboor
@@ -167,7 +184,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 							//this step city  has a task available FROM HIM
 							if (nextState.potentialPackageDest != null) {
 								//iterate trough neighboor
-
+								// TODO what is this? Transition probability has NOTHING to do with a task appearing!?
 								futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest);
 							}
 
@@ -204,14 +221,16 @@ public class ReactiveTemplate implements ReactiveBehavior {
 						reward += td.reward(state.currentCity,destinationOfAcceptedPackage ) - state.currentCity.distanceTo(destinationOfAcceptedPackage)*vehicle.costPerKm();
 					} else {
 						// agent move to neighboor
+						// TODO if potentialPackageDest is null, pickup cannot be performed (code should never get here!)
 						reward -= state.currentCity.distanceTo(getCityFromString(action, tp))*vehicle.costPerKm();
+						// TODO negative reward should be executed if action is move to another neighbour
 					}
 				}
 
 				rewardTable.put(stateAction, reward);
 		}
 
-		return rewardTable;
+		return rewardTable; // TODO remove return here -> change the function to void
 	}
 
 	public City getCityFromString(String cityName, Topology tp){
@@ -252,7 +271,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		HashMap<State, Double> V0 = new HashMap<State, Double>(V);
 		actionLookupTable = new HashMap<State, String>();
-
+		// TODO: implement goodEnough(V,V0) function here (idea: loop over s: if forall |V(s)-V0(s)|<eps
 		while(cnt<niter){
 			for(State_Action stateAction : stateActionList){
 				Double futureReward = new Double(0);
@@ -270,6 +289,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 					V.put(stateAction.currentState,maxQ);
 				}
 			}
+			//TODO update V0 (values only!)
 			cnt++;
 
 		}
@@ -283,6 +303,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			cityStringLookupTable.put(city.name, city);
 		}
 	}
+
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
 
@@ -316,7 +337,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	public Action act(Vehicle vehicle, Task availableTask) {
 		Action action=null;
 
-		if (finalDestinationForOnlineTravelling==null) {
+		if (finalDestinationForOnlineTravelling==null) { // TODO ??
 			// identify the current state
 
 			// info avialble for this task :
@@ -331,6 +352,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			}
 
 			State currentState = new State(vehicle.getCurrentCity(), null);
+			// TODO why not put State(vehicle.getCurrentCity(),destination) here??
 			int i = 0;
 			for (State currentStateIter : states) { // loop over all possible initial states
 
