@@ -313,8 +313,11 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 	public void RLA(){
 		HashMap<State, Double> V = new HashMap<State,Double>();
-
-
+		/*
+		for(State_Action sa : stateActionList){
+			System.out.println("State: (" + sa.currentState.currentCity + "," + sa.currentState.potentialPackageDest + ") action: " + sa.action + " -- direct reward: " + rewardTable.get(sa));
+		}
+		*/
 		// initialization of V(s) at 0
 		for(State state : states){
 			// initialize V with some random action in that state
@@ -338,6 +341,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		// optimize
 		int niter = 100;
 		int cnt = 0;
+		discount = 0.9;
 		System.out.println("========   the discount is : " + discount);
 
 		HashMap<State, Double> V0 = new HashMap<State, Double>(V);
@@ -345,21 +349,28 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		// TODO: implement goodEnough(V,V0) function here (idea: loop over s: if forall |V(s)-V0(s)|<eps
 		while(cnt<niter){
-			HashMap<State_Action,Double> Q = new HashMap<State_Action,Double>();
-			for(State_Action stateAction : stateActionList){
-				Double futureReward = new Double(0);
-				// sum over all future states s' to get V(s)
-				for(FutureState_Prob futureStateProb : transitionTable.get(stateAction)){
-					futureReward += futureStateProb.probability*V.get(futureStateProb.futureState);
-				}
-				Double totalReward = new Double(rewardTable.get(stateAction)+discount*futureReward);
-				Q.put(stateAction, totalReward);
 
-				//System.out.println("Iter" + cnt + " - Reward is " + totalReward );
-			}
-
-			// extract best action stored in Q for that state and put it in V
 			for(State state : states){
+				// consider a given state and loop over all possible actions of that state
+
+				HashMap<State_Action,Double> Q = new HashMap<State_Action,Double>();
+
+				Double futureReward = new Double(0);
+				for(State_Action stateAction : stateActionList){
+					if (stateAction.currentState != state){
+						continue;
+					} else {
+						// reward for a given state and a given action -> loop over future states
+						for(FutureState_Prob futureStateProbability : transitionTable.get(stateAction)){
+							futureReward += futureStateProbability.probability*V.get(futureStateProbability.futureState);
+						}
+						Double totalReward = new Double(rewardTable.get(stateAction)+discount*futureReward);
+						Q.put(stateAction, totalReward);
+						//System.out.println("Iter" + cnt + " - Reward is " + totalReward );
+					}
+				}
+
+				// extract the best possible action
 				Double maxQ = new Double(0);
 				for(State_Action stateAction: stateActionList){
 					if (stateAction.currentState != state){
@@ -373,6 +384,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 						}
 					}
 				}
+
 			}
 
 			//TODO update V0 (values only!)
