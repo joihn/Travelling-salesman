@@ -443,7 +443,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		} else if (currentBestAction!=null){
 			// move to a RANDOM neighbour
-			int cityIdx = (int) Math.random()*currentState.currentCity.neighbors().size();
+			int cityIdx = (int) (Math.random()*currentState.currentCity.neighbors().size());
+			System.out.println("City Index is: " +cityIdx);
 			City nextCity = currentState.currentCity.neighbors().get(cityIdx);
 
 			action = new Action.Move(nextCity);
