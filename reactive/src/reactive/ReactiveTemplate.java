@@ -204,9 +204,17 @@ public class ReactiveTemplate implements ReactiveBehavior {
 						}
 					} else {
 						// handle move cases
+						int nNeighbours;
+						if (state_action.currentState.currentCity.hasNeighbor(state_action.currentState.potentialPackageDest)){
+							// the destination of the refused but available Task is a neighbour -> move to one of the N-1 Neighbours
+							nNeighbours = state_action.currentState.currentCity.neighbors().size()-1;
+						} else {
+							nNeighbours = state_action.currentState.currentCity.neighbors().size();
+						}
+
 						if(nextState.potentialPackageDest != null){
 							// in the next state is a package available
-							futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest);
+							futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest)/nNeighbours;
 						} else {
 							// the next state has no task appearing
 							// this happens at a probability p = 1-sum_j td.p(i.j) (compare above)
@@ -218,7 +226,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 								}
 							}
 
-							futStateProb.probability = 1-cumsum;
+							futStateProb.probability = (1-cumsum)/nNeighbours;
 							//System.out.println("Inverse probability is "+ futStateProb.probability);
 						}
 					}
@@ -328,14 +336,13 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		 */
 
 		// optimize
-		int niter = 2;
+		int niter = 100;
 		int cnt = 0;
 		System.out.println("========   the discount is : " + discount);
 
 		HashMap<State, Double> V0 = new HashMap<State, Double>(V);
 		actionLookupTable = new HashMap<State, String>();
 
-		// TODO: while loop has an error: optimal actions are null -> WTF?!
 		// TODO: implement goodEnough(V,V0) function here (idea: loop over s: if forall |V(s)-V0(s)|<eps
 		while(cnt<niter){
 			HashMap<State_Action,Double> Q = new HashMap<State_Action,Double>();
@@ -350,23 +357,37 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 				//System.out.println("Iter" + cnt + " - Reward is " + totalReward );
 			}
-			// extract best action
-			for(State_Action stateAction : stateActionList){
+
+			// extract best action stored in Q for that state and put it in V
+			for(State state : states){
 				Double maxQ = new Double(0);
-				if(Q.get(stateAction)>maxQ){
-					maxQ = Q.get(stateAction);
-					actionLookupTable.put(stateAction.currentState,stateAction.action);
-					V.put(stateAction.currentState,maxQ);
+				for(State_Action stateAction: stateActionList){
+					if (stateAction.currentState != state){
+						continue;
+					} else {
+						if(Q.get(stateAction) > maxQ){
+							// the action in stateAction is the best of all actions so far
+							actionLookupTable.put(state,stateAction.action);
+							maxQ = Q.get(stateAction);
+							V.put(state,maxQ);
+						}
+					}
 				}
 			}
+
 			//TODO update V0 (values only!)
 			cnt++;
 
 		}
+
 		System.out.print("Finished Optimization");
 		for(State_Action sa : stateActionList){
-			System.out.println("Optimal Reward is" + V.get(sa.currentState) + " -- Optimal action: " + actionLookupTable.get(sa) );
+			System.out.println("State (" + sa.currentState.currentCity + ", " + sa.currentState.potentialPackageDest+")"+
+					"-- Optimal Reward is " + V.get(sa.currentState) + " -- Optimal action: " + actionLookupTable.get(sa.currentState));
 		}
+		// TODO: the agent chooses only at 2 states to pickup :S
+
+
 	}
 
 	@Override
