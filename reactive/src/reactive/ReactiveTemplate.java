@@ -26,6 +26,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	private int numActions;
 	private Agent myAgent;
 	private TaskDistribution td;
+	private double epsilon = 1e-3;
 
 	private ArrayList<State> states; // all possible states of the agent - state (i,i) expluded
 	private HashMap<State,ArrayList<String>> actionTable; // returns all possible actions at state s
@@ -142,6 +143,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 
 		stateActionList = new ArrayList<State_Action>();
+		futureStatesTable = new HashMap<State_Action, ArrayList<StateActionFutureState>>();
 		for(State state : states){
 			for(String action : actionTable.get(state)){
 				State_Action stateAction = new State_Action(state, action);
@@ -273,19 +275,27 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				// reward is negative if no task is taken and the vehicle moves arount empty
 				reward = - state.currentCity.distanceTo(getCityFromString(action, tp))*vehicle.costPerKm();
 			}
-			System.out.println("Reward from ("+state.currentCity + " to " + state.potentialPackageDest + "), action : " + action + " is " + reward);
+			//System.out.println("Reward from ("+state.currentCity + " to " + state.potentialPackageDest + "), action : " + action + " is " + reward);
 			rewardTable.put(stateAction, reward);
 		}
+	}
+
+	public boolean goodEnough(HashMap<State,Double> Vold, HashMap<State, Double> Vnew){
+		double maxDiff = 0;
+		for(State key : Vnew.keySet()){
+			double diff = Math.abs(Vold.get(key).doubleValue() - Vnew.get(key).doubleValue());
+			if (diff>maxDiff){
+				maxDiff = diff;
+			}
+		}
+		return maxDiff<epsilon;
+
 	}
 
 
 	public void RLA(){
 		HashMap<State, Double> V = new HashMap<State,Double>();
-		/*
-		for(State_Action sa : stateActionList){
-			System.out.println("State: (" + sa.currentState.currentCity + "," + sa.currentState.potentialPackageDest + ") action: " + sa.action + " -- direct reward: " + rewardTable.get(sa));
-		}
-		*/
+
 		// initialization of V(s) at 0
 		for(State state : states){
 			// initialize V with some random action in that state
@@ -298,13 +308,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				V.put(stateAction.currentState, rewardTable.get(stateAction));
 			}
 		}
-		/*
-		System.out.print("After Initialization:");
-		for(State_Action sa : stateActionList){
-			System.out.println("Optimal Reward is " + V.get(sa.currentState));
-		}
-
-		 */
 
 		// optimize
 		int niter = 100;
@@ -316,7 +319,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		actionLookupTable = new HashMap<State, String>();
 
 		// TODO: implement goodEnough(V,V0) function here (idea: loop over s: if forall |V(s)-V0(s)|<eps
-		while(cnt<niter){
+		while(true){
 
 			for(State state : states){
 				// consider a given state and loop over all possible actions of that state
@@ -328,14 +331,13 @@ public class ReactiveTemplate implements ReactiveBehavior {
 					if (stateAction.currentState != state){
 						continue;
 					} else {
-						// reward for a given state and a given action -> loop over future states
-						for(FutureState_Prob futureStateProbability : transitionTable.get(stateAction)){
-							futureReward += futureStateProbability.probability*V.get(futureStateProbability.futureState);
+						for(StateActionFutureState safs :futureStatesTable.get(stateAction)){
+							futureReward += transitionProbability.get(safs)*V.get(safs.futureState);
 						}
-						Double totalReward = new Double(rewardTable.get(stateAction)+discount*futureReward);
-						Q.put(stateAction, totalReward);
 						//System.out.println("Iter" + cnt + " - Reward is " + totalReward );
 					}
+					Double totalReward = new Double(rewardTable.get(stateAction)+discount*futureReward);
+					Q.put(stateAction, totalReward);
 				}
 
 				// extract the best possible action
@@ -355,12 +357,15 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 			}
 
-			//TODO update V0 (values only!)
 			cnt++;
+			if (goodEnough(V0,V)){
+				break;
+			}
+			V0 = new HashMap<State, Double>(V);
 
 		}
 
-		System.out.print("Finished Optimization");
+		System.out.print("Finished Optimization after " + cnt + " iterations");
 		/*for(State_Action sa : stateActionList){
 			System.out.println("State (" + sa.currentState.currentCity + ", " + sa.currentState.potentialPackageDest+")"+
 					"-- Optimal Reward is " + V.get(sa.currentState) + " -- Optimal action: " + actionLookupTable.get(sa.currentState));
@@ -392,7 +397,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 
 		createActionTable(topology); // initialize states list and actionTable
-		createTransitionTable(topology);
+		createTransitionTable(topology, td);
 		createReward(td, topology, vehicle);
 		RLA();
 		//fill up the cityStringLookupTable for us in "act"
@@ -425,14 +430,14 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		} else if (currentBestAction!=null){
 			// move to a RANDOM neighbour
-			int cityIdx = (int) (Math.random()*currentState.currentCity.neighbors().size());
-			System.out.println("City Index is: " +cityIdx);
-			City nextCity = currentState.currentCity.neighbors().get(cityIdx);
+			//int cityIdx = (int) (Math.random()*currentState.currentCity.neighbors().size());
+			//System.out.println("City Index is: " +cityIdx);
+			//City nextCity = currentState.currentCity.neighbors().get(cityIdx);
 
 			// TODO move to random neighour
 
-			action = new Action.Move(nextCity);
-			System.out.println("Action " + numActions + "is Move To" + nextCity.name);
+			action = new Action.Move(currentState.currentCity.randomNeighbor(random));
+			//System.out.println("Action " + numActions + "is Move To" + nextCity.name);
 
 		}else{ // action is null !! :( gotta do something instead !
 			City choosenNeighboor=vehicle.getCurrentCity().neighbors().get(0);
@@ -448,94 +453,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		numActions++;
 		return action;
 
-
-		/*
-		if (finalDestinationForOnlineTravelling==null) { // TODO ??
-			// identify the current state
-
-			// info avialble for this task :
-			// current city
-			// if there is an available task
-			//    if yes, the destination a this task
-			City destination;
-			if (availableTask != null) {
-				destination = availableTask.deliveryCity;
-			} else {
-				destination = null; // if no package available, destination is null
-			}
-
-			State currentState = new State(vehicle.getCurrentCity(), null);
-			// TODO why not put State(vehicle.getCurrentCity(),destination) here??
-			int i = 0;
-			for (State currentStateIter : states) { // loop over all possible initial states
-
-				if (currentStateIter.currentCity == vehicle.getCurrentCity() && destination == currentStateIter.potentialPackageDest) {
-					currentState = currentStateIter;
-					i++;
-				}
-
-			}
-			if (i != 1) {
-				System.out.println("WARING, didn't find the correct amount of current states, it should be 1");
-			}
-
-			if (numActions >= 1) {
-				System.out.println("The total profit after " + numActions + " actions is " + myAgent.getTotalProfit() + " (average profit: " + (myAgent.getTotalProfit() / (double) numActions) + ")");
-			}
-
-			//System.out.println("Currently acting");
-
-			String currentBestAction = actionLookupTable.get(currentState); //TODO remove error
-
-			if (currentBestAction == "pickup") {
-				//System.out.println("will try to pickup");
-				action = new Action.Pickup(availableTask);
-				//finalDestinationForOnlineTravelling = availableTask.deliveryCity; // will go to delivery
-			} else if (currentBestAction!=null){ // action is a city
-				//System.out.println("will try to move");
-				City goalCity = cityStringLookupTable.get(currentBestAction);
-
-				if (vehicle.getCurrentCity().neighbors().contains(goalCity)) {
-					action = new Action.Move(goalCity);
-					System.out.println("neighboor was my final destination HEHEHE! ");
-				} else {
-					finalDestinationForOnlineTravelling = goalCity;
-					new Action.Move(vehicle.getCurrentCity().pathTo(goalCity).get(0));
-				}
-
-			}else{ // action is null !! :( gotta do something instead !
-				City choosenNeighboor=vehicle.getCurrentCity().neighbors().get(0); //TODO get closed city instead of first
-				System.out.println("WARINGN POLICY DIDN'T FIND ANYTHING ");
-
-				action= new Action.Move(choosenNeighboor);
-			}
-		}else{ // travelling along the way for the final destination
-			City next_step = vehicle.getCurrentCity().pathTo(finalDestinationForOnlineTravelling).get(0);
-			action = new Action.Move(next_step);
-			if (next_step==finalDestinationForOnlineTravelling){
-				finalDestinationForOnlineTravelling=null;
-			}
-		}
-
-		//logging to file
-		String currentCountry="switzerland";
-		try{
-			FileWriter logger = null;
-			logger = new FileWriter("perfLog/"+currentCountry+".csv", true);
-			Double rewardPerKm = ((double) myAgent.getTotalReward() / (double)myAgent.getTotalDistance());
-			logger.append(myAgent.name()+ ";" + numActions+ ";" + myAgent.getTotalReward() + ";" + myAgent.getTotalDistance() +";" + rewardPerKm +"\n");
-			logger.flush();
-			logger.close();
-		}catch(IOException theError){
-			System.out.println("error writing log !");
-			theError.printStackTrace();
-		}
-
-
-		numActions++;
-		return action;
-
-		 */
 	}
 
 
