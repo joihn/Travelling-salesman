@@ -205,12 +205,43 @@ public class ReactiveTemplate implements ReactiveBehavior {
 							probability = td.probability(safs.futureState.currentCity, safs.futureState.potentialPackageDest);
 						} else {
 							// at the future state no task is available
+							double cumsum = 0;
+							for(City destinationCity : topo.cities()){
+								cumsum += td.probability(safs.futureState.currentCity,destinationCity);
+							}
+							probability = 1-cumsum;
+						}
+					} else {
+						// move
+						// a task is available but the agent does refuse it
+						if(safs.state.currentCity.hasNeighbor(safs.state.potentialPackageDest)){
+							if(safs.futureState.potentialPackageDest != null){
+								probability = 1/(safs.state.currentCity.neighbors().size()-1)*td.probability(safs.futureState.currentCity,safs.futureState.potentialPackageDest);
+							} else {
+								// future state has no task available anymore
+								double cumsum = 0;
+								for(City destinationCity : topo.cities()){
+									cumsum += td.probability(safs.futureState.currentCity,destinationCity);
+								}
 
+								probability = 1/(safs.state.currentCity.neighbors().size()-1)*(1-cumsum);
+							}
+						} else {
+							if(safs.futureState.potentialPackageDest != null){
+								probability = 1/safs.state.currentCity.neighbors().size()*td.probability(safs.futureState.currentCity,safs.futureState.potentialPackageDest);
+							} else {
+								double cumsum = 0;
+								for(City destinationCity : topo.cities()){
+									cumsum += td.probability(safs.futureState.currentCity,destinationCity);
+								}
+								probability = 1/safs.state.currentCity.neighbors().size()*(1-cumsum);
+							}
 						}
 
 					}
 
 				}
+				transitionProbability.put(safs, probability);
 
 			}
 		}
