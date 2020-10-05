@@ -310,9 +310,9 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 
 		// optimize
-		int niter = 100;
+
 		int cnt = 0;
-		discount = 0.9;
+		//discount = 0.9;
 		System.out.println("========   the discount is : " + discount);
 
 		HashMap<State, Double> V0 = new HashMap<State, Double>(V);

@@ -5,7 +5,7 @@
 	<agent name="reactive-random">
 		<set class-path="bin/"/>
 		<set class-name="reactive.ReactiveTemplate"/>
-		<set discount-factor=".85"/>
+		<set discount-factor=".95"/>
 	</agent>
 	<!-- #### REACTIVE AGENTS ### -->
 	<agent name="reactive-0.85">
