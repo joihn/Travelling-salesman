@@ -3,6 +3,7 @@ package reactive;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -25,19 +26,23 @@ public class ReactiveTemplate implements ReactiveBehavior {
 	private int numActions;
 	private Agent myAgent;
 	private TaskDistribution td;
+
+	private ArrayList<State> states; // all possible states of the agent - state (i,i) expluded
+	private HashMap<State,ArrayList<String>> actionTable; // returns all possible actions at state s
+
 	private ArrayList<State_Action> stateActionList;
-	private HashMap<State_Action, ArrayList<FutureState_Prob>> transitionTable;
-	private HashMap<State,ArrayList<String>> actionTable;
+
+	private HashMap<State_Action, ArrayList<StateActionFutureState>> futureStatesTable; // Lookup table for s'
+	private HashMap<StateActionFutureState, Double> transitionProbability;
 
 	private HashMap<State_Action, Double> rewardTable;
 
 	private HashMap<State, String> actionLookupTable;
 	private HashMap<String, City> cityStringLookupTable;
+
 	City finalDestinationForOnlineTravelling=null;
 	private int nCities;
 	private double discount = 0.0; // will be modified in setup
-
-	private ArrayList<State> states;
 
 	class State {
 		public City currentCity;
@@ -49,13 +54,15 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 	}
 
-	class FutureState_Prob{
+	class StateActionFutureState{
+		public State state;
+		public String action;
 		public State futureState;
-		public double probability; // probability of the future state
 
-		private FutureState_Prob(State futState, double p){
-			futureState = futState;
-			probability = p;
+		private StateActionFutureState(State s, String a, State fs){
+			state = s;
+			action = a;
+			futureState = fs;
 		}
 	}
 
@@ -131,6 +138,27 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				}
 			}
 			actionTable.put(state, availableActions);
+
+		}
+
+		stateActionList = new ArrayList<State_Action>();
+		for(State state : states){
+			for(String action : actionTable.get(state)){
+				State_Action stateAction = new State_Action(state, action);
+				stateActionList.add(stateAction);
+
+				ArrayList<StateActionFutureState> futureStatesList = new ArrayList<StateActionFutureState>();
+				// define possible future states for the couple (s,a)
+				for(State futureState : states){
+					if((stateAction.currentState.currentCity.hasNeighbor(futureState.currentCity))
+							||((futureState.currentCity == stateAction.currentState.potentialPackageDest)&&
+							action=="pickup")){
+						StateActionFutureState safs = new StateActionFutureState(stateAction.currentState, stateAction.action, futureState);
+						futureStatesList.add(safs);
+					}
+				}
+				futureStatesTable.put(stateAction,futureStatesList);
+			}
 		}
 
 
@@ -145,139 +173,48 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		*/
 	}
 
-	private void createTransitionTable(Topology topo) {
 
-		transitionTable = new HashMap<State_Action,ArrayList<FutureState_Prob>>();
-		stateActionList = new ArrayList<State_Action>();
+	private void createTransitionTable(Topology topo, TaskDistribution td) {
 
-		for (State currentState : states) { // loop over all possible initial states
-			ArrayList<String> avAction = actionTable.get(currentState); // extract possible actions at initial state
-			for (String action : avAction) {
-				ArrayList<FutureState_Prob> futureStates_Prob = new ArrayList<FutureState_Prob>();
+		transitionProbability = new HashMap<StateActionFutureState,Double>();
 
-				State_Action state_action = new State_Action(currentState, action); // loop over all possible actions
-				stateActionList.add(state_action);
+		for(State_Action stateAction : stateActionList){
+			for(StateActionFutureState safs : futureStatesTable.get(stateAction)){
+				// safs contains all possible (s,a,s') tuples
+				double probability;
 
-				for(State nextState : states){ // loop over all possible next states
-					// initialize transition probability to 0
-					FutureState_Prob futStateProb = new FutureState_Prob(nextState,0);
-
-					// TODO: remove this (until next todo)
-					/*
-					if (state_action.currentState.currentCity == state_action.currentState.potentialPackageDest){
-						System.out.println("WARNING: currentCity equals nextCity in currentState-> should not get here");
-					}
-					if (nextState.currentCity == nextState.potentialPackageDest){
-						System.out.println("WARNING: currentCity equals nextCity in nextState-> should not get here");
-					}*/
-					// TODO: remove until here
-
-					if (state_action.currentState == nextState){
-						// exclude the case where states are identical
-						continue;
-					}
-					if(state_action.action == "pickup"){
-						// handle pickup cases
-
-						if(nextState.currentCity == state_action.currentState.potentialPackageDest){
-							if(nextState.potentialPackageDest != null){
-								// assume you end up at the destination city and after delivery
-								// there is directly a task available again
-								// TODO check if this is true (seems a bit fishy)
-								futStateProb.probability = td.probability(nextState.currentCity,nextState.potentialPackageDest);
-							} else {
-								// agent ends up at the delivery city but there is no task available after delivery
-								// the probability that there is no task in city i equals p = 1- sum_j td.p(i,j)
-								double cumsum = 0;
-								for(City city : topo.cities()){
-									if (city != nextState.currentCity){
-										cumsum += td.probability(nextState.currentCity, city);
-									}
-								}
-								futStateProb.probability = 1-cumsum;
-								//System.out.println("Inverse probability is "+ futStateProb.probability);
-							}
-						} else {
-							// currentCity of the nextState is not equal to the package destination
-							// it is impossible to end up in such a state after delivery
-							futStateProb.probability = 0;
-						}
+				if(safs.state.potentialPackageDest == null){
+					// no task is available
+					if(safs.futureState.potentialPackageDest != null){
+						// at the future state a task is available
+						probability =  1/safs.state.currentCity.neighbors().size()*td.probability(safs.futureState.currentCity,safs.futureState.potentialPackageDest);
 					} else {
-						// handle move cases
-						int nNeighbours;
-						if (state_action.currentState.currentCity.hasNeighbor(state_action.currentState.potentialPackageDest)){
-							// the destination of the refused but available Task is a neighbour -> move to one of the N-1 Neighbours
-							nNeighbours = state_action.currentState.currentCity.neighbors().size()-1;
+						// at the future state there is still no task
+						double cumsum = 0;
+						for(City destinationCity : topo.cities()){
+							cumsum += td.probability(safs.futureState.currentCity, destinationCity);
+						}
+						probability =  (1-cumsum)/safs.state.currentCity.neighbors().size();
+					}
+				} else {
+					// a task is available
+					if(safs.action == "pickup"){
+						// a task is available and pickup is performed
+						if(safs.futureState.potentialPackageDest != null){
+							// at the future state again a task is available
+							probability = td.probability(safs.futureState.currentCity, safs.futureState.potentialPackageDest);
 						} else {
-							nNeighbours = state_action.currentState.currentCity.neighbors().size();
-						}
-
-						if(nextState.potentialPackageDest != null){
-							// in the next state is a package available
-							futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest)/nNeighbours;
-						} else {
-							// the next state has no task appearing
-							// this happens at a probability p = 1-sum_j td.p(i.j) (compare above)
-							// TODO check if this is true (seems a bit fishy)
-							double cumsum = 0;
-							for(City city : topo.cities()){
-								if (city != nextState.currentCity){
-									cumsum += td.probability(nextState.currentCity, city);
-								}
-							}
-
-							futStateProb.probability = (1-cumsum)/nNeighbours;
-							//System.out.println("Inverse probability is "+ futStateProb.probability);
-						}
-					}
-					futureStates_Prob.add(futStateProb);
-
-
-					// TODO remove the code from here on
-					/*
-					if()
-					if 		(state_action.currentState.currentCity==state_action.currentState.potentialPackageDest ||  // destination os the same as current town
-							state_action.currentState.currentCity==nextState.currentCity ||                            // staying on the spot is forbiden
-							nextState.currentCity==nextState.potentialPackageDest                                    // destination is the same as current town; next state
-							//state_action.currentState.potentialPackageDest != nextState.currentCity                  // will implemented forbiding useless move later
-							 ) {
-						futStateProb.probability = 0.0;
-					}
-					*/
-					/*
-					else { //action stuff :D
-
-						if (state_action.action == "pickup") // you pick up
-						{              // there is package    														// you end up at destination
-							if (state_action.currentState.potentialPackageDest != null && nextState.currentCity == state_action.currentState.potentialPackageDest) {
-								futStateProb.probability = 1.0;
-							}
-						} else { // you don't pickup = you move to EXPLORE :D
-
-														// exploring step must be in neighboorhood		this neighboor has a task available FROM HIM
-							if (state_action.currentState.currentCity.neighbors().contains(nextState.currentCity) && nextState.potentialPackageDest != null) {
-								//iterate trough neighboor
-								// we will do this for ALLL neighboor separately
-								futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest);
-							}
-
-//							goto everyone, not only neigbhoor
-//							//this step city  has a task available FROM HIM
-//							if (nextState.potentialPackageDest != null) {
-//								//iterate trough neighboor
-//
-//								futStateProb.probability = td.probability(nextState.currentCity, nextState.potentialPackageDest);
-//							}
+							// at the future state no task is available
 
 						}
+
 					}
-					*/
-					// TODO remove code until here
+
 				}
-				transitionTable.put(state_action,futureStates_Prob);
 
 			}
 		}
+
 	}
 
 	public void createReward(TaskDistribution td, Topology tp, Vehicle vehicle){
@@ -305,7 +242,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				// reward is negative if no task is taken and the vehicle moves arount empty
 				reward = - state.currentCity.distanceTo(getCityFromString(action, tp))*vehicle.costPerKm();
 			}
-			//System.out.println("Reward from "+state.currentCity + " to " + state.potentialPackageDest + " is " + reward);
+			System.out.println("Reward from ("+state.currentCity + " to " + state.potentialPackageDest + "), action : " + action + " is " + reward);
 			rewardTable.put(stateAction, reward);
 		}
 	}
@@ -393,10 +330,12 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 
 		System.out.print("Finished Optimization");
-		for(State_Action sa : stateActionList){
+		/*for(State_Action sa : stateActionList){
 			System.out.println("State (" + sa.currentState.currentCity + ", " + sa.currentState.potentialPackageDest+")"+
 					"-- Optimal Reward is " + V.get(sa.currentState) + " -- Optimal action: " + actionLookupTable.get(sa.currentState));
 		}
+		*/
+
 		// TODO: the agent chooses only at 2 states to pickup :S
 
 
@@ -458,6 +397,8 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			int cityIdx = (int) (Math.random()*currentState.currentCity.neighbors().size());
 			System.out.println("City Index is: " +cityIdx);
 			City nextCity = currentState.currentCity.neighbors().get(cityIdx);
+
+			// TODO move to random neighour
 
 			action = new Action.Move(nextCity);
 			System.out.println("Action " + numActions + "is Move To" + nextCity.name);
