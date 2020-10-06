@@ -15,7 +15,7 @@ def extractData(countries):
 
     dataFrames=[]
     for name in countries:
-        dataFrame = pd.read_csv("./perfLog/"+name+".csv", sep=";",
+        dataFrame = pd.read_csv("./"+name+".csv", sep=";",
                                 names=["agent", "num_actions", "reward", "distance_travelled", "reward_per_km"])
         dataFrames.append(dataFrame)
     return dataFrames
@@ -41,5 +41,5 @@ def plot(column, dataF,limit_time):
     ax.set_ylabel(column)
     plt.show()
 #%% // plotting the stuff
-plot('reward', dataF, 905)
-plot('reward_per_km', dataF, 905)
+plot('reward', dataF, 500)
+plot('reward_per_km', dataF, 500)
