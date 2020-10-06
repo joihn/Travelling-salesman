@@ -20,7 +20,7 @@ def extractData(countries):
         dataFrames.append(dataFrame)
     return dataFrames
 
-countries= ["switzerland"]
+countries= ["france"]
 dataFrames=extractData(countries)
 dataF= dataFrames[0]
 agentNames = dataF.agent.unique()
@@ -30,8 +30,6 @@ def get_column(df, agent_name, column, limit_time):
     columna = np.zeros(limit_time)
     columna[:] = df[df.agent==agent_name].head(limit_time)[column]
     return columna
-
-
 
 def plot(column, dataF,limit_time):
     f, ax = plt.subplots(1, 1)
@@ -43,5 +41,5 @@ def plot(column, dataF,limit_time):
     ax.set_ylabel(column)
     plt.show()
 #%% // plotting the stuff
-plot('reward', dataF, 300)
-plot('reward_per_km', dataF, 300)
+plot('reward', dataF, 905)
+plot('reward_per_km', dataF, 905)

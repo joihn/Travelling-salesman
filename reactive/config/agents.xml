@@ -2,7 +2,7 @@
 
 <agents>
 	<!-- A list of agents and their behavior classes -->
-	<agent name="reactive-random">
+	<agent name="reactive-0.95">
 		<set class-path="bin/"/>
 		<set class-name="reactive.ReactiveTemplate"/>
 		<set discount-factor=".95"/>
@@ -32,5 +32,10 @@
 		<set class-path="bin/"/>
 		<set class-name="reactive.ReactiveTemplate"/>
 		<set discount-factor=".01"/>
+	</agent>
+	<agent name="reactive-0.0">
+	<set class-path="bin/"/>
+	<set class-name="reactive.ReactiveTemplate"/>
+	<set discount-factor=".0"/>
 	</agent>
 </agents>

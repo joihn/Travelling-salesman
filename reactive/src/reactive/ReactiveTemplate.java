@@ -3,7 +3,6 @@ package reactive;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -19,7 +18,6 @@ import logist.topology.Topology.City;
 
 
 public class ReactiveTemplate implements ReactiveBehavior {
-	// TODO add mvtPrecision --> why is this not here anymore?
 	private Random random;
 	private double pPickup;
 
@@ -162,17 +160,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				futureStatesTable.put(stateAction,futureStatesList);
 			}
 		}
-
-
-		/* TODO remove that comment for print
-		for(State stat : states){
-			if (stat.potentialPackageDest != null) {
-				System.out.println("State: (" + stat.currentCity.name + ", " + stat.potentialPackageDest.name + ")");
-			} else {
-				System.out.println("State: (" + stat.currentCity.name + ", null)");
-			}
-		}
-		*/
 	}
 
 
@@ -280,15 +267,15 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 	}
 
-	public boolean goodEnough(HashMap<State,Double> Vold, HashMap<State, Double> Vnew){
-		double maxDiff = 0;
+	public boolean noPolicyVariation(HashMap<State,Double> Vold, HashMap<State, Double> Vnew){
+		double mDiff = 0;
 		for(State key : Vnew.keySet()){
 			double diff = Math.abs(Vold.get(key).doubleValue() - Vnew.get(key).doubleValue());
-			if (diff>maxDiff){
-				maxDiff = diff;
+			if (diff>mDiff){
+				mDiff = diff;
 			}
 		}
-		return maxDiff<epsilon;
+		return mDiff<epsilon;
 
 	}
 
@@ -318,7 +305,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		HashMap<State, Double> V0 = new HashMap<State, Double>(V);
 		actionLookupTable = new HashMap<State, String>();
 
-		// TODO: implement goodEnough(V,V0) function here (idea: loop over s: if forall |V(s)-V0(s)|<eps
 		while(true){
 
 			for(State state : states){
@@ -358,7 +344,7 @@ public class ReactiveTemplate implements ReactiveBehavior {
 			}
 
 			cnt++;
-			if (goodEnough(V0,V)){
+			if (noPolicyVariation(V0,V)){
 				break;
 			}
 			V0 = new HashMap<State, Double>(V);
@@ -366,14 +352,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 		}
 
 		System.out.print("Finished Optimization after " + cnt + " iterations");
-		/*for(State_Action sa : stateActionList){
-			System.out.println("State (" + sa.currentState.currentCity + ", " + sa.currentState.potentialPackageDest+")"+
-					"-- Optimal Reward is " + V.get(sa.currentState) + " -- Optimal action: " + actionLookupTable.get(sa.currentState));
-		}
-		*/
-
-		// TODO: the agent chooses only at 2 states to pickup :S
-
 
 	}
 
@@ -385,7 +363,6 @@ public class ReactiveTemplate implements ReactiveBehavior {
 				0.95);
 
 		this.random = new Random();
-		this.pPickup = discount; // TODO can proabbly delete this
 		this.numActions = 0;
 		this.myAgent = agent;
 		this.td=td;
@@ -430,24 +407,31 @@ public class ReactiveTemplate implements ReactiveBehavior {
 
 		} else if (currentBestAction!=null){
 			// move to a RANDOM neighbour
-			//int cityIdx = (int) (Math.random()*currentState.currentCity.neighbors().size());
-			//System.out.println("City Index is: " +cityIdx);
-			//City nextCity = currentState.currentCity.neighbors().get(cityIdx);
-
-			// TODO move to random neighour
 
 			action = new Action.Move(currentState.currentCity.randomNeighbor(random));
 			//System.out.println("Action " + numActions + "is Move To" + nextCity.name);
 
 		}else{ // action is null !! :( gotta do something instead !
 			City choosenNeighboor=vehicle.getCurrentCity().neighbors().get(0);
-			System.out.println("WARINGN POLICY DIDN'T FIND ANYTHING ");
+			System.out.println("WARNING POLICY DIDN'T FIND ANYTHING ");
 			action= new Action.Move(choosenNeighboor);
 		}
-
 		if (numActions >= 1) {
 			System.out.println("The total profit after "+numActions+" actions is "+ myAgent.getTotalProfit()+
 					" (average profit: "+(myAgent.getTotalProfit() / (double) numActions) + ")");
+		}
+		//logging to file
+		String currentCountry="france";
+		try{
+			FileWriter logger = null;
+			logger = new FileWriter("perfLog/"+currentCountry+".csv", true);
+			Double rewardPerKm = ((double) myAgent.getTotalReward() / (double)myAgent.getTotalDistance());
+			logger.append(myAgent.name()+ ";" + numActions+ ";" + myAgent.getTotalReward() + ";" + myAgent.getTotalDistance() +";" + rewardPerKm +"\n");
+			logger.flush();
+			logger.close();
+		}catch(IOException theError){
+			System.out.println("error writing log !");
+			theError.printStackTrace();
 		}
 
 		numActions++;
