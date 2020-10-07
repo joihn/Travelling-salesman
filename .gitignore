@@ -6,9 +6,11 @@ rabbits/gardoni-dubach-in/.project
 rabbits/gardoni-dubach-in/.settings/
 rabbits/gardoni-dubach-in/bin
 rabbits/instructions.txt
+rabbits/report_rabbits.tex
 
 reactive/.classpath
 reactive/.idea
 reactive/.project
 reactive/.settings
 reactive/bin
+reactive/history.xml
