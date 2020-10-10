@@ -47,7 +47,7 @@ public class DeliberativeTemplate implements DeliberativeBehavior {
 	}
 	
 	@Override
-	public Plan plan(Vehicle vehicle, TaskSet tasks) {
+	public Plan plan(Vehicle vehicle, TaskSet tasks) { // tasks is the TaskSet of available task
 		Plan plan;
 
 		// Compute the plan with the selected algorithm.
