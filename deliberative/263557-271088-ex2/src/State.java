@@ -21,7 +21,6 @@ public class State {
     double cost;
 
     public State(Vehicle vehicle, TaskSet tasksAvailable, Action actionParent, State parent){
-        this.currentCity = vehicle.getCurrentCity();
         this.tasksToDeliver = vehicle.getCurrentTasks();
         this.tasksAvailable = tasksAvailable;
         this.parent = parent;
@@ -29,9 +28,11 @@ public class State {
         if (this.parent != null){ // initial node has no parent
             this.cost = this.parent.cost + this.currentCity.distanceTo(this.parent.currentCity);
             this.actionParent = actionParent;
+            if(actionParent)
         } else {
             this.cost = 0;
             this.actionParent = null;
+            this.currentCity = vehicle.getCurrentCity();
         }
     }
 
