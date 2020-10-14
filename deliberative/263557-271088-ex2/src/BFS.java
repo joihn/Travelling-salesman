@@ -11,6 +11,7 @@ import logist.plan.Action;
 import logist.task.TaskSet;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Collections;
 public class BFS {
@@ -20,7 +21,7 @@ public class BFS {
     Plan optimalPlan ;
     public BFS(Vehicle vehicle_, TaskSet taskSet_){
 
-        State initialNode= new State(vehicle_, taskSet_, null, null);
+        State initialNode= new State(vehicle_.getCurrentCity(),vehicle_,vehicle_.getCurrentTasks(), taskSet_, null, null);
 
         ArrayList<State> finalNodes = new ArrayList<State>();
         ArrayList<State> C = new ArrayList<State>();
@@ -30,7 +31,12 @@ public class BFS {
         Queue<State> Q = new LinkedList<>();
         Q.add(initialNode);
 
-        while(!Q.isEmpty() ){ //TODO
+        int iter=0;
+        while(!Q.isEmpty() ){
+            if (iter%100==0){
+                System.out.println("iter is : " + iter);
+            }
+            iter++;
             State n= Q.remove();
             if (!IsNInC(n,C) || (n.parent.cost + n.currentCity.distanceTo(n.parent.currentCity) )< getCostOfNInC(n, C) ){
                 //add n to C
@@ -45,6 +51,8 @@ public class BFS {
                     Q.addAll(n.getChildren(vehicle_));// warnirng it's not a collection
                 }
 
+            }else{
+                System.out.println("CYCLE AVOIDED ! the node wasn't added to C, and it's neighborr not added to Q");
             }
         }
         System.out.println(" finished exploring all the tree :D  ");
@@ -64,7 +72,7 @@ public class BFS {
         //backtracking the best route
 
         State currentNode= optimalFinalNode;
-        ArrayList<Action> actions= new ArrayList<Action>();
+        List<Action> actions= new ArrayList<Action>();
         while (currentNode!=null){
             actions.add(currentNode.actionParent);
             currentNode=currentNode.parent;
@@ -72,8 +80,12 @@ public class BFS {
 
         // inverse the list
         Collections.reverse(actions);
+        //optimalPlan= new Plan(vehicle_.getCurrentCity(), actions);
+        optimalPlan= new Plan(vehicle_.getCurrentCity());
+        for(Action action : actions){
+            optimalPlan.append(action);
+        }
 
-        optimalPlan= new Plan(vehicle_.getCurrentCity(), actions);
 
     }
 
@@ -87,16 +99,19 @@ public class BFS {
 
          */
         for(State stateC: C) {
-            if (stateC.currentCity == n.currentCity && stateC.tasksToDeliver == n.tasksToDeliver && stateC.tasksAvailable == n.tasksAvailable) {
+            if ((stateC.currentCity == n.currentCity) && (stateC.tasksToDeliver == n.tasksToDeliver) && (stateC.tasksAvailable == n.tasksAvailable)) {
+                System.out.println("IsNInC : true");
                 return true;
             }
         }
+        System.out.println("IsNInC : false");
         return false;
     }
 
     double getCostOfNInC(State n, ArrayList<State> C){
         for(State stateC: C) {
             if (stateC.currentCity == n.currentCity && stateC.tasksToDeliver == n.tasksToDeliver && stateC.tasksAvailable == n.tasksAvailable) {
+                System.out.println("getCostOfNInC returned the value : " + stateC.cost);
                 return stateC.cost;
             }
         }
