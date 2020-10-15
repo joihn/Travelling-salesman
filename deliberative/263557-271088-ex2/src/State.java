@@ -12,7 +12,7 @@ import logist.task.TaskSet;
 
 import java.util.ArrayList;
 
-public class State {
+public class State{
     public City currentCity;
     public TaskSet tasksToDeliver;
     public TaskSet tasksAvailable;

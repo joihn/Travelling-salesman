@@ -16,26 +16,26 @@ import java.util.Queue;
 import java.util.Collections;
 public class BFS {
     Plan optimalPlan ;
-    
-    public BFS(Vehicle vehicle_, TaskSet taskSet_){
+    State optimalFinalNode;
+    public BFS(Vehicle vehicle_, TaskSet taskSet_) {
 
-        State initialNode= new State(vehicle_.getCurrentCity(),vehicle_,vehicle_.getCurrentTasks(), taskSet_, null, null);
+        State initialNode = new State(vehicle_.getCurrentCity(), vehicle_, vehicle_.getCurrentTasks(), taskSet_, null, null);
 
         ArrayList<State> finalNodes = new ArrayList<State>();
         ArrayList<State> C = new ArrayList<State>();
 
-        Queue<State> Q = new LinkedList<>();
+        Queue<State> Q = new LinkedList<State>();
         Q.add(initialNode);
 
-        int iter=0;
-        while(!Q.isEmpty() ){
-            if (iter%100==0){
+        int iter = 0;
+        while (!Q.isEmpty()) {
+            if (iter % 100 == 0) {
                 System.out.println("iter is : " + iter);
             }
             iter++;
-            System.out.println("Size of Q: "+ Q.size());
-            State n= Q.remove();
-            if (!IsNInC(n,C) || (n.parent.cost + n.currentCity.distanceTo(n.parent.currentCity) )< getCostOfNInC(n, C) ){
+            System.out.println("Size of Q: " + Q.size());
+            State n = Q.remove();
+            if (!IsNInC(n, C) || (n.parent.cost + n.currentCity.distanceTo(n.parent.currentCity)) < getCostOfNInC(n, C)) {
                 //add n to C
                 C.add(n);
 
@@ -44,52 +44,73 @@ public class BFS {
                     System.out.println("We found a final node !");
                     finalNodes.add(n);
 
-                }else{
-                    Q.addAll(n.getChildren(vehicle_));// warnirng it's not a collection
+                } else {
+
+                    ArrayList<State> children = new ArrayList(n.getChildren(vehicle_));
+                    for (State childNode : children) {
+                        if (!isChildInQ(childNode,Q)) {
+                            Q.add(childNode);
+                        } else {
+                            checkAndReplaceNode(childNode,Q);
+                        }
+                    }
+
+                    //Q.addAll(n.getChildren(vehicle_));// warnirng it's not a collection
                 }
 
-            }else{
+            } else {
                 System.out.println("CYCLE AVOIDED ! the node wasn't added to C, and it's neighborr not added to Q");
             }
         }
         System.out.println(" finished exploring all the tree :D  ");
 
         // comparing which final node is the best
-        int indexOfOptimal=0;
+        int indexOfOptimal = 0;
         double minCostSoFar = Double.POSITIVE_INFINITY;
-        for(int i=0; i<finalNodes.size();i++ ) {
-            State stateFinal=finalNodes.get(i);
-            if (stateFinal.cost<minCostSoFar){
-                indexOfOptimal=i;
+        for (int i = 0; i < finalNodes.size(); i++) {
+            State stateFinal = finalNodes.get(i);
+            if (stateFinal.cost < minCostSoFar) {
+                indexOfOptimal = i;
             }
             i++;
         }
-        State optimalFinalNode = finalNodes.get(indexOfOptimal);
+        optimalFinalNode = finalNodes.get(indexOfOptimal);
 
-        //backtracking the best route
+        BacktrackPath(vehicle_);
 
+    }
+
+    public void BacktrackPath(Vehicle vehicle){//backtracking the best route
         State currentNode= optimalFinalNode;
-        List<Action> actions= new ArrayList<Action>();
+        List<State> stateTrajectory= new ArrayList<State>();
         List<City> path;
         while (currentNode!=null){
-            path = currentNode.currentCity.pathTo(currentNode.parent.currentCity);
-            if (path.size()>0){
-                for(City nextCity : path) {
-                    actions.add(new Action.Move(nextCity));
-                }
-            }
-            actions.add(currentNode.actionParent);
+            stateTrajectory.add(currentNode);
             currentNode=currentNode.parent;
         }
 
         // inverse the list
-        Collections.reverse(actions);
+        Collections.reverse(stateTrajectory);
         //optimalPlan= new Plan(vehicle_.getCurrentCity(), actions);
-        optimalPlan= new Plan(vehicle_.getCurrentCity());
-        for(Action action : actions){
-            optimalPlan.append(action);
+        optimalPlan= new Plan(vehicle.getCurrentCity());
+        for(State state : stateTrajectory){
+            if (state.parent == null){
+                System.out.println("1st node - only get here once");
+            } else {
+                //System.out.println("starting another node ");
+                path = state.parent.currentCity.pathTo(state.currentCity);
+                if (path.size()>0){
+                    for(City nextCity : path) {
+                        optimalPlan.appendMove(nextCity);
+                    }
+                }
+                //System.out.println("finished another node, gonna add ");
+                optimalPlan.append(state.actionParent);
+                System.out.println(state.actionParent.toString());
+                //System.out.println("finished another node, ADDED ! ");
+            }
         }
-
+        System.out.println("Finished plan build");
 
     }
 
@@ -111,6 +132,31 @@ public class BFS {
         //System.out.println("IsNInC : false");
         return false;
     }
+
+    boolean isChildInQ(State child, Queue<State> Q ){
+        for(State stateInQ : Q) {
+            if ((stateInQ.currentCity.equals(child.currentCity)) && (stateInQ.tasksToDeliver.equals(child.tasksToDeliver)) && (stateInQ.tasksAvailable.equals(child.tasksAvailable))) {
+                //System.out.println("IsNInC : true");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void checkAndReplaceNode(State child, Queue<State> Q){
+        for(State stateInQ: Q){
+            if ((stateInQ.currentCity.equals(child.currentCity)) && (stateInQ.tasksToDeliver.equals(child.tasksToDeliver)) && (stateInQ.tasksAvailable.equals(child.tasksAvailable))) {
+                //System.out.println("IsNInC : true");
+                if (stateInQ.cost > child.cost){
+                    stateInQ.cost = child.cost;
+                    stateInQ.parent = child.parent;
+                }
+                return;
+            }
+        }
+    }
+
+
 
     double getCostOfNInC(State n, ArrayList<State> C){
         System.out.println("The size of C is: " + C.size());
