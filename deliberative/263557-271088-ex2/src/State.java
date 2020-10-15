@@ -91,6 +91,25 @@ public class State implements Comparator<State> {
         return Double.compare(state1.costPlusH, state2.costPlusH);
     }
 
+    public double heuristic(City currentCity, TaskSet tasksToDeliver, TaskSet tasksAvailable ) {
+        double maxCost = 0;
+        // take the max cost of 1 task, looking trough all tasksAvailable
+        for (Task taskAvailable : tasksAvailable) {
+            double cost = currentCity.distanceTo(taskAvailable.pickupCity) + taskAvailable.pickupCity.distanceTo(taskAvailable.deliveryCity);
+            if (cost > maxCost) {
+                maxCost = cost;
+            }
+        }
+        // take the max cost of 1 task, looking trough all taskToDeliver
+        for (Task taskToDeliver : tasksToDeliver) {
+            double cost = currentCity.distanceTo(taskToDeliver.deliveryCity);
+            if (cost > maxCost) {
+                maxCost = cost;
+            }
+        }
+        return maxCost;
+    }
+
 
 
 }

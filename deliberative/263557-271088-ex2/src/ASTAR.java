@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-public class ASTAR(Vehicle vehicle_, TaskSet taskSet_) {
+public class ASTAR {
     Plan bestPlan;
     State finalNode;
 
@@ -102,24 +102,7 @@ public class ASTAR(Vehicle vehicle_, TaskSet taskSet_) {
 
 
 
-    public double heuristic(City currentCity, TaskSet tasksToDeliver, TaskSet tasksAvailable ) {
-        double maxCost = 0;
-        // take the max cost of 1 task, looking trough all tasksAvailable
-        for (Task taskAvailable : tasksAvailable) {
-            double cost = currentCity.distanceTo(taskAvailable.pickupCity) + taskAvailable.pickupCity.distanceTo(taskAvailable.deliveryCity);
-            if (cost > maxCost) {
-                maxCost = cost;
-            }
-        }
-        // take the max cost of 1 task, looking trough all taskToDeliver
-        for (Task taskToDeliver : tasksToDeliver) {
-            double cost = currentCity.distanceTo(taskToDeliver.deliveryCity);
-            if (cost > maxCost) {
-                maxCost = cost;
-            }
-        }
-        return maxCost;
-    }
+
 
     public boolean isFinalNode(State node){
         return node.tasksToDeliver.isEmpty() && node.tasksAvailable.isEmpty() ;
