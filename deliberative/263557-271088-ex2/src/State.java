@@ -50,7 +50,7 @@ public class State {
                     TaskSet nextTasksAvailable = tasksAvailable.clone();
                     nextTasksAvailable.remove(availableTask);
 
-                    TaskSet nextTasksToDeliver = tasksToDeliver.clone();//TODO warning ! is it a shallow copy ??
+                    TaskSet nextTasksToDeliver = tasksToDeliver.clone();
                     nextTasksToDeliver.add(availableTask);
 
                     Action action = new Action.Pickup(availableTask);

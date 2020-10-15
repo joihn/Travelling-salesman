@@ -15,10 +15,8 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Collections;
 public class BFS {
-
-
-
     Plan optimalPlan ;
+    
     public BFS(Vehicle vehicle_, TaskSet taskSet_){
 
         State initialNode= new State(vehicle_.getCurrentCity(),vehicle_,vehicle_.getCurrentTasks(), taskSet_, null, null);
@@ -37,6 +35,7 @@ public class BFS {
                 System.out.println("iter is : " + iter);
             }
             iter++;
+            System.out.println("Size of Q: "+ Q.size());
             State n= Q.remove();
             if (!IsNInC(n,C) || (n.parent.cost + n.currentCity.distanceTo(n.parent.currentCity) )< getCostOfNInC(n, C) ){
                 //add n to C
@@ -99,19 +98,20 @@ public class BFS {
 
          */
         for(State stateC: C) {
-            if ((stateC.currentCity == n.currentCity) && (stateC.tasksToDeliver == n.tasksToDeliver) && (stateC.tasksAvailable == n.tasksAvailable)) {
-                System.out.println("IsNInC : true");
+            if ((stateC.currentCity.equals(n.currentCity)) && (stateC.tasksToDeliver.equals(n.tasksToDeliver)) && (stateC.tasksAvailable.equals(n.tasksAvailable))) {
+                //System.out.println("IsNInC : true");
                 return true;
             }
         }
-        System.out.println("IsNInC : false");
+        //System.out.println("IsNInC : false");
         return false;
     }
 
     double getCostOfNInC(State n, ArrayList<State> C){
+        System.out.println("The size of C is: " + C.size());
         for(State stateC: C) {
-            if (stateC.currentCity == n.currentCity && stateC.tasksToDeliver == n.tasksToDeliver && stateC.tasksAvailable == n.tasksAvailable) {
-                System.out.println("getCostOfNInC returned the value : " + stateC.cost);
+            if (stateC.currentCity.equals(n.currentCity) && stateC.tasksToDeliver.equals(n.tasksToDeliver)  && stateC.tasksAvailable.equals(n.tasksAvailable)) {
+                //System.out.println("getCostOfNInC returned the value : " + stateC.cost);
                 return stateC.cost;
             }
         }
