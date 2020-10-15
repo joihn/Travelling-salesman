@@ -3,9 +3,7 @@ import logist.simulation.Vehicle;
 import logist.task.TaskSet;
 import logist.topology.Topology.City;
 
-import java.util.ArrayList;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.*;
 
 public class ASTAR {
     Plan bestPlan;
@@ -43,10 +41,13 @@ public class ASTAR {
             // TODO change finalNodeReached to true if n is a final node
             if (isFinalNode(n)){
                 finalNodeReached = true;
+                finalNode = n;
             }
 
         }
 
+
+        // TODO backpropagation
 
 
     }
@@ -98,17 +99,43 @@ public class ASTAR {
         return 0.0;
     }
 
-
-
-
-
-
-
     public boolean isFinalNode(State node){
         return node.tasksToDeliver.isEmpty() && node.tasksAvailable.isEmpty() ;
     }
 
+    public Plan backtrackPath(Vehicle vehicle){//backtracking the best route
+        State currentNode= finalNode;
+        List<State> stateTrajectory= new ArrayList<State>();
+        List<City> path;
+        while (currentNode!=null){
+            stateTrajectory.add(currentNode);
+            currentNode=currentNode.parent;
+        }
 
+        // inverse the list
+        Collections.reverse(stateTrajectory);
+        //optimalPlan= new Plan(vehicle_.getCurrentCity(), actions);
+        bestPlan= new Plan(vehicle.getCurrentCity());
+        for(State state : stateTrajectory){
+            if (state.parent == null){
+                System.out.println("1st node - only get here once");
+            } else {
+                //System.out.println("starting another node ");
+                path = state.parent.currentCity.pathTo(state.currentCity);
+                if (path.size()>0){
+                    for(City nextCity : path) {
+                        bestPlan.appendMove(nextCity);
+                    }
+                }
+                //System.out.println("finished another node, gonna add ");
+                bestPlan.append(state.actionParent);
+                System.out.println(state.actionParent.toString());
+                //System.out.println("finished another node, ADDED ! ");
+            }
+        }
+        System.out.println("Finished plan build");
+        return bestPlan;
+    }
 
 
 }

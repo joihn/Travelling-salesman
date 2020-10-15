@@ -49,7 +49,8 @@ public class Deliberative implements DeliberativeBehavior {
         switch (algorithm) {
             case ASTAR:
                 // ...
-                plan = naivePlan(vehicle, tasks);
+                ASTAR AStar = new ASTAR(vehicle, tasks);
+                plan = AStar.backtrackPath(vehicle);
                 break;
             case BFS:
                 // ...

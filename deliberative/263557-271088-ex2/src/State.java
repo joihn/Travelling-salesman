@@ -88,7 +88,13 @@ public class State implements Comparator<State> {
     public int compare(State state1, State state2){
         // returns a value >0 if state1.cost > state2.cost
         // returns 0 if both are equal
-        return Double.compare(state1.costPlusH, state2.costPlusH);
+        if (state1.costPlusH-state2.cost>0){
+            return 1;
+        } else if (state1.costPlusH- state2.costPlusH<0){
+            return -1;
+        } else {
+            return 0;
+        }
     }
 
     public double heuristic(City currentCity, TaskSet tasksToDeliver, TaskSet tasksAvailable ) {
