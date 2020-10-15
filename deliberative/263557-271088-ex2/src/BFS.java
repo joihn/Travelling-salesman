@@ -76,11 +76,9 @@ public class BFS {
         }
         optimalFinalNode = finalNodes.get(indexOfOptimal);
 
-        BacktrackPath(vehicle_);
-
     }
 
-    public void BacktrackPath(Vehicle vehicle){//backtracking the best route
+    public Plan backtrackPath(Vehicle vehicle){//backtracking the best route
         State currentNode= optimalFinalNode;
         List<State> stateTrajectory= new ArrayList<State>();
         List<City> path;
@@ -111,7 +109,7 @@ public class BFS {
             }
         }
         System.out.println("Finished plan build");
-
+        return optimalPlan;
     }
 
 

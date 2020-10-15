@@ -55,7 +55,7 @@ public class Deliberative implements DeliberativeBehavior {
                 // ...
                 BFS optimizer;
                 optimizer = new BFS(vehicle, tasks);
-                plan = optimizer.optimalPlan;
+                plan = optimizer.backtrackPath(vehicle);
                 break;
             default:
                 throw new AssertionError("Should not happen.");
