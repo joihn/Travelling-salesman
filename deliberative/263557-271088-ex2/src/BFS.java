@@ -35,7 +35,7 @@ public class BFS {
             iter++;
             System.out.println("Size of Q: " + Q.size());
             State n = Q.remove();
-            if (!IsNInC(n, C) || (n.parent.cost + n.currentCity.distanceTo(n.parent.currentCity)) < getCostOfNInC(n, C)) {
+            if (!IsNinC(n, C) || (n.parent.cost + n.currentCity.distanceTo(n.parent.currentCity)) < getCostOfNInC(n, C)) {
                 //add n to C
                 C.add(n);
 
@@ -113,14 +113,8 @@ public class BFS {
     }
 
 
-    boolean IsNInC(State n, ArrayList<State> C){ //TODO correct declaratio
-        /*
-        check: -current town
-                - task avaialble
-                - taskToDeliver
-                and nothing else !
-
-         */
+    boolean IsNinC(State n, ArrayList<State> C){ //TODO correct declaratio
+        // check if the node is already contained in C
         for(State stateC: C) {
             if ((stateC.currentCity.equals(n.currentCity)) && (stateC.tasksToDeliver.equals(n.tasksToDeliver)) && (stateC.tasksAvailable.equals(n.tasksAvailable))) {
                 //System.out.println("IsNInC : true");

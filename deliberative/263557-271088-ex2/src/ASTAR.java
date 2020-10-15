@@ -1,84 +1,104 @@
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
-import logist.task.Task;
-import logist.task.TaskDistribution;
 import logist.task.TaskSet;
-import logist.topology.Topology;
 import logist.topology.Topology.City;
-import logist.plan.Action;
-import logist.task.TaskSet;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Collections;
 
-public class ASTAR{
-    Plan optimalPlan ;
-    State optimalFinalNode;
+import java.util.ArrayList;
+import java.util.PriorityQueue;
+import java.util.Queue;
+
+public class ASTAR(Vehicle vehicle_, TaskSet taskSet_) {
+    Plan bestPlan;
+    State finalNode;
+
 
     public ASTAR(Vehicle vehicle_, TaskSet taskSet_){
+        State initialNode = new State(vehicle_.getCurrentCity(), vehicle_, vehicle_.getCurrentTasks(),taskSet_, null,null);
 
-        State initialNode = new State(vehicle_.getCurrentCity(), vehicle_, vehicle_.getCurrentTasks(), taskSet_, null, null);
-
-        ArrayList<State> finalNodes = new ArrayList<State>();
         ArrayList<State> C = new ArrayList<State>();
+        Queue<State> Q = new PriorityQueue<State>();
 
-        Queue<State> Q = new LinkedList<State>();
         Q.add(initialNode);
+        boolean finalNodeReached = false;
 
-        int iter = 0;
-        while (!Q.isEmpty()) {
-            if (iter % 100 == 0) {
-                System.out.println("iter is : " + iter);
-            }
-            iter++;
-            System.out.println("Size of Q: " + Q.size());
+        while(!finalNodeReached){
             State n = Q.remove();
-            if (!IsNInC(n, C) || (n.parent.cost + n.currentCity.distanceTo(n.parent.currentCity)) < getCostOfNInC(n, C)) {
-                //add n to C
+            if (!IsNinC(n,C) || (n.parent.cost + n.currentCity.distanceTo(n.parent.currentCity)) < getValueOfNInC(n, C)){
                 C.add(n);
 
-                if (n.getChildren(vehicle_).isEmpty()) {
-                    //it's a final node !
-                    System.out.println("We found a final node !");
-                    finalNodes.add(n);
-
-                } else {
-
-                    ArrayList<State> children = new ArrayList(n.getChildren(vehicle_));
-                    for (State childNode : children) {
-                        if (!isChildInQ(childNode,Q)) {
-                            Q.add(childNode);
-                        } else {
-                            checkAndReplaceNode(childNode,Q);
-                        }
+                ArrayList<State> children = new ArrayList<State>(n.getChildren(vehicle_));
+                for (State childNode : children) {
+                    if (!isChildInQ(childNode,Q)) {
+                        Q.add(childNode);
+                    } else {
+                        // child is already in Q
+                        // modify cost and costPlusH
+                        checkAndReplaceNode(childNode,Q);
                     }
-
-                    //Q.addAll(n.getChildren(vehicle_));// warnirng it's not a collection
                 }
 
             } else {
-                System.out.println("CYCLE AVOIDED ! the node wasn't added to C, and it's neighborr not added to Q");
+                System.out.println("Cycle avoided. Didn't add node to C again");
             }
-        }
-        System.out.println(" finished exploring all the tree :D  ");
-
-        // comparing which final node is the best
-        int indexOfOptimal = 0;
-        double minCostSoFar = Double.POSITIVE_INFINITY;
-        for (int i = 0; i < finalNodes.size(); i++) {
-            State stateFinal = finalNodes.get(i);
-            if (stateFinal.cost < minCostSoFar) {
-                indexOfOptimal = i;
+            // TODO change finalNodeReached to true if n is a final node
+            if (isFinalNode(n)){
+                finalNodeReached = true;
             }
-            i++;
-        }
-        optimalFinalNode = finalNodes.get(indexOfOptimal);
 
-        BacktrackPath(vehicle_);
+        }
+
+
 
     }
+
+    boolean IsNinC(State n, ArrayList<State> C){
+        // check if the node is already contained in C
+        for(State stateC: C) {
+            if ((stateC.currentCity.equals(n.currentCity)) && (stateC.tasksToDeliver.equals(n.tasksToDeliver)) && (stateC.tasksAvailable.equals(n.tasksAvailable))) {
+                //System.out.println("IsNInC : true");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean isChildInQ(State child, Queue<State> Q ){
+        for(State stateInQ : Q) {
+            if ((stateInQ.currentCity.equals(child.currentCity)) && (stateInQ.tasksToDeliver.equals(child.tasksToDeliver)) && (stateInQ.tasksAvailable.equals(child.tasksAvailable))) {
+                //System.out.println("IsNInC : true");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void checkAndReplaceNode(State child, Queue<State> Q){
+        for(State stateInQ: Q){
+            if ((stateInQ.currentCity.equals(child.currentCity)) && (stateInQ.tasksToDeliver.equals(child.tasksToDeliver)) && (stateInQ.tasksAvailable.equals(child.tasksAvailable))) {
+                //System.out.println("IsNInC : true");
+                if (stateInQ.costPlusH > child.costPlusH){
+                    stateInQ.cost = child.cost;
+                    stateInQ.costPlusH = child.costPlusH;
+                    stateInQ.parent = child.parent;
+                }
+                return;
+            }
+        }
+    }
+
+    public double getValueOfNInC(State n, ArrayList<State> C){
+        System.out.println("The size of C is: " + C.size());
+        for(State stateC: C) {
+            if (stateC.currentCity.equals(n.currentCity) && stateC.tasksToDeliver.equals(n.tasksToDeliver)  && stateC.tasksAvailable.equals(n.tasksAvailable)) {
+                //System.out.println("getCostOfNInC returned the value : " + stateC.cost);
+                return stateC.cost;
+            }
+        }
+        System.out.println("WARNING ! DIDN'T FIND THIS STATE IN C");
+        return 0.0;
+    }
+
+
 
 
 

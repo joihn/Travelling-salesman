@@ -11,14 +11,17 @@ import logist.plan.Action;
 import logist.task.TaskSet;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 
-public class State{
+public class State implements Comparator<State> {
     public City currentCity;
     public TaskSet tasksToDeliver;
     public TaskSet tasksAvailable;
     public Action actionParent;
     public State parent;
-    double cost;
+    double cost; // cost from initial node
+    double costPlusH; // cost from initial node + heuristic cost to final node
 
     public State(City currentCity, Vehicle vehicle, TaskSet tasksToDeliver_,TaskSet tasksAvailable_, Action actionParent, State parent){
         this.currentCity = currentCity;
@@ -29,13 +32,11 @@ public class State{
         if (this.parent != null){ // initial node has no parent
             this.cost = this.parent.cost + this.currentCity.distanceTo(this.parent.currentCity);
             this.actionParent = actionParent;
-
-
         } else {
             this.cost = 0;
             this.actionParent = null;
-
         }
+        this.costPlusH = this.cost + heuristic(currentCity,tasksToDeliver_,tasksAvailable_);
     }
 
     public ArrayList<State> getChildren(Vehicle vehicle){
@@ -81,6 +82,13 @@ public class State{
             weight += task.weight;
         }
         return weight;
+    }
+
+    @Override
+    public int compare(State state1, State state2){
+        // returns a value >0 if state1.cost > state2.cost
+        // returns 0 if both are equal
+        return Double.compare(state1.costPlusH, state2.costPlusH);
     }
 
 
