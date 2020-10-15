@@ -53,7 +53,8 @@ public class Deliberative implements DeliberativeBehavior {
                 break;
             case BFS:
                 // ...
-                BFS optimizer= new BFS(vehicle, tasks);
+                BFS optimizer;
+                optimizer = new BFS(vehicle, tasks);
                 plan = optimizer.optimalPlan;
                 break;
             default:

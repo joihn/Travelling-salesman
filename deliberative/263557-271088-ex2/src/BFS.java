@@ -24,8 +24,6 @@ public class BFS {
         ArrayList<State> finalNodes = new ArrayList<State>();
         ArrayList<State> C = new ArrayList<State>();
 
-
-
         Queue<State> Q = new LinkedList<>();
         Q.add(initialNode);
 
@@ -72,7 +70,14 @@ public class BFS {
 
         State currentNode= optimalFinalNode;
         List<Action> actions= new ArrayList<Action>();
+        List<City> path;
         while (currentNode!=null){
+            path = currentNode.currentCity.pathTo(currentNode.parent.currentCity);
+            if (path.size()>0){
+                for(City nextCity : path) {
+                    actions.add(new Action.Move(nextCity));
+                }
+            }
             actions.add(currentNode.actionParent);
             currentNode=currentNode.parent;
         }
