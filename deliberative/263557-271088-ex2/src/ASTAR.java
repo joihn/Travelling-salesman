@@ -20,8 +20,10 @@ public class ASTAR {
                 // returns 0 if both are equal
                 if (state1.costPlusH - state2.cost > 0) {
                     return 1;
+//                    return -1;
                 } else if (state1.costPlusH - state2.costPlusH < 0) {
                     return -1;
+//                    return 1;
                 } else {
                     return 0;
                 }
@@ -38,7 +40,7 @@ public class ASTAR {
         boolean finalNodeReached = false;
 
         while(!finalNodeReached){
-            State n = Q.remove();
+            State n = Q.poll(); //TODO CHECKL POLL
             if (!IsNinC(n,C) || (n.parent.cost + n.currentCity.distanceTo(n.parent.currentCity)) < getValueOfNInC(n, C)){
                 C.add(n);
 
@@ -49,6 +51,7 @@ public class ASTAR {
                     } else {
                         // child is already in Q
                         // modify cost and costPlusH
+                        System.out.println("gonna modify element already present in Q");
                         checkAndReplaceNode(childNode,Q);
                     }
                 }
@@ -92,17 +95,23 @@ public class ASTAR {
     }
 
     void checkAndReplaceNode(State child, Queue<State> Q){
+        int sameNodeDiscovered =0;
         for(State stateInQ: Q){
             if ((stateInQ.currentCity.equals(child.currentCity)) && (stateInQ.tasksToDeliver.equals(child.tasksToDeliver)) && (stateInQ.tasksAvailable.equals(child.tasksAvailable))) {
                 //System.out.println("IsNInC : true");
+                sameNodeDiscovered++;
                 if (stateInQ.costPlusH > child.costPlusH){
                     stateInQ.cost = child.cost;
                     stateInQ.costPlusH = child.costPlusH;
                     stateInQ.parent = child.parent;
                 }
-                return;
+//                return; // I just check that we actually
             }
         }
+        if (sameNodeDiscovered!=1) {
+            System.out.println("problem in checkAndReplaceNode() ! we discovered " + sameNodeDiscovered + " nodes instead of 1 Node !!!!");
+        }
+        return;
     }
 
     public double getValueOfNInC(State n, ArrayList<State> C){
@@ -147,7 +156,7 @@ public class ASTAR {
                 }
                 //System.out.println("finished another node, gonna add ");
                 bestPlan.append(state.actionParent);
-                System.out.println(state.actionParent.toString());
+                System.out.println("the plan is : " + state.actionParent.toString());
                 //System.out.println("finished another node, ADDED ! ");
             }
         }
