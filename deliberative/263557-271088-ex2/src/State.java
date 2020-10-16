@@ -10,11 +10,12 @@ import logist.topology.Topology.City;
 import logist.plan.Action;
 import logist.task.TaskSet;
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 
-public class State implements Comparator<State> {
+public class State  {
     public City currentCity;
     public TaskSet tasksToDeliver;
     public TaskSet tasksAvailable;
@@ -84,18 +85,7 @@ public class State implements Comparator<State> {
         return weight;
     }
 
-    @Override
-    public int compare(State state1, State state2){
-        // returns a value >0 if state1.cost > state2.cost
-        // returns 0 if both are equal
-        if (state1.costPlusH-state2.cost>0){
-            return 1;
-        } else if (state1.costPlusH- state2.costPlusH<0){
-            return -1;
-        } else {
-            return 0;
-        }
-    }
+
 
     public double heuristic(City currentCity, TaskSet tasksToDeliver, TaskSet tasksAvailable ) {
         double maxCost = 0;

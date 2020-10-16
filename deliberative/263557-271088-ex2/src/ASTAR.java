@@ -2,7 +2,8 @@ import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.TaskSet;
 import logist.topology.Topology.City;
-
+import java.util.Comparator;
+import java.util.PriorityQueue;
 import java.util.*;
 
 public class ASTAR {
@@ -11,10 +12,27 @@ public class ASTAR {
 
 
     public ASTAR(Vehicle vehicle_, TaskSet taskSet_){
+
+        Comparator<State> stateComparator = new Comparator<State>() {
+            @Override
+            public int compare(State state1, State state2) {
+                // returns a value >0 if state1.cost > state2.cost
+                // returns 0 if both are equal
+                if (state1.costPlusH - state2.cost > 0) {
+                    return 1;
+                } else if (state1.costPlusH - state2.costPlusH < 0) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        };
+
+
         State initialNode = new State(vehicle_.getCurrentCity(), vehicle_, vehicle_.getCurrentTasks(),taskSet_, null,null);
 
         ArrayList<State> C = new ArrayList<State>();
-        Queue<State> Q = new PriorityQueue<State>();
+        Queue<State> Q = new PriorityQueue<State>(stateComparator);
 
         Q.add(initialNode);
         boolean finalNodeReached = false;
