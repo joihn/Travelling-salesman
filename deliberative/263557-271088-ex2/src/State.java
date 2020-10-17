@@ -63,6 +63,7 @@ public class State  {
             }
         }else{
             System.out.println("WARNING : taskavailable is null :( ");
+            System.out.println("This method should never be called at a final node...");
         }
         if(tasksToDeliver!=null) { //TODO check if it actually fix this weird bug
             for (Task taskToDeliver : tasksToDeliver) {
@@ -70,7 +71,7 @@ public class State  {
                 TaskSet nextTasksToDeliver = tasksToDeliver.clone();
                 nextTasksToDeliver.remove(taskToDeliver);
                 Action action = new Action.Delivery(taskToDeliver);
-                State child = new State(taskToDeliver.deliveryCity, vehicle, nextTasksToDeliver, tasksAvailable, action, this);
+                State child = new State(childCity, vehicle, nextTasksToDeliver, tasksAvailable, action, this);
                 children.add(child);
             }
         }
@@ -78,6 +79,7 @@ public class State  {
     }
 
     private int getCurrentWeight(){
+        // returns the weight of all tasks currently on the vehicle
         int weight = 0;
         for(Task task : tasksToDeliver){
             weight += task.weight;
