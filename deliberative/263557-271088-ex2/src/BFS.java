@@ -142,6 +142,7 @@ public class BFS {
                 if (stateInQ.cost > child.cost){
                     stateInQ.cost = child.cost;
                     stateInQ.parent = child.parent;
+                    stateInQ.actionParent = child.actionParent;
                 }
                 return;
             }
