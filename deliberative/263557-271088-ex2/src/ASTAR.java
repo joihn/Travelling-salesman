@@ -18,7 +18,7 @@ public class ASTAR {
             public int compare(State state1, State state2) {
                 // returns a value >0 if state1.cost > state2.cost
                 // returns 0 if both are equal
-                if (state1.costPlusH - state2.cost > 0) {
+                if (state1.costPlusH - state2.costPlusH > 0) {
                     return 1;
 //                    return -1;
                 } else if (state1.costPlusH - state2.costPlusH < 0) {
@@ -104,8 +104,8 @@ public class ASTAR {
                     stateInQ.cost = child.cost;
                     stateInQ.costPlusH = child.costPlusH;
                     stateInQ.parent = child.parent;
+                    stateInQ.actionParent = child.actionParent; // TODO Experimental
                 }
-//                return; // I just check that we actually
             }
         }
         if (sameNodeDiscovered!=1) {
