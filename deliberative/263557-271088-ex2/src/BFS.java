@@ -29,11 +29,11 @@ public class BFS {
 
         int iter = 0;
         while (!Q.isEmpty()) {
-            if (iter % 100 == 0) {
-                System.out.println("iter is : " + iter);
-            }
-            iter++;
-            System.out.println("Size of Q: " + Q.size());
+//            if (iter % 100 == 0) {
+//                System.out.println("iter is : " + iter);
+//            }
+
+//            System.out.println("Size of Q: " + Q.size());
             State n = Q.remove();
             if (!IsNinC(n, C) || (n.parent.cost + n.currentCity.distanceTo(n.parent.currentCity)) < getCostOfNInC(n, C)) {
                 //add n to C
@@ -41,7 +41,7 @@ public class BFS {
 
                 if (n.getChildren(vehicle_).isEmpty()) {
                     //it's a final node !
-                    System.out.println("We found a final node !");
+//                    System.out.println("We found a final node !");
                     finalNodes.add(n);
 
                 } else {
@@ -61,8 +61,9 @@ public class BFS {
             } else {
                 System.out.println("CYCLE AVOIDED ! the node wasn't added to C, and it's neighborr not added to Q");
             }
+            iter++;
         }
-        System.out.println(" finished exploring all the tree :D  ");
+        System.out.printf("BFS iter: %d ", iter);
 
         // comparing which final node is the best
         int indexOfOptimal = 0;
@@ -93,7 +94,8 @@ public class BFS {
         optimalPlan= new Plan(vehicle.getCurrentCity());
         for(State state : stateTrajectory){
             if (state.parent == null){
-                System.out.println("1st node - only get here once");
+//                System.out.println("1st node - only get here once");
+                ;
             } else {
                 //System.out.println("starting another node ");
                 path = state.parent.currentCity.pathTo(state.currentCity);
@@ -104,11 +106,12 @@ public class BFS {
                 }
                 //System.out.println("finished another node, gonna add ");
                 optimalPlan.append(state.actionParent);
-                System.out.println(state.actionParent.toString());
+//                System.out.println(state.actionParent.toString());
                 //System.out.println("finished another node, ADDED ! ");
             }
         }
-        System.out.println("Finished plan build");
+        System.out.printf("cost: %.0f ", optimalFinalNode.cost * vehicle.costPerKm());
+
         return optimalPlan;
     }
 
@@ -152,7 +155,6 @@ public class BFS {
 
 
     double getCostOfNInC(State n, ArrayList<State> C){
-        System.out.println("The size of C is: " + C.size());
         for(State stateC: C) {
             if (stateC.currentCity.equals(n.currentCity) && stateC.tasksToDeliver.equals(n.tasksToDeliver)  && stateC.tasksAvailable.equals(n.tasksAvailable)) {
                 //System.out.println("getCostOfNInC returned the value : " + stateC.cost);

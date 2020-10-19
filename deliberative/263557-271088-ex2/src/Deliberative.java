@@ -38,22 +38,23 @@ public class Deliberative implements DeliberativeBehavior {
         // Throws IllegalArgumentException if algorithm is unknown
         algorithm = Deliberative.Algorithm.valueOf(algorithmName.toUpperCase());
 
-        // ...
+
     }
 
     @Override
     public Plan plan(Vehicle vehicle, TaskSet tasks) {
         Plan plan;
+        long timeStart = System.currentTimeMillis();
 
         // Compute the plan with the selected algorithm.
         switch (algorithm) {
             case ASTAR:
-                // ...
+
                 ASTAR AStar = new ASTAR(vehicle, tasks);
                 plan = AStar.backtrackPath(vehicle);
                 break;
             case BFS:
-                // ...
+
                 BFS optimizer;
                 optimizer = new BFS(vehicle, tasks);
                 plan = optimizer.backtrackPath(vehicle);
@@ -61,6 +62,8 @@ public class Deliberative implements DeliberativeBehavior {
             default:
                 throw new AssertionError("Should not happen.");
         }
+        long timeEnd = System.currentTimeMillis();
+        System.out.printf("planningDuration(MS): %d%n", timeEnd - timeStart);
         return plan;
     }
 

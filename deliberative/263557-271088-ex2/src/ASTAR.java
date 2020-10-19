@@ -38,7 +38,7 @@ public class ASTAR {
 
         Q.add(initialNode);
         boolean finalNodeReached = false;
-
+        int iter=0;
         while(!finalNodeReached){
             State n = Q.poll(); //TODO CHECKL POLL
             if (!IsNinC(n,C) || (n.parent.cost + n.currentCity.distanceTo(n.parent.currentCity)) < getValueOfNInC(n, C)){
@@ -51,25 +51,24 @@ public class ASTAR {
                     } else {
                         // child is already in Q
                         // modify cost and costPlusH
-                        System.out.println("gonna modify element already present in Q");
                         checkAndReplaceNode(childNode,Q);
                     }
                 }
 
             } else {
-                System.out.println("Cycle avoided. Didn't add node to C again");
+//                System.out.println("Cycle avoided. Didn't add node to C again");
+            ;
             }
             // TODO change finalNodeReached to true if n is a final node
             if (isFinalNode(n)){
                 finalNodeReached = true;
                 finalNode = n;
             }
-
+        iter++;
         }
-
+        System.out.printf("ASTAR iter %d ", iter);
 
         // TODO backpropagation
-
 
     }
 
@@ -115,7 +114,6 @@ public class ASTAR {
     }
 
     public double getValueOfNInC(State n, ArrayList<State> C){
-        System.out.println("The size of C is: " + C.size());
         for(State stateC: C) {
             if (stateC.currentCity.equals(n.currentCity) && stateC.tasksToDeliver.equals(n.tasksToDeliver)  && stateC.tasksAvailable.equals(n.tasksAvailable)) {
                 //System.out.println("getCostOfNInC returned the value : " + stateC.cost);
@@ -145,7 +143,8 @@ public class ASTAR {
         bestPlan= new Plan(vehicle.getCurrentCity());
         for(State state : stateTrajectory){
             if (state.parent == null){
-                System.out.println("1st node - only get here once");
+//                System.out.println("1st node - only get here once");
+                ;
             } else {
                 //System.out.println("starting another node ");
                 path = state.parent.currentCity.pathTo(state.currentCity);
@@ -156,11 +155,13 @@ public class ASTAR {
                 }
                 //System.out.println("finished another node, gonna add ");
                 bestPlan.append(state.actionParent);
-                System.out.println("the plan is : " + state.actionParent.toString());
+//                System.out.println("the plan is : " + state.actionParent.toString());
                 //System.out.println("finished another node, ADDED ! ");
             }
         }
-        System.out.println("Finished plan build");
+
+
+        System.out.printf("cost: %.0f ", finalNode.cost * vehicle.costPerKm());
         return bestPlan;
     }
 
