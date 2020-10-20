@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Collections;
+
 public class BFS {
     Plan optimalPlan ;
     State optimalFinalNode;
