@@ -19,10 +19,17 @@ import logist.topology.Topology;
 import logist.topology.Topology.City;
 
 
+
+
+
 public class STL {
 
     public HashMap<Vehicle, List<exTask>> centraPlan;
     public List<HashMap<Vehicle, List<exTask>>> centraPlanSet;
+
+
+
+
 
     public STL(TaskSet taskSet, List<Vehicle> vehicles) {
         // centraPlan=makeInitialPlan
@@ -37,7 +44,13 @@ public class STL {
     //pickBiggestVehicle()   //marcel
     //makeInitialPlan()    //marcel
 
-    //generateNeighboor()
+    private List<HashMap<Vehicle, List<exTask>>> generateNeighbour(HashMap<Vehicle, List<exTask>> centraPlan){
+
+
+        List<HashMap<Vehicle, List<exTask>>> N = new ArrayList<HashMap<Vehicle, List<exTask>>>;
+
+        return centraPlanSet;
+    }
         //swapVehicle()   // max
         //swapOrder()     //max
 
