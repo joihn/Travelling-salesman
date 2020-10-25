@@ -34,16 +34,16 @@ public class STL {
 
     }
 
-    //pickBiggestVehicle()
-    //makeInitialPlan()
+    //pickBiggestVehicle()   //marcel
+    //makeInitialPlan()    //marcel
 
     //generateNeighboor()
-        //swapVehicle()
-        //swapOrder()
+        //swapVehicle()   // max
+        //swapOrder()     //max
 
 
 
-    //localchoice()  //pickBestNeighboor
+    //localChoice(centraPlanSet, centraPlan)()  //will pick Best Neighboor
 
 
 
