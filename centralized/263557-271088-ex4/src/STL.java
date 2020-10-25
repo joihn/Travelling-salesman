@@ -27,7 +27,15 @@ public class STL {
             //centraPlanSet = generateNeighboor()
             //centraPlan = localChoice(centraPlanSet, centraPlan)
 //    }
-
+        /*
+             for(loop idx1 ){
+                for (loop idx2 s.t. idx1 < idx2 ){
+                    if(canSwap(A, vehicle, idx1, dix2)){
+                        Anew = swap();
+                        N.add = Anew;
+                }
+             }
+         */
     }
 
 
