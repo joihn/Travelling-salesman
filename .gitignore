@@ -1,9 +1,13 @@
-**/.classpath
+
 **/.idea
-**/.project
 **/.settings
 **/bin
-**/.DS_Store
+
+
+*.classpath
+*.project
+*.DS_Store
+*.pdf
 
 rabbits/instructions.txt
 rabbits/report_rabbits.tex
@@ -12,4 +16,4 @@ reactive/history.xml
 reactive/reactive.iml
 
 assignments/
-*.pdf
+
