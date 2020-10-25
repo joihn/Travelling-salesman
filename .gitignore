@@ -1,18 +1,13 @@
-rabbits/.idea
-rabbits/.DS_Store
-rabbits/gardoni-dubach-in/.DS_Store
-rabbits/gardoni-dubach-in/.classpath
-rabbits/gardoni-dubach-in/.project
-rabbits/gardoni-dubach-in/.settings/
-rabbits/gardoni-dubach-in/bin
+**/.classpath
+**/.idea
+**/.project
+**/.settings
+**/bin
+**/.DS_Store
+
 rabbits/instructions.txt
 rabbits/report_rabbits.tex
 
-reactive/.classpath
-reactive/.idea
-reactive/.project
-reactive/.settings
-reactive/bin
 reactive/history.xml
 reactive/reactive.iml
 
