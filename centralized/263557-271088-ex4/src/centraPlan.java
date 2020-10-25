@@ -12,14 +12,18 @@ import logist.topology.Topology.City;
 import java.util.HashMap;
 import java.util.List;
 
-public class centraPlan {
+public class CentraPlan {
     HashMap<Vehicle, List<exTask>> centraPlan;
 
     //initialisation
-    public centraPlan(List<Vehicle>, TaskSet tasks){
-
+    public CentraPlan(List<Vehicle>, TaskSet tasks){
+        // initialize plan
     }
 
-    public
+    //pickBiggestVehicle()   //marcel
+    
+    //swapVehicle(Vehicle, List<Vehicle>, centraPlan)   // max
+    
+    //swapOrder(centraPlan, Vehicle, idx1, idx2)     //max
 
 }

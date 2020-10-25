@@ -41,7 +41,7 @@ public class STL {
 
     }
 
-    //pickBiggestVehicle()   //marcel
+
     //makeInitialPlan()    //marcel
 
     private List<HashMap<Vehicle, List<exTask>>> generateNeighbour(HashMap<Vehicle, List<exTask>> centraPlan){
@@ -51,8 +51,7 @@ public class STL {
 
         return centraPlanSet;
     }
-        //swapVehicle()   // max
-        //swapOrder()     //max
+
 
 
 
