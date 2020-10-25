@@ -45,17 +45,18 @@
 			</tasks>
 			<events>
 				<event id="0" time="0" vehicle="Vehicle 1" move="Leeds"/>
-				<event id="1" time="1094444373" vehicle="Vehicle 1" move="Sheffield"/>
+				<event id="1" time="1094444378" vehicle="Vehicle 1" move="Sheffield"/>
+				<event id="2" time="1553333235" vehicle="Vehicle 1" move="Birmingham"/>
 			</events>
 		</round>
 	</rounds>
 	<statistics>
 		<stat rank="1" agent="centralized-random">
 			<total-tasks value="30"/>
-			<total-distance value="139.8"/>
-			<total-cost value="699"/>
+			<total-distance value="230.0"/>
+			<total-cost value="1150"/>
 			<total-reward value="0"/>
-			<total-profit value="-699"/>
+			<total-profit value="-1150"/>
 		</stat>
 	</statistics>
 </history>
