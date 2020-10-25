@@ -1,21 +1,10 @@
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
-import logist.LogistSettings;
 
-import logist.Measures;
-import logist.behavior.AuctionBehavior;
-import logist.behavior.CentralizedBehavior;
-import logist.agent.Agent;
-import logist.config.Parsers;
 import logist.simulation.Vehicle;
 import logist.plan.Plan;
-import logist.task.Task;
-import logist.task.TaskDistribution;
 import logist.task.TaskSet;
-import logist.topology.Topology;
 import logist.topology.Topology.City;
 
 
@@ -25,7 +14,7 @@ import logist.topology.Topology.City;
 public class STL {
 
     public CentraPlan centraPlan;
-    public List<HashMap<Vehicle, List<exTask>>> centraPlanSet;
+    public List<HashMap<Vehicle, List<ExTask>>> centraPlanSet;
 
 
 
@@ -44,18 +33,34 @@ public class STL {
 
     //makeInitialPlan()    //marcel
 
-    private List<HashMap<Vehicle, List<exTask>>> generateNeighbour(HashMap<Vehicle, List<exTask>> centraPlan){
+    private List<HashMap<Vehicle, List<ExTask>>> generateNeighbour(HashMap<Vehicle, List<ExTask>> centraPlan){
 
 
-        List<HashMap<Vehicle, List<exTask>>> N = new ArrayList<HashMap<Vehicle, List<exTask>>>;
+        List<HashMap<Vehicle, List<ExTask>>> N = new ArrayList<HashMap<Vehicle, List<ExTask>>>();
 
         return centraPlanSet;
     }
 
-    public List<Plan> convertPlan(){
-        for (Vehicle vehicle : centraPlan.centraPlan.keySet()){
+    public List<Plan> convertPlan(List<Vehicle> allVehicles){
+        List<Plan> globalPlan = new ArrayList<Plan>();
+        for (Vehicle vehicle : allVehicles){
 
+            City currentCity = vehicle.getCurrentCity();
+            Plan plan  = new Plan(currentCity);
+
+            for(ExTask extendedTask : centraPlan.A.get(vehicle)){
+                for(City city : currentCity.pathTo(extendedTask.task.pickupCity)){
+                    plan.appendMove(city);
+                }
+                plan.appendPickup(extendedTask.task);
+                for(City city : extendedTask.task.pickupCity.pathTo(extendedTask.task.deliveryCity)){
+                    plan.appendMove(city);
+                }
+                plan.appendDelivery(extendedTask.task);
+            }
+            globalPlan.add(plan);
         }
+        return globalPlan;
     }
 
 
