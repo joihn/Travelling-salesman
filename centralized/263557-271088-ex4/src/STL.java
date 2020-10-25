@@ -21,7 +21,11 @@ public class STL {
 
 
     public STL(TaskSet taskSet, List<Vehicle> vehicles) {
-        // centraPlan=makeInitialPlan
+        CentraPlan centraPlan = new CentraPlan(vehicles,taskSet);
+        if (!centraPlan.isFeasible){
+            System.out.println("WARNING: your problem is not feasible");
+        }
+
         // while(goodEnough){
 
             //centraPlanSet = generateNeighboor()

@@ -8,17 +8,21 @@ import java.util.ArrayList;
 
 public class CentraPlan {
     HashMap<Vehicle, List<ExTask>> A;
+    public boolean isFeasible;
 
     //initialisation
     public CentraPlan(List<Vehicle> allVehicles, TaskSet allTasks){
         Vehicle biggestVehicle = pickBiggestVehicle(allVehicles);
-
+        isFeasible = true;
         for(Vehicle vehicle : allVehicles){
             if (vehicle != biggestVehicle){
                 A.put(vehicle, new ArrayList());
             } else {
                 List<ExTask> vehiclePlan = new ArrayList<ExTask>();
                 for(Task task : allTasks){
+                    if (vehicle.capacity()<task.weight){
+                        isFeasible = false;
+                    }
                     ExTask exTask = new ExTask(task, ExTask.ActionType.PICKUP);
                     vehiclePlan.add(exTask);
                     exTask = new ExTask(task, ExTask.ActionType.DELIVERY);
@@ -27,8 +31,9 @@ public class CentraPlan {
                 A.put(vehicle,vehiclePlan);
             }
         }
-
     }
+
+
 
     private Vehicle pickBiggestVehicle(List<Vehicle> allVehicles){
         Vehicle biggestVehicle = null;
@@ -81,6 +86,32 @@ public class CentraPlan {
                     return false;
                 }
             }
+        }
+
+        int weight = 0;
+        for(int i=0; i<vehicleActions.size();i++){
+            if(i==idx1){
+                if (vehicleActions.get(idx2).actionType == ExTask.ActionType.PICKUP){
+                    weight += vehicleActions.get(idx2).task.weight;
+                } else {
+                    weight -= vehicleActions.get(idx2).task.weight;
+                }
+            } else if (i==idx2) {
+                if (vehicleActions.get(idx1).actionType == ExTask.ActionType.PICKUP){
+                    weight += vehicleActions.get(idx1).task.weight;
+                } else {
+                    weight -= vehicleActions.get(idx1).task.weight;
+                }
+            } else {
+                if (vehicleActions.get(i).actionType == ExTask.ActionType.PICKUP){
+                    weight += vehicleActions.get(i).task.weight;
+                } else {
+                    weight -= vehicleActions.get(i).task.weight;
+                }
+            if (weight>v1.capacity()){
+                 return false;
+            }
+
         }
         return true;
     }
