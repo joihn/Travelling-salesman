@@ -24,7 +24,7 @@ import logist.topology.Topology.City;
 
 public class STL {
 
-    public HashMap<Vehicle, List<exTask>> centraPlan;
+    public CentraPlan centraPlan;
     public List<HashMap<Vehicle, List<exTask>>> centraPlanSet;
 
 
@@ -50,6 +50,12 @@ public class STL {
         List<HashMap<Vehicle, List<exTask>>> N = new ArrayList<HashMap<Vehicle, List<exTask>>>;
 
         return centraPlanSet;
+    }
+
+    public List<Plan> convertPlan(){
+        for (Vehicle vehicle : centraPlan.centraPlan.keySet()){
+
+        }
     }
 
 
