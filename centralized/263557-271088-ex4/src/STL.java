@@ -45,12 +45,40 @@ public class STL {
 
     //makeInitialPlan()    //marcel
 
-    private List<HashMap<Vehicle, List<ExTask>>> generateNeighbour(HashMap<Vehicle, List<ExTask>> centraPlan){
+    private List<HashMap<Vehicle, List<ExTask>>> generateNeighbour(Vehicle vehicle, List<Vehicle> allVehicles, CentraPlan centraPlan){
+        // generate mutations to find other feasible sequences
+
+        /*
+            v1 = selectRandomVehicle(List<Vehicle>) // select random vehicle with tasks
+            loop v2:
+                if (canChangeVehicle(v1,v2))
+                // assume v1 has at least 1 task
+                // check on capacity of v2 to take the first task of v1 // TODO
+                    A = ChangeVehicle(v1,v2)
+                    N.append(A)
+
+            loop(idx1)
+                loop(idx2>idx1)
+                    if(canSwap(Aold,v1,idx,idx2)
+                        A = swap(Aold,v1,idx,idx2)
+                        N.append(A)
+
+            return N
+
+         */
+
+        List<HashMap<Vehicle, List<ExTask>>> N = new ArrayList<HashMap<Vehicle, List<ExTask>>>(); // neighbour plans are a list of HashMap
+
+        HashMap<Vehicle, List<ExTask>> Aold = centraPlan.A;
+
+        for(Vehicle vehicle2 : allVehicles){
+            changeVehicle()
+        }
 
 
-        List<HashMap<Vehicle, List<ExTask>>> N = new ArrayList<HashMap<Vehicle, List<ExTask>>>();
 
-        return centraPlanSet;
+
+        return N;
     }
 
     public List<Plan> convertPlan(List<Vehicle> allVehicles){

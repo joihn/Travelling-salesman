@@ -34,7 +34,6 @@ public class CentraPlan {
     }
 
 
-
     private Vehicle pickBiggestVehicle(List<Vehicle> allVehicles){
         Vehicle biggestVehicle = null;
         double maxCapacity = 0;
@@ -48,10 +47,30 @@ public class CentraPlan {
 
     }
 
+    public boolean canChangeVehicle(CentraPlan centraPlanOld, Vehicle v1, Vehicle v2){
+        boolean canChange = false;
+        // TODO implement this check
+
+        /* prototype
+            task = getFirstTask(v1)
+            weight = 0
+            canChange = false;
+            if (capacity(v2) > task.weight)
+                v2 <- append(Deliver,0)
+                v2 <- append(Pickup, 0)
+                canChange = true;
+            return canChange
+         */
+
+        return
+    }
+
+
     public HashMap<Vehicle, List<ExTask>> changeVehicle(CentraPlan centraPlanOld, Vehicle v1 ,Vehicle v2){
         // pass the first task from v1 to v2
         // will be called only for v1 with nonempty task set
-        HashMap<Vehicle, List<ExTask>> Anew = (HashMap<Vehicle, List<ExTask>>) centraPlanOld.A.clone();ExTask tmpPickup = Anew.get(v1).remove(0); // get ExTask object (should be Pickup)
+        HashMap<Vehicle, List<ExTask>> Anew = (HashMap<Vehicle, List<ExTask>>) centraPlanOld.A.clone();
+        ExTask tmpPickup = Anew.get(v1).remove(0); // get ExTask object (should be Pickup)
         ExTask tmpDeliver = null;
         for (int i=0; i < Anew.get(v1).size();i++){
             if (Anew.get(v1).get(i).task == tmpPickup.task){
@@ -62,6 +81,8 @@ public class CentraPlan {
         Anew.get(v2).add(0, tmpPickup);
         return Anew;
     }
+
+
 
     public boolean canSwap(CentraPlan centraPlanOld, Vehicle v1, int idx1, int idx2){
         /* criteria to be able to swap: if task(idx1)== pickup: check that it's possible to pickup later
