@@ -154,4 +154,37 @@ public class CentralPlan {
         return Anew;
     }
 
+
+
+    //TODO implement this pseudo code
+    /*
+      Hmap getBestNeighboor(list<hmap> neighboors) {
+            minCost=math.Inf
+            bestNeigboor=null;
+
+            for n in neighboors{
+                cost= computeCost(n)
+                If cost<mincost
+                    etc…...
+
+            }
+
+        }
+
+
+        Int computeCost(hmap n){
+            distance=0
+            For all vehicle
+
+                currentCity= vehicle.currentCity
+        For all task
+                    distance+= currentcity.pathTo(task.city)
+                    currentCity=task.city
+
+            cost=distance*costPerDistance
+            Return cost
+        }
+
+     */
+
 }

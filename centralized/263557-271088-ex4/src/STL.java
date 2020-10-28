@@ -127,4 +127,19 @@ public class STL {
 
 
     //getOptimalPlan()
+
+    //TODO implemnt pseudo code
+    /*
+    Void localchoice(List<Hmap> n, p, Aold){
+        Hmap bestNeighboor=getBestNeighboor(n)
+
+        if(randomComputing(p)){
+            Return Aold
+        }else{
+            Return BestNeighboor
+          }
+
+    }
+
+     */
 }
