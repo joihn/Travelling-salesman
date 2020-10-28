@@ -13,38 +13,39 @@ import logist.topology.Topology.City;
 
 public class STL {
 
-    public CentraPlan centraPlan;
-    public List<HashMap<Vehicle, List<ExTask>>> centraPlanSet;
+    public CentralPlan A;
+    public CentralPlan Aold;
+
 
 
     public STL(TaskSet taskSet, List<Vehicle> vehicles) {
-        CentraPlan centraPlan = new CentraPlan(vehicles,taskSet);
-        if (!centraPlan.isFeasible){
+        /* pseudo code:
+            A = initializeA(taskset, vehicleset)
+
+            while(!goodEnough()) // combine cost improvement between A and Aold
+                Aold = A;
+                N = generateNeighbours(Aold) // generate all neighbors by copy!
+                A = localChoice(N,A,p)  // select best neighbour with probability p, else select A
+            return A
+         */
+
+        // initialization
+        A = new CentralPlan(vehicles,taskSet);
+        if (!A.isFeasible){
             System.out.println("WARNING: your problem is not feasible");
         }
+        while(1) { // TODO implement good enough
+            Aold = new CentralPlan(A);
+            List<HashMap<Vehicle, List<ExTask>>> N = generateNeighbour();
 
+        }
 
-
-        // while(goodEnough){
-
-            //centraPlanSet = generateNeighboor()
-            //centraPlan = localChoice(centraPlanSet, centraPlan)
-//    }
-        /*
-             for(loop idx1 ){
-                for (loop idx2 s.t. idx1 < idx2 ){
-                    if(canSwap(A, vehicle, idx1, dix2)){
-                        Anew = swap();
-                        N.add = Anew;
-                }
-             }
-         */
     }
 
 
     //makeInitialPlan()    //marcel
 
-    private List<HashMap<Vehicle, List<ExTask>>> generateNeighbour(Vehicle vehicle, List<Vehicle> allVehicles, CentraPlan centraPlan){
+    private List<HashMap<Vehicle, List<ExTask>>> generateNeighbour(CentralPlan Aold, List<Vehicle> allVehicles){
         // generate mutations to find other feasible sequences
         /*
             v1 = selectRandomVehicle(List<Vehicle>) // select random vehicle with tasks
@@ -66,20 +67,20 @@ public class STL {
          */
         List<HashMap<Vehicle, List<ExTask>>> N = new ArrayList<HashMap<Vehicle, List<ExTask>>>(); // neighbour plans are a list of HashMap
 
-        HashMap<Vehicle, List<ExTask>> Aold = centraPlan.A;
-        Vehicle v1 = selectRandomVehicle(allVehicles, Aold);
+
+        Vehicle v1 = selectRandomVehicle(allVehicles);
         for(Vehicle v2 : allVehicles){
-            if(centraPlan.canChangeVehicle(centraPlan,v1,v2)){
-                HashMap<Vehicle, List<ExTask>> A = centraPlan.changeVehicle(Aold, v1, v2);
-                N.add(A);
+            if(Aold.canChangeVehicle(Aold.content,v1,v2)){
+                HashMap<Vehicle, List<ExTask>> Anew = Aold.changeVehicle(Aold.content, v1, v2);
+                N.add(Anew);
             }
         }
 
-        for (int idx1=0; idx1<Aold.get(v1).size()-1;idx1++){
-            for(int idx2=idx1+1; idx2<Aold.get(v1).size();idx2++){
-                if(centraPlan.canSwap(Aold,v1,idx1,idx2)){
-                    HashMap<Vehicle,List<ExTask>> A = centraPlan.swapTask(Aold,v1,idx1,idx2);
-                    N.add(A);
+        for (int idx1=0; idx1<Aold.content.get(v1).size()-1;idx1++){
+            for(int idx2=idx1+1; idx2<Aold.content.get(v1).size();idx2++){
+                if(Aold.canSwap(Aold.content,v1,idx1,idx2)){
+                    HashMap<Vehicle,List<ExTask>> Anew = Aold.swapTask(Aold.content,v1,idx1,idx2);
+                    N.add(Anew);
                 }
             }
         }
@@ -93,7 +94,7 @@ public class STL {
             City currentCity = vehicle.getCurrentCity();
             Plan plan  = new Plan(currentCity);
 
-            for(ExTask extendedTask : centraPlan.A.get(vehicle)){
+            for(ExTask extendedTask : A.content.get(vehicle)){
                 for(City city : currentCity.pathTo(extendedTask.task.pickupCity)){
                     plan.appendMove(city);
                 }
@@ -110,13 +111,14 @@ public class STL {
 
 
 
-    public Vehicle selectRandomVehicle(List<Vehicle> allVehicles, HashMap<Vehicle,List<ExTask>> A){
+    public Vehicle selectRandomVehicle(List<Vehicle> allVehicles){
+        // select a vehicle with a nonempty task set
         int nTasks = 0;
         Vehicle vehicle;
         do{
             int randIdx = (int) (Math.random()*allVehicles.size());
             vehicle = allVehicles.get(randIdx);
-            nTasks = A.get(vehicle).size();
+            nTasks = A.content.get(vehicle).size();
         }while(nTasks==0);
         return vehicle;
     }

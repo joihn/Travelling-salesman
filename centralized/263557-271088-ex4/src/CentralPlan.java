@@ -6,17 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
-public class CentraPlan {
-    HashMap<Vehicle, List<ExTask>> A;
+public class CentralPlan {
+
+    HashMap<Vehicle, List<ExTask>> content;
     public boolean isFeasible;
 
     //initialisation
-    public CentraPlan(List<Vehicle> allVehicles, TaskSet allTasks){
+
+    public CentralPlan(List<Vehicle> allVehicles, TaskSet allTasks){
         Vehicle biggestVehicle = pickBiggestVehicle(allVehicles);
         isFeasible = true;
         for(Vehicle vehicle : allVehicles){
             if (vehicle != biggestVehicle){
-                A.put(vehicle, new ArrayList());
+                content.put(vehicle, new ArrayList());
             } else {
                 List<ExTask> vehiclePlan = new ArrayList<ExTask>();
                 for(Task task : allTasks){
@@ -28,9 +30,14 @@ public class CentraPlan {
                     exTask = new ExTask(task, ExTask.ActionType.DELIVERY);
                     vehiclePlan.add(exTask);
                 }
-                A.put(vehicle,vehiclePlan);
+                content.put(vehicle,vehiclePlan);
             }
         }
+    }
+
+    public CentralPlan(CentralPlan Aold){
+        isFeasible = Aold.isFeasible;
+        content = new HashMap<Vehicle,List<ExTask>>(Aold.content);
     }
 
 
@@ -47,7 +54,7 @@ public class CentraPlan {
 
     }
 
-    public boolean canChangeVehicle(CentraPlan centraPlanOld, Vehicle v1, Vehicle v2){
+    public boolean canChangeVehicle(HashMap<Vehicle,List<ExTask>> A, Vehicle v1, Vehicle v2){
         // returns true if the first task from v1 can be passed to v2 (check on capacity of v2 only)
         boolean canChange = false;
         /* prototype
@@ -58,7 +65,7 @@ public class CentraPlan {
                 canChange = true;
             return canChange
          */
-        ExTask firstTask = centraPlanOld.A.get(v1).get(0);
+        ExTask firstTask = centraPlanOld.content.get(v1).get(0);
         boolean canChangeVehicle = false;
         if (firstTask.task.weight<v2.capacity()) {
             canChangeVehicle = true;
