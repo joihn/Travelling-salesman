@@ -70,10 +70,16 @@ public class STL {
         List<HashMap<Vehicle, List<ExTask>>> N = new ArrayList<HashMap<Vehicle, List<ExTask>>>(); // neighbour plans are a list of HashMap
 
         HashMap<Vehicle, List<ExTask>> Aold = centraPlan.A;
-
-        for(Vehicle vehicle2 : allVehicles){
-            changeVehicle()
+        Vehicle v1 = selectRandomVehicle(allVehicles, Aold);
+        for(Vehicle v2 : allVehicles){
+            if(centraPlan.canChangeVehicle(centraPlan,v1,v2)){
+                HashMap<Vehicle, List<ExTask>> A = centraPlan.changeVehicle(Aold, v1, v2);
+                N.add(A);
+            }
         }
+
+        // select random vehicle
+
 
 
 
@@ -105,7 +111,16 @@ public class STL {
 
 
 
-
+    public Vehicle selectRandomVehicle(List<Vehicle> allVehicles, HashMap<Vehicle,List<ExTask>> A){
+        int nTasks = 0;
+        Vehicle vehicle;
+        do{
+            int randIdx = (int) (Math.random()*allVehicles.size());
+            vehicle = allVehicles.get(randIdx);
+            nTasks = A.get(vehicle).size();
+        }while(nTasks==0);
+        return vehicle;
+    }
     //localChoice(centraPlanSet, centraPlan)()  //will pick Best Neighboor
 
 

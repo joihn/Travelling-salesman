@@ -40,7 +40,7 @@ public class ASTAR {
         boolean finalNodeReached = false;
         int iter=0;
         while(!finalNodeReached){
-            State n = Q.poll(); //TODO CHECKL POLL
+            State n = Q.poll();
             if (!IsNinC(n,C) || (n.parent.cost + n.currentCity.distanceTo(n.parent.currentCity)) < getValueOfNInC(n, C)){
                 C.add(n);
 
@@ -59,7 +59,7 @@ public class ASTAR {
 //                System.out.println("Cycle avoided. Didn't add node to C again");
             ;
             }
-            // TODO change finalNodeReached to true if n is a final node
+
             if (isFinalNode(n)){
                 finalNodeReached = true;
                 finalNode = n;
@@ -68,7 +68,7 @@ public class ASTAR {
         }
         System.out.printf("ASTAR iter %d ", iter);
 
-        // TODO backpropagation
+
 
     }
 
@@ -103,7 +103,7 @@ public class ASTAR {
                     stateInQ.cost = child.cost;
                     stateInQ.costPlusH = child.costPlusH;
                     stateInQ.parent = child.parent;
-                    stateInQ.actionParent = child.actionParent; // TODO Experimental
+                    stateInQ.actionParent = child.actionParent;
                 }
             }
         }

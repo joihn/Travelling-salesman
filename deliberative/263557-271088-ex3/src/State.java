@@ -44,7 +44,7 @@ public class State  {
         ArrayList<State> children = new ArrayList<State>();
 
         int currentWeight = getCurrentWeight();
-        if (tasksAvailable!=null) {//TODO check if it actually fix this weird bug
+        if (tasksAvailable!=null) {
             for (Task availableTask : tasksAvailable) {
                 if (vehicle.capacity() >= currentWeight + availableTask.weight) {
                     // it is possible to pickup the task
@@ -65,7 +65,7 @@ public class State  {
             System.out.println("WARNING : taskavailable is null :( ");
             System.out.println("This method should never be called at a final node...");
         }
-        if(tasksToDeliver!=null) { //TODO check if it actually fix this weird bug
+        if(tasksToDeliver!=null) {
             for (Task taskToDeliver : tasksToDeliver) {
                 City childCity = taskToDeliver.deliveryCity;
                 TaskSet nextTasksToDeliver = tasksToDeliver.clone();

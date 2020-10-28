@@ -48,28 +48,29 @@ public class CentraPlan {
     }
 
     public boolean canChangeVehicle(CentraPlan centraPlanOld, Vehicle v1, Vehicle v2){
+        // returns true if the first task from v1 can be passed to v2 (check on capacity of v2 only)
         boolean canChange = false;
-        // TODO implement this check
-
         /* prototype
             task = getFirstTask(v1)
             weight = 0
             canChange = false;
             if (capacity(v2) > task.weight)
-                v2 <- append(Deliver,0)
-                v2 <- append(Pickup, 0)
                 canChange = true;
             return canChange
          */
-
-        return
+        ExTask firstTask = centraPlanOld.A.get(v1).get(0);
+        boolean canChangeVehicle = false;
+        if (firstTask.task.weight<v2.capacity()) {
+            canChangeVehicle = true;
+        }
+        return canChangeVehicle;
     }
 
 
-    public HashMap<Vehicle, List<ExTask>> changeVehicle(CentraPlan centraPlanOld, Vehicle v1 ,Vehicle v2){
+    public HashMap<Vehicle, List<ExTask>> changeVehicle(HashMap<Vehicle,List<ExTask>> A, Vehicle v1 ,Vehicle v2){
         // pass the first task from v1 to v2
         // will be called only for v1 with nonempty task set
-        HashMap<Vehicle, List<ExTask>> Anew = (HashMap<Vehicle, List<ExTask>>) centraPlanOld.A.clone();
+        HashMap<Vehicle, List<ExTask>> Anew = new HashMap<Vehicle,List<ExTask>> (A);
         ExTask tmpPickup = Anew.get(v1).remove(0); // get ExTask object (should be Pickup)
         ExTask tmpDeliver = null;
         for (int i=0; i < Anew.get(v1).size();i++){

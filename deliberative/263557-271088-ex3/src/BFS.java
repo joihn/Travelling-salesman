@@ -117,7 +117,7 @@ public class BFS {
     }
 
 
-    boolean IsNinC(State n, ArrayList<State> C){ //TODO correct declaratio
+    boolean IsNinC(State n, ArrayList<State> C){
         // check if the node is already contained in C
         for(State stateC: C) {
             if ((stateC.currentCity.equals(n.currentCity)) && (stateC.tasksToDeliver.equals(n.tasksToDeliver)) && (stateC.tasksAvailable.equals(n.tasksAvailable))) {
