@@ -17,14 +17,13 @@ public class STL {
     public List<HashMap<Vehicle, List<ExTask>>> centraPlanSet;
 
 
-
-
-
     public STL(TaskSet taskSet, List<Vehicle> vehicles) {
         CentraPlan centraPlan = new CentraPlan(vehicles,taskSet);
         if (!centraPlan.isFeasible){
             System.out.println("WARNING: your problem is not feasible");
         }
+
+
 
         // while(goodEnough){
 
@@ -47,7 +46,6 @@ public class STL {
 
     private List<HashMap<Vehicle, List<ExTask>>> generateNeighbour(Vehicle vehicle, List<Vehicle> allVehicles, CentraPlan centraPlan){
         // generate mutations to find other feasible sequences
-
         /*
             v1 = selectRandomVehicle(List<Vehicle>) // select random vehicle with tasks
             loop v2:
@@ -66,7 +64,6 @@ public class STL {
             return N
 
          */
-
         List<HashMap<Vehicle, List<ExTask>>> N = new ArrayList<HashMap<Vehicle, List<ExTask>>>(); // neighbour plans are a list of HashMap
 
         HashMap<Vehicle, List<ExTask>> Aold = centraPlan.A;
@@ -82,17 +79,10 @@ public class STL {
             for(int idx2=idx1+1; idx2<Aold.get(v1).size();idx2++){
                 if(centraPlan.canSwap(Aold,v1,idx1,idx2)){
                     HashMap<Vehicle,List<ExTask>> A = centraPlan.swapTask(Aold,v1,idx1,idx2);
+                    N.add(A);
                 }
             }
-
         }
-
-        // select random vehicle
-
-
-
-
-
         return N;
     }
 

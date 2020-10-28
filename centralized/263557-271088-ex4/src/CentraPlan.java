@@ -139,7 +139,7 @@ public class CentraPlan {
     }
 
     public HashMap<Vehicle, List<ExTask>> swapTask(HashMap<Vehicle,List<ExTask>> A, Vehicle v1, int idx1, int idx2){
-        HashMap<Vehicle, List<ExTask>> Anew = new HashMap<Vehicle,List<Task>> (A);
+        HashMap<Vehicle, List<ExTask>> Anew = new HashMap<Vehicle,List<ExTask>>(A);
 
         ExTask tmp = Anew.get(v1).get(idx1); // get ExTask object (should be Pickup)
         Anew.get(v1).set(idx1,Anew.get(v1).get(idx2));
