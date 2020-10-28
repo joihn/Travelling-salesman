@@ -18,7 +18,7 @@ public class STL {
 
 
 
-    public STL(TaskSet taskSet, List<Vehicle> vehicles) {
+    public STL(TaskSet taskSet, List<Vehicle> allVehicles) {
         /* pseudo code:
             A = initializeA(taskset, vehicleset)
 
@@ -30,20 +30,21 @@ public class STL {
          */
 
         // initialization
-        A = new CentralPlan(vehicles,taskSet);
+        A = new CentralPlan(allVehicles,taskSet);
         if (!A.isFeasible){
             System.out.println("WARNING: your problem is not feasible");
         }
-        while(1) { // TODO implement good enough
+        while(true) { // TODO implement good enough
             Aold = new CentralPlan(A);
-            List<HashMap<Vehicle, List<ExTask>>> N = generateNeighbour();
+            List<HashMap<Vehicle, List<ExTask>>> N = generateNeighbour(Aold, allVehicles);
+            //Anew = localChoice(N,p)// TODO implement local choice
 
+            /* TODO: - cost function
+                     - getLeastCostSolution
+                     -
+            */
         }
-
     }
-
-
-    //makeInitialPlan()    //marcel
 
     private List<HashMap<Vehicle, List<ExTask>>> generateNeighbour(CentralPlan Aold, List<Vehicle> allVehicles){
         // generate mutations to find other feasible sequences
@@ -67,19 +68,18 @@ public class STL {
          */
         List<HashMap<Vehicle, List<ExTask>>> N = new ArrayList<HashMap<Vehicle, List<ExTask>>>(); // neighbour plans are a list of HashMap
 
-
         Vehicle v1 = selectRandomVehicle(allVehicles);
         for(Vehicle v2 : allVehicles){
-            if(Aold.canChangeVehicle(Aold.content,v1,v2)){
-                HashMap<Vehicle, List<ExTask>> Anew = Aold.changeVehicle(Aold.content, v1, v2);
+            if(Aold.canChangeVehicle(Aold,v1,v2)){
+                HashMap<Vehicle, List<ExTask>> Anew = Aold.changeVehicle(Aold, v1, v2);
                 N.add(Anew);
             }
         }
 
         for (int idx1=0; idx1<Aold.content.get(v1).size()-1;idx1++){
             for(int idx2=idx1+1; idx2<Aold.content.get(v1).size();idx2++){
-                if(Aold.canSwap(Aold.content,v1,idx1,idx2)){
-                    HashMap<Vehicle,List<ExTask>> Anew = Aold.swapTask(Aold.content,v1,idx1,idx2);
+                if(Aold.canSwap(Aold,v1,idx1,idx2)){
+                    HashMap<Vehicle,List<ExTask>> Anew = Aold.swapTask(Aold,v1,idx1,idx2);
                     N.add(Anew);
                 }
             }

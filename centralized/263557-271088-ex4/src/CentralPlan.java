@@ -54,7 +54,7 @@ public class CentralPlan {
 
     }
 
-    public boolean canChangeVehicle(HashMap<Vehicle,List<ExTask>> A, Vehicle v1, Vehicle v2){
+    public boolean canChangeVehicle(CentralPlan A, Vehicle v1, Vehicle v2){
         // returns true if the first task from v1 can be passed to v2 (check on capacity of v2 only)
         boolean canChange = false;
         /* prototype
@@ -65,7 +65,7 @@ public class CentralPlan {
                 canChange = true;
             return canChange
          */
-        ExTask firstTask = centraPlanOld.content.get(v1).get(0);
+        ExTask firstTask = A.content.get(v1).get(0);
         boolean canChangeVehicle = false;
         if (firstTask.task.weight<v2.capacity()) {
             canChangeVehicle = true;
@@ -74,10 +74,10 @@ public class CentralPlan {
     }
 
 
-    public HashMap<Vehicle, List<ExTask>> changeVehicle(HashMap<Vehicle,List<ExTask>> A, Vehicle v1 ,Vehicle v2){
+    public HashMap<Vehicle, List<ExTask>> changeVehicle(CentralPlan A, Vehicle v1 ,Vehicle v2){
         // pass the first task from v1 to v2
         // will be called only for v1 with nonempty task set
-        HashMap<Vehicle, List<ExTask>> Anew = new HashMap<Vehicle,List<ExTask>> (A);
+        HashMap<Vehicle, List<ExTask>> Anew = new HashMap<Vehicle,List<ExTask>> (A.content);
         ExTask tmpPickup = Anew.get(v1).remove(0); // get ExTask object (should be Pickup)
         ExTask tmpDeliver = null;
         for (int i=0; i < Anew.get(v1).size();i++){
@@ -92,7 +92,7 @@ public class CentralPlan {
 
 
 
-    public boolean canSwap(HashMap<Vehicle,List<ExTask>> A, Vehicle v1, int idx1, int idx2){
+    public boolean canSwap(CentralPlan A, Vehicle v1, int idx1, int idx2){
         /* criteria to be able to swap: if task(idx1)== pickup: check that it's possible to pickup later
                                             return false
         //                              else if task(idx2)== deliver:  check it's possible to deliver earlier
@@ -100,7 +100,7 @@ public class CentralPlan {
         /                               return true
 
         */
-        List<ExTask> vehicleActions = A.get(v1);
+        List<ExTask> vehicleActions = A.content.get(v1);
 
         if (vehicleActions.get(idx1).actionType == ExTask.ActionType.PICKUP) {
             for(int i = idx1+1; i <= idx2; i++){
@@ -145,8 +145,8 @@ public class CentralPlan {
         return true;
     }
 
-    public HashMap<Vehicle, List<ExTask>> swapTask(HashMap<Vehicle,List<ExTask>> A, Vehicle v1, int idx1, int idx2){
-        HashMap<Vehicle, List<ExTask>> Anew = new HashMap<Vehicle,List<ExTask>>(A);
+    public HashMap<Vehicle, List<ExTask>> swapTask(CentralPlan A, Vehicle v1, int idx1, int idx2){
+        HashMap<Vehicle, List<ExTask>> Anew = new HashMap<Vehicle,List<ExTask>>(A.content);
 
         ExTask tmp = Anew.get(v1).get(idx1); // get ExTask object (should be Pickup)
         Anew.get(v1).set(idx1,Anew.get(v1).get(idx2));
