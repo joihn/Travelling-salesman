@@ -85,7 +85,7 @@ public class CentraPlan {
 
 
 
-    public boolean canSwap(CentraPlan centraPlanOld, Vehicle v1, int idx1, int idx2){
+    public boolean canSwap(HashMap<Vehicle,List<ExTask>> A, Vehicle v1, int idx1, int idx2){
         /* criteria to be able to swap: if task(idx1)== pickup: check that it's possible to pickup later
                                             return false
         //                              else if task(idx2)== deliver:  check it's possible to deliver earlier
@@ -93,7 +93,7 @@ public class CentraPlan {
         /                               return true
 
         */
-        List<ExTask> vehicleActions = centraPlanOld.A.get(v1);
+        List<ExTask> vehicleActions = A.get(v1);
 
         if (vehicleActions.get(idx1).actionType == ExTask.ActionType.PICKUP) {
             for(int i = idx1+1; i <= idx2; i++){
@@ -125,21 +125,21 @@ public class CentraPlan {
                     weight -= vehicleActions.get(idx1).task.weight;
                 }
             } else {
-                if (vehicleActions.get(i).actionType == ExTask.ActionType.PICKUP){
+                if (vehicleActions.get(i).actionType == ExTask.ActionType.PICKUP) {
                     weight += vehicleActions.get(i).task.weight;
                 } else {
                     weight -= vehicleActions.get(i).task.weight;
                 }
-            if (weight>v1.capacity()){
-                 return false;
+                if (weight > v1.capacity()) {
+                    return false;
+                }
             }
-
         }
         return true;
     }
 
-    public HashMap<Vehicle, List<ExTask>> swapTask(CentraPlan centraPlanOld, Vehicle v1, int idx1, int idx2){
-        HashMap<Vehicle, List<ExTask>> Anew = (HashMap<Vehicle, List<ExTask>>) centraPlanOld.A.clone();
+    public HashMap<Vehicle, List<ExTask>> swapTask(HashMap<Vehicle,List<ExTask>> A, Vehicle v1, int idx1, int idx2){
+        HashMap<Vehicle, List<ExTask>> Anew = new HashMap<Vehicle,List<Task>> (A);
 
         ExTask tmp = Anew.get(v1).get(idx1); // get ExTask object (should be Pickup)
         Anew.get(v1).set(idx1,Anew.get(v1).get(idx2));

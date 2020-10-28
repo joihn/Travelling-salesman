@@ -78,6 +78,15 @@ public class STL {
             }
         }
 
+        for (int idx1=0; idx1<Aold.get(v1).size()-1;idx1++){
+            for(int idx2=idx1+1; idx2<Aold.get(v1).size();idx2++){
+                if(centraPlan.canSwap(Aold,v1,idx1,idx2)){
+                    HashMap<Vehicle,List<ExTask>> A = centraPlan.swapTask(Aold,v1,idx1,idx2);
+                }
+            }
+
+        }
+
         // select random vehicle
 
 
