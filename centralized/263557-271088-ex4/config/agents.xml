@@ -8,5 +8,8 @@
 		<set class-path="bin/"/>
 		<set class-name="Centralized"/>
 	</agent>
-	
+	<agent name="centralized-SMART">
+		<set class-path="bin/"/>
+		<set class-name="Centralized"/>
+	</agent>
 </agents>

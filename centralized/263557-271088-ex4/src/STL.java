@@ -76,14 +76,14 @@ public class STL {
             plans.append(plan)
     }
      */
-    public List<Plan> reconstructPlan(CentralPlan A, List<Vehicle> allVehicles){
+    public List<Plan> reconstructPlan( List<Vehicle> allVehicles){
 
         List<Plan> plans = new ArrayList<Plan>();
         for (Vehicle v : allVehicles){
             City currentCity=v.getCurrentCity();
             Plan plan = new Plan(currentCity);
 
-            for (ExTask t : A.content.get(v)){
+            for (ExTask t : this.A.content.get(v)){
                 //finding where the next city is
                 City nextCity=null;
                 if (t.actionType== ExTask.ActionType.PICKUP){

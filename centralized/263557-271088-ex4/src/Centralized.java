@@ -58,16 +58,21 @@ public class Centralized implements CentralizedBehavior {
     @Override
     public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
         long time_start = System.currentTimeMillis();
-        
-//		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
-        Plan planVehicle1 = naivePlan(vehicles.get(0), tasks);
 
-        List<Plan> plans = new ArrayList<Plan>();
-        plans.add(planVehicle1);
-        while (plans.size() < vehicles.size()) {
-            plans.add(Plan.EMPTY);
-        }
-        
+
+        //TODO check which kind of agent is called (random or smart)
+//		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
+        //Plan planVehicle1 = naivePlan(vehicles.get(0), tasks);
+
+//        List<Plan> plans = new ArrayList<Plan>();
+//        plans.add(planVehicle1);
+//        while (plans.size() < vehicles.size()) {
+//            plans.add(Plan.EMPTY);
+//        }
+
+        STL solution= new STL(tasks, vehicles);
+        List<Plan> plans = solution.reconstructPlan(vehicles);
+
         long time_end = System.currentTimeMillis();
         long duration = time_end - time_start;
         System.out.println("The plan was generated in " + duration + " milliseconds.");
