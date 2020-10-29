@@ -56,9 +56,9 @@ public class CentralPlan {
 
     }
 
-    public boolean canChangeVehicle(CentralPlan A, Vehicle v1, Vehicle v2){
+    public static boolean canChangeVehicle(CentralPlan A, Vehicle v1, Vehicle v2){
         // returns true if the first task from v1 can be passed to v2 (check on capacity of v2 only)
-        boolean canChange = false;
+
         /* prototype
             task = getFirstTask(v1)
             weight = 0
@@ -67,7 +67,7 @@ public class CentralPlan {
                 canChange = true;
             return canChange
          */
-        ExTask firstTask = A.content.get(v1).get(0);
+        ExTask firstTask = A.content.get(v1).get(0); ///// create NULL POINTER !!!!!!!!!¨¨
         boolean canChangeVehicle = false;
         if (firstTask.task.weight<v2.capacity()) {
             canChangeVehicle = true;
@@ -76,7 +76,7 @@ public class CentralPlan {
     }
 
 
-    public CentralPlan changeVehicle(CentralPlan A, Vehicle v1 ,Vehicle v2){
+    public static CentralPlan changeVehicle(CentralPlan A, Vehicle v1 ,Vehicle v2){
         // pass the first task from v1 to v2
         // will be called only for v1 with nonempty task set
         CentralPlan Anew = new CentralPlan(A);

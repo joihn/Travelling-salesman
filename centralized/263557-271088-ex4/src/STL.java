@@ -34,11 +34,15 @@ public class STL {
         if (!A.isFeasible){
             System.out.println("WARNING: your problem is not feasible");
         }
+        int iter=0;
+        while(!goodEnough(A, Aold)) {
 
-        while(goodEnough(A, Aold)) {
             Aold = new CentralPlan(A);
+            System.out.println("will genrate neighbboor, iter: "+iter);
             List<CentralPlan> N = generateNeighbour(Aold, allVehicles);
-            CentralPlan A = localChoice(N, Aold, p);
+            System.out.println("will do localChoice, iter: "+iter);
+            A = localChoice(N, Aold, p);
+            iter++;
         }
     }
     /*
@@ -159,10 +163,10 @@ public class STL {
          */
         List<CentralPlan> N = new ArrayList<CentralPlan>(); // neighbour plans are a list of HashMap
 
-        Vehicle v1 = selectRandomVehicle(allVehicles);
+        Vehicle v1 = selectRandomVehicle(Aold,allVehicles);
         for(Vehicle v2 : allVehicles){
-            if(Aold.canChangeVehicle(Aold,v1,v2)){
-                CentralPlan Anew = Aold.changeVehicle(Aold, v1, v2);
+            if(CentralPlan.canChangeVehicle(Aold,v1,v2)){
+                CentralPlan Anew = CentralPlan.changeVehicle(Aold, v1, v2);
                 N.add(Anew);
             }
         }
@@ -202,15 +206,16 @@ public class STL {
 
 
 
-    public Vehicle selectRandomVehicle(List<Vehicle> allVehicles){
+    public Vehicle selectRandomVehicle(CentralPlan Aold, List<Vehicle> allVehicles){
         // select a vehicle with a nonempty task set
         int nTasks = 0;
         Vehicle vehicle;
         do{
             int randIdx = (int) (Math.random()*allVehicles.size());
             vehicle = allVehicles.get(randIdx);
-            nTasks = A.content.get(vehicle).size();
+            nTasks = Aold.content.get(vehicle).size(); //THIS FUCKER IS WEIRD !!!!!!!!!!!!!!!
         }while(nTasks==0);
+
         return vehicle;
     }
     //localChoice(centraPlanSet, centraPlan)()  //will pick Best Neighboor
