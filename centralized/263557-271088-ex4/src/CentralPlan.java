@@ -1,7 +1,9 @@
 import logist.simulation.Vehicle;
 import logist.task.Task;
 import logist.task.TaskSet;
+import logist.topology.Topology;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ public class CentralPlan {
         }
     }
 
-    public CentralPlan(CentralPlan Aold){
+    public CentralPlan(CentralPlan Aold){   // constructor for deep copying a centralplan
         isFeasible = Aold.isFeasible;
         content = new HashMap<Vehicle,List<ExTask>>(Aold.content);
     }
@@ -74,19 +76,19 @@ public class CentralPlan {
     }
 
 
-    public HashMap<Vehicle, List<ExTask>> changeVehicle(CentralPlan A, Vehicle v1 ,Vehicle v2){
+    public CentralPlan changeVehicle(CentralPlan A, Vehicle v1 ,Vehicle v2){
         // pass the first task from v1 to v2
         // will be called only for v1 with nonempty task set
-        HashMap<Vehicle, List<ExTask>> Anew = new HashMap<Vehicle,List<ExTask>> (A.content);
-        ExTask tmpPickup = Anew.get(v1).remove(0); // get ExTask object (should be Pickup)
+        CentralPlan Anew = new CentralPlan(A);
+        ExTask tmpPickup = Anew.content.get(v1).remove(0); // get ExTask object (should be Pickup)
         ExTask tmpDeliver = null;
-        for (int i=0; i < Anew.get(v1).size();i++){
-            if (Anew.get(v1).get(i).task == tmpPickup.task){
-                tmpDeliver = Anew.get(v1).remove(i);
+        for (int i=0; i < Anew.content.get(v1).size();i++){
+            if (Anew.content.get(v1).get(i).task == tmpPickup.task){
+                tmpDeliver = Anew.content.get(v1).remove(i);
             }
         }
-        Anew.get(v2).add(0, tmpDeliver);
-        Anew.get(v2).add(0, tmpPickup);
+        Anew.content.get(v2).add(0, tmpDeliver);
+        Anew.content.get(v2).add(0, tmpPickup);
         return Anew;
     }
 
@@ -145,18 +147,18 @@ public class CentralPlan {
         return true;
     }
 
-    public HashMap<Vehicle, List<ExTask>> swapTask(CentralPlan A, Vehicle v1, int idx1, int idx2){
-        HashMap<Vehicle, List<ExTask>> Anew = new HashMap<Vehicle,List<ExTask>>(A.content);
+    public CentralPlan swapTask(CentralPlan A, Vehicle v1, int idx1, int idx2){
+        CentralPlan Anew = new CentralPlan(A);
 
-        ExTask tmp = Anew.get(v1).get(idx1); // get ExTask object (should be Pickup)
-        Anew.get(v1).set(idx1,Anew.get(v1).get(idx2));
-        Anew.get(v1).set(idx2,tmp);
+        ExTask tmp = Anew.content.get(v1).get(idx1); // get ExTask object (should be Pickup)
+        Anew.content.get(v1).set(idx1,Anew.content.get(v1).get(idx2));
+        Anew.content.get(v1).set(idx2,tmp);
         return Anew;
     }
 
 
 
-    //TODO implement this pseudo code
+
     /*
       Hmap getBestNeighboor(list<hmap> neighboors) {
             minCost=math.Inf
@@ -170,21 +172,59 @@ public class CentralPlan {
             }
 
         }
+    */
+    public static CentralPlan getBestNeighbour(List<CentralPlan> neighbours){
+        double minCost=Double.POSITIVE_INFINITY;
+        CentralPlan bestNeighbour=null;
 
+        Collections.shuffle(neighbours);  /// making sure that if there are multiple eually good neighboor, we pick one at random
+        for(CentralPlan n: neighbours){
+            double cost=computeCost(n);
+            if (cost<minCost){
+                minCost=cost;
+                bestNeighbour= n;
+            }
+        }
+        return bestNeighbour;
+    }
 
-        Int computeCost(hmap n){
-            distance=0
-            For all vehicle
+    /*
+    Int computeCost(hmap n){
+        distance=0
+        For all vehicle
 
-                currentCity= vehicle.currentCity
-        For all task
-                    distance+= currentcity.pathTo(task.city)
-                    currentCity=task.city
+            currentCity= vehicle.currentCity
+    For all task
+                distance+= currentcity.pathTo(task.city)
+                currentCity=task.city
 
             cost=distance*costPerDistance
-            Return cost
+        Return cost
+    }
+
+ */
+
+    public static double computeCost(CentralPlan A){
+        double totalCost=0;
+        for(Vehicle v:A.content.keySet()){
+            double distance=0;
+            Topology.City currentCity= v.getCurrentCity();
+
+            for(ExTask t:A.content.get(v)){   //checking what kind of Extask we have to do
+                if(t.actionType==ExTask.ActionType.PICKUP){
+                    distance+= currentCity.distanceTo(t.task.pickupCity);
+                    currentCity= t.task.pickupCity;
+                }else{
+                    distance+=currentCity.distanceTo(t.task.deliveryCity);
+                    currentCity= t.task.deliveryCity;
+                }
+
+            }
+            totalCost+=distance*v.costPerKm();
         }
 
-     */
+        return totalCost;
+    }
+
 
 }

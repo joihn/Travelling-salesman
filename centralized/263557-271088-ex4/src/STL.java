@@ -4,19 +4,18 @@ import java.util.List;
 
 import logist.simulation.Vehicle;
 import logist.plan.Plan;
+import logist.task.Task;
 import logist.task.TaskSet;
 import logist.topology.Topology.City;
-
-
-
+import org.jdom.IllegalNameException;
 
 
 public class STL {
 
     public CentralPlan A;
     public CentralPlan Aold;
-
-
+    public double p =0.4;  //TODO should we harcode this ?????????????????????????????????????????????????????????????
+    public int iterWithNoChange=0;
 
     public STL(TaskSet taskSet, List<Vehicle> allVehicles) {
         /* pseudo code:
@@ -34,19 +33,109 @@ public class STL {
         if (!A.isFeasible){
             System.out.println("WARNING: your problem is not feasible");
         }
-        while(true) { // TODO implement good enough
-            Aold = new CentralPlan(A);
-            List<HashMap<Vehicle, List<ExTask>>> N = generateNeighbour(Aold, allVehicles);
-            //Anew = localChoice(N,p)// TODO implement local choice
 
-            /* TODO: - cost function
-                     - getLeastCostSolution
-                     -
-            */
+        while(goodEnough(A, Aold)) {
+            Aold = new CentralPlan(A);
+            List<CentralPlan> N = generateNeighbour(Aold, allVehicles);
+            CentralPlan A = localChoice(N, Aold, p);
         }
     }
+    /*
+    List<Plan> reconstructPlan(CentralPlan A, List<vehicle> vehicles){
+        List<Plan> plans = new ArrayList<Plan>();
 
-    private List<HashMap<Vehicle, List<ExTask>>> generateNeighbour(CentralPlan Aold, List<Vehicle> allVehicles){
+        for v in Vehicles
+            city currentCity=vehicle.getCurrentCity()
+
+            new plan= new plan(currentCity)
+
+            for task in A.content.get(vehicle) // will pick the correct one
+
+                // finding where the next city is
+                nextCity=null
+                if (pickup)
+                    nextCity=task.PICKUPCITY
+                elif(deliver)
+                    nextCity=task.DELIVERCITY
+                else
+                    print(WARRRNING)
+
+                // finding the path to this city
+                List<City> path= currentCity.pathTo(tas);
+                for nextCity in path:
+                    plan.appendMove(nextCity))
+
+                //appending the action
+                if ExTask.actionType =="deliver"
+                    plan.appendDelivery(Task)
+                elif ExTask.actionType== "pickup"
+                    plan.appendPickup(Task)
+                else:
+                   print WARING
+
+            plans.append(plan)
+    }
+     */
+    public List<Plan> reconstructPlan(CentralPlan A, List<Vehicle> allVehicles){
+
+        List<Plan> plans = new ArrayList<Plan>();
+        for (Vehicle v : allVehicles){
+            City currentCity=v.getCurrentCity();
+            Plan plan = new Plan(currentCity);
+
+            for (ExTask t : A.content.get(v)){
+                //finding where the next city is
+                City nextCity=null;
+                if (t.actionType== ExTask.ActionType.PICKUP){
+                    nextCity=t.task.pickupCity;
+                }else if(t.actionType== ExTask.ActionType.DELIVERY){
+                    nextCity=t.task.deliveryCity;
+                }else{
+                    throw new IllegalNameException("problem with type of extask");
+                }
+                // finding the path to this city
+                List<City> path= currentCity.pathTo(nextCity);
+                for (City c :path){
+                    plan.appendMove(c);
+                }
+                // appending the action
+                if(t.actionType==ExTask.ActionType.PICKUP){
+                    plan.appendPickup(t.task);
+                }else if (t.actionType==ExTask.ActionType.DELIVERY){
+                    plan.appendDelivery(t.task);
+                }else{
+                    throw new IllegalNameException("problem with appending the action");
+                }
+
+            }
+            plans.add(plan);
+        }
+        return plans;
+    }
+
+
+
+
+    private boolean goodEnough(CentralPlan A, CentralPlan Aold){
+        double changeRatio= Math.abs(CentralPlan.computeCost(A)-CentralPlan.computeCost(Aold))/CentralPlan.computeCost(Aold);
+        double eps=1e-3;
+        double maxIterWithNoChange=20;
+
+        if (changeRatio<eps){
+            iterWithNoChange++;
+        }else{
+            iterWithNoChange=0;
+        }
+
+        if (iterWithNoChange>maxIterWithNoChange){
+            return true;
+        }else{
+            return false;
+        }
+
+    }
+
+    private List<CentralPlan> generateNeighbour(CentralPlan Aold, List<Vehicle> allVehicles){
         // generate mutations to find other feasible sequences
         /*
             v1 = selectRandomVehicle(List<Vehicle>) // select random vehicle with tasks
@@ -66,12 +155,12 @@ public class STL {
             return N
 
          */
-        List<HashMap<Vehicle, List<ExTask>>> N = new ArrayList<HashMap<Vehicle, List<ExTask>>>(); // neighbour plans are a list of HashMap
+        List<CentralPlan> N = new ArrayList<CentralPlan>(); // neighbour plans are a list of HashMap
 
         Vehicle v1 = selectRandomVehicle(allVehicles);
         for(Vehicle v2 : allVehicles){
             if(Aold.canChangeVehicle(Aold,v1,v2)){
-                HashMap<Vehicle, List<ExTask>> Anew = Aold.changeVehicle(Aold, v1, v2);
+                CentralPlan Anew = Aold.changeVehicle(Aold, v1, v2);
                 N.add(Anew);
             }
         }
@@ -79,7 +168,7 @@ public class STL {
         for (int idx1=0; idx1<Aold.content.get(v1).size()-1;idx1++){
             for(int idx2=idx1+1; idx2<Aold.content.get(v1).size();idx2++){
                 if(Aold.canSwap(Aold,v1,idx1,idx2)){
-                    HashMap<Vehicle,List<ExTask>> Anew = Aold.swapTask(Aold,v1,idx1,idx2);
+                    CentralPlan Anew = Aold.swapTask(Aold,v1,idx1,idx2);
                     N.add(Anew);
                 }
             }
@@ -140,6 +229,17 @@ public class STL {
           }
 
     }
-
      */
+    public CentralPlan localChoice(List<CentralPlan> neighbours, CentralPlan Aold, double p){
+        CentralPlan bestNeighbour=CentralPlan.getBestNeighbour(neighbours);
+        if(Math.random()<p){   //p=0.3 ou 0.5   //p give the new plan //    (1-P) give the old one
+            //give the new plan
+            return bestNeighbour;
+        }else{
+            //give the old plan
+            return Aold;
+        }
+    }
+
+
 }
