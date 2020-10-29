@@ -2,7 +2,7 @@
 
 <history configuration="config\centralized.xml">
 	<agents>
-		<agent name="centralized-random">
+		<agent name="centralized-SMART">
 			<vehicle name="Vehicle 1"/>
 			<vehicle name="Vehicle 2"/>
 			<vehicle name="Vehicle 3"/>
@@ -17,46 +17,52 @@
 				<task id="2" pickup="Cardiff" delivery="Norwich" weight="3" reward="43918"/>
 				<task id="3" pickup="Manchester" delivery="London" weight="3" reward="68101"/>
 				<task id="4" pickup="Norwich" delivery="Sheffield" weight="3" reward="48357"/>
-				<task id="5" pickup="Leeds" delivery="Manchester" weight="3" reward="87021"/>
-				<task id="6" pickup="London" delivery="Sheffield" weight="3" reward="68942"/>
-				<task id="7" pickup="Newcastle" delivery="Norwich" weight="3" reward="23333"/>
-				<task id="8" pickup="Cardiff" delivery="Sheffield" weight="3" reward="69479"/>
-				<task id="9" pickup="Newcastle" delivery="Norwich" weight="3" reward="23333"/>
-				<task id="10" pickup="Portsmouth" delivery="Manchester" weight="3" reward="54712"/>
-				<task id="11" pickup="Newcastle" delivery="Norwich" weight="3" reward="23333"/>
-				<task id="12" pickup="London" delivery="Liverpool" weight="3" reward="61890"/>
-				<task id="13" pickup="Liverpool" delivery="Leeds" weight="3" reward="93232"/>
-				<task id="14" pickup="Cardiff" delivery="Sheffield" weight="3" reward="69479"/>
-				<task id="15" pickup="Manchester" delivery="Newcastle" weight="3" reward="69390"/>
-				<task id="16" pickup="Newcastle" delivery="Birmingham" weight="3" reward="65040"/>
-				<task id="17" pickup="Plymouth" delivery="Liverpool" weight="3" reward="18071"/>
-				<task id="18" pickup="Manchester" delivery="Liverpool" weight="3" reward="99999"/>
-				<task id="19" pickup="London" delivery="Liverpool" weight="3" reward="61890"/>
-				<task id="20" pickup="Portsmouth" delivery="London" weight="3" reward="92821"/>
-				<task id="21" pickup="London" delivery="Norwich" weight="3" reward="85625"/>
-				<task id="22" pickup="Birmingham" delivery="Liverpool" weight="3" reward="83012"/>
-				<task id="23" pickup="Birmingham" delivery="London" weight="3" reward="85088"/>
-				<task id="24" pickup="Newcastle" delivery="Liverpool" weight="3" reward="75601"/>
-				<task id="25" pickup="Manchester" delivery="Plymouth" weight="3" reward="24282"/>
-				<task id="26" pickup="London" delivery="Liverpool" weight="3" reward="61890"/>
-				<task id="27" pickup="Norwich" delivery="Leeds" weight="3" reward="40965"/>
-				<task id="28" pickup="Plymouth" delivery="Birmingham" weight="3" reward="41269"/>
-				<task id="29" pickup="Newcastle" delivery="Norwich" weight="3" reward="23333"/>
 			</tasks>
 			<events>
 				<event id="0" time="0" vehicle="Vehicle 1" move="Leeds"/>
-				<event id="1" time="1094444378" vehicle="Vehicle 1" move="Sheffield"/>
-				<event id="2" time="1553333235" vehicle="Vehicle 1" move="Birmingham"/>
+				<event id="1" time="1094444415" vehicle="Vehicle 1" move="Sheffield"/>
+				<event id="2" time="1553333291" vehicle="Vehicle 1" move="Birmingham"/>
+				<event id="3" time="2555555479" vehicle="Vehicle 1" move="Cardiff"/>
+				<event id="4" time="3833333176" vehicle="Vehicle 1" pickup="0"/>
+				<event id="5" time="4133333158" vehicle="Vehicle 1" move="Birmingham"/>
+				<event id="6" time="5411110851" vehicle="Vehicle 1" move="London"/>
+				<event id="7" time="6722221887" vehicle="Vehicle 1" move="Portsmouth"/>
+				<event id="8" time="7553332966" vehicle="Vehicle 1" deliver="0"/>
+				<event id="9" time="7853332953" vehicle="Vehicle 1" move="London"/>
+				<event id="10" time="8684444037" vehicle="Vehicle 1" move="Birmingham"/>
+				<event id="11" time="9995555083" vehicle="Vehicle 1" pickup="1"/>
+				<event id="12" time="10295555072" vehicle="Vehicle 1" move="Manchester"/>
+				<event id="13" time="11349999469" vehicle="Vehicle 1" deliver="1"/>
+				<event id="14" time="11649999461" vehicle="Vehicle 1" move="Birmingham"/>
+				<event id="15" time="12704443866" vehicle="Vehicle 1" move="Cardiff"/>
+				<event id="16" time="13982221577" vehicle="Vehicle 1" pickup="2"/>
+				<event id="17" time="14282221559" vehicle="Vehicle 1" move="Birmingham"/>
+				<event id="18" time="15559999268" vehicle="Vehicle 1" move="London"/>
+				<event id="19" time="16871110300" vehicle="Vehicle 1" move="Norwich"/>
+				<event id="20" time="18148888012" vehicle="Vehicle 1" deliver="2"/>
+				<event id="21" time="18448887993" vehicle="Vehicle 1" move="London"/>
+				<event id="22" time="19726665694" vehicle="Vehicle 1" move="Birmingham"/>
+				<event id="23" time="21037776728" vehicle="Vehicle 1" move="Manchester"/>
+				<event id="24" time="22092221112" vehicle="Vehicle 1" pickup="3"/>
+				<event id="25" time="22392221093" vehicle="Vehicle 1" move="Birmingham"/>
+				<event id="26" time="23446665475" vehicle="Vehicle 1" move="London"/>
+				<event id="27" time="24757776501" vehicle="Vehicle 1" deliver="3"/>
+				<event id="28" time="25057776482" vehicle="Vehicle 1" move="Norwich"/>
+				<event id="29" time="26335554177" vehicle="Vehicle 1" pickup="4"/>
+				<event id="30" time="26635554159" vehicle="Vehicle 1" move="London"/>
+				<event id="31" time="27913331868" vehicle="Vehicle 1" move="Birmingham"/>
+				<event id="32" time="29224442901" vehicle="Vehicle 1" move="Sheffield"/>
+				<event id="33" time="30226665066" vehicle="Vehicle 1" deliver="4"/>
 			</events>
 		</round>
 	</rounds>
 	<statistics>
-		<stat rank="1" agent="centralized-random">
-			<total-tasks value="30"/>
-			<total-distance value="230.0"/>
-			<total-cost value="1150"/>
-			<total-reward value="0"/>
-			<total-profit value="-1150"/>
+		<stat rank="1" agent="centralized-SMART">
+			<total-tasks value="5"/>
+			<total-distance value="2477.4"/>
+			<total-cost value="12387"/>
+			<total-reward value="300713"/>
+			<total-profit value="288326"/>
 		</stat>
 	</statistics>
 </history>

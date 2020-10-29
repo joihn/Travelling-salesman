@@ -12,7 +12,7 @@ import org.jdom.IllegalNameException;
 
 public class STL {
 
-    public CentralPlan A;
+    public CentralPlan A ;
     public CentralPlan Aold;
     public double p =0.4;  //TODO should we harcode this ?????????????????????????????????????????????????????????????
     public int iterWithNoChange=0;
@@ -30,6 +30,7 @@ public class STL {
 
         // initialization
         A = new CentralPlan(allVehicles,taskSet);
+        Aold = new CentralPlan(A);
         if (!A.isFeasible){
             System.out.println("WARNING: your problem is not feasible");
         }
@@ -98,6 +99,7 @@ public class STL {
                 for (City c :path){
                     plan.appendMove(c);
                 }
+                currentCity=nextCity;  // corrected this dumb mistake
                 // appending the action
                 if(t.actionType==ExTask.ActionType.PICKUP){
                     plan.appendPickup(t.task);

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class CentralPlan {
 
-    HashMap<Vehicle, List<ExTask>> content;
+    HashMap<Vehicle, List<ExTask>> content= new HashMap<Vehicle, List<ExTask>>();
     public boolean isFeasible;
 
     //initialisation
