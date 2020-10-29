@@ -164,7 +164,14 @@ public class STL {
         List<CentralPlan> N = new ArrayList<CentralPlan>(); // neighbour plans are a list of HashMap
 
         Vehicle v1 = selectRandomVehicle(Aold,allVehicles);
+
+
+
         for(Vehicle v2 : allVehicles){
+            if (v1==v2){
+                continue; // avoid changing a task with itself
+            }
+
             if(CentralPlan.canChangeVehicle(Aold,v1,v2)){
                 CentralPlan Anew = CentralPlan.changeVehicle(Aold, v1, v2);
                 N.add(Anew);

@@ -38,8 +38,14 @@ public class CentralPlan {
     }
 
     public CentralPlan(CentralPlan Aold){   // constructor for deep copying a centralplan
-        isFeasible = Aold.isFeasible;
-        content = new HashMap<Vehicle,List<ExTask>>(Aold.content);
+        this.isFeasible = Aold.isFeasible;
+        this.content = new HashMap<Vehicle,List<ExTask>>();
+
+        for (Vehicle v: Aold.content.keySet()){ // deep copy
+            //List<ExTask> tempList = new ArrayList<ExTask>(Aold.content.get(v));
+
+            this.content.put(v, new ArrayList<ExTask>( Aold.content.get(v)) );
+        }
     }
 
 
