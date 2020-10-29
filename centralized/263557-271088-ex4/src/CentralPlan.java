@@ -110,23 +110,28 @@ public class CentralPlan {
         */
         List<ExTask> vehicleActions = A.content.get(v1);
 
-        if (vehicleActions.get(idx1).actionType == ExTask.ActionType.PICKUP) {
+        if (vehicleActions.get(idx1).actionType == ExTask.ActionType.PICKUP) { // check that it's possible to pickup later
             for(int i = idx1+1; i <= idx2; i++){
                 if(vehicleActions.get(idx1).task == vehicleActions.get(i).task){
+                    //System.out.println("canSwap said : not allowed 1");
                     return false;
                 }
             }
-        } else {
+        }
+        if (vehicleActions.get(idx2).actionType == ExTask.ActionType.DELIVERY) {
             // actionType == DELIVER
-            for(int i = idx1; i < idx2; i++){
+            for(int i = idx1; i < idx2; i++){    //check it's possible to deliver earlier
                 if(vehicleActions.get(idx2).task == vehicleActions.get(i).task){
+                    //System.out.println("canSwap said : not allowed 2");
                     return false;
                 }
             }
         }
 
+        //checking that we can swap task and still RESPECT THE WEIGHT
         int weight = 0;
-        for(int i=0; i<vehicleActions.size();i++){
+
+        for(int i=0; i<vehicleActions.size();i++){ // browse trough all the action
             if(i==idx1){
                 if (vehicleActions.get(idx2).actionType == ExTask.ActionType.PICKUP){
                     weight += vehicleActions.get(idx2).task.weight;
@@ -146,10 +151,12 @@ public class CentralPlan {
                     weight -= vehicleActions.get(i).task.weight;
                 }
                 if (weight > v1.capacity()) {
+                    //System.out.println("canSwap said : not allowed 3");
                     return false;
                 }
             }
         }
+        //System.out.println("canSwap said :  allowed");
         return true;
     }
 

@@ -124,8 +124,8 @@ public class STL {
 
     private boolean goodEnough(CentralPlan A, CentralPlan Aold){
         double changeRatio= Math.abs(CentralPlan.computeCost(A)-CentralPlan.computeCost(Aold))/CentralPlan.computeCost(Aold);
-        double eps=1e-3;
-        double maxIterWithNoChange=20;
+        double eps=1e-5; // smaller = more iteration
+        double maxIterWithNoChange=10000;
 
         if (changeRatio<eps){
             iterWithNoChange++;
@@ -173,6 +173,7 @@ public class STL {
             }
 
             if(CentralPlan.canChangeVehicle(Aold,v1,v2)){
+                System.out.println("------------------------------------------->    HEHE will change vehicle !!!");
                 CentralPlan Anew = CentralPlan.changeVehicle(Aold, v1, v2);
                 N.add(Anew);
             }
@@ -188,29 +189,6 @@ public class STL {
         }
         return N;
     }
-
-    public List<Plan> convertPlan(List<Vehicle> allVehicles){
-        List<Plan> globalPlan = new ArrayList<Plan>();
-        for (Vehicle vehicle : allVehicles){
-
-            City currentCity = vehicle.getCurrentCity();
-            Plan plan  = new Plan(currentCity);
-
-            for(ExTask extendedTask : A.content.get(vehicle)){
-                for(City city : currentCity.pathTo(extendedTask.task.pickupCity)){
-                    plan.appendMove(city);
-                }
-                plan.appendPickup(extendedTask.task);
-                for(City city : extendedTask.task.pickupCity.pathTo(extendedTask.task.deliveryCity)){
-                    plan.appendMove(city);
-                }
-                plan.appendDelivery(extendedTask.task);
-            }
-            globalPlan.add(plan);
-        }
-        return globalPlan;
-    }
-
 
 
     public Vehicle selectRandomVehicle(CentralPlan Aold, List<Vehicle> allVehicles){
