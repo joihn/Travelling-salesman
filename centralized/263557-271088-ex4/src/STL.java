@@ -16,7 +16,7 @@ public class STL {
     public double p =0.4;  //TODO should we harcode this ?????????????????????????????????????????????????????????????
     public int iterFarFromBest=0;
 
-    public STL(TaskSet taskSet, List<Vehicle> allVehicles) {
+    public STL(TaskSet taskSet, List<Vehicle> allVehicles, long timeout_plan) {
         /* pseudo code:
             A = initializeA(taskset, vehicleset)
 
@@ -26,6 +26,7 @@ public class STL {
                 A = localChoice(N,A,p)  // select best neighbour with probability p, else select A
             return A
          */
+        long start_time=System.currentTimeMillis();
 
         // initialization
         A = new CentralPlan(allVehicles,taskSet);
@@ -34,7 +35,7 @@ public class STL {
             System.out.println("WARNING: your problem is not feasible");
         }
         int iter=0;
-        while(stillImproving(A)) {
+        while(stillImproving(A) && (System.currentTimeMillis()-start_time+1000)<timeout_plan) {
 
             Aold = new CentralPlan(A);
             //System.out.println("will genrate neighbboor, iter: "+iter);
@@ -123,7 +124,7 @@ public class STL {
 
     public boolean stillImproving(CentralPlan A){
 
-        double maxIterFarFromBest =5000;
+        double maxIterFarFromBest =10000;
 
         if (this.bestASoFar==null) { //first iter
             return true;
@@ -131,7 +132,7 @@ public class STL {
             double closenessOfAToBest = CentralPlan.computeCost(this.bestASoFar)/CentralPlan.computeCost(A);
             //     = 0.99 : super close to best
             //     = 0.4    : far from best
-            if (closenessOfAToBest<0.6){
+            if (closenessOfAToBest<0.5){
                 this.iterFarFromBest++;
             }else{
                 this.iterFarFromBest=0;

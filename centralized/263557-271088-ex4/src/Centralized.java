@@ -70,7 +70,7 @@ public class Centralized implements CentralizedBehavior {
 //            plans.add(Plan.EMPTY);
 //        }
 
-        STL solution= new STL(tasks, vehicles);
+        STL solution= new STL(tasks, vehicles, this.timeout_plan);
         List<Plan> plans = solution.reconstructPlan(vehicles);
 
         long time_end = System.currentTimeMillis();
