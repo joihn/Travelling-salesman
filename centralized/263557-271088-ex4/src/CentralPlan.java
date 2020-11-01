@@ -132,28 +132,29 @@ public class CentralPlan {
         int weight = 0;
 
         for(int i=0; i<vehicleActions.size();i++){ // browse trough all the action
-            if(i==idx1){
+            if(i==idx1){  //task is one of those which get swapped
                 if (vehicleActions.get(idx2).actionType == ExTask.ActionType.PICKUP){
                     weight += vehicleActions.get(idx2).task.weight;
                 } else {
                     weight -= vehicleActions.get(idx2).task.weight;
                 }
-            } else if (i==idx2) {
+            } else if (i==idx2) { //task is one of those which get swapped
                 if (vehicleActions.get(idx1).actionType == ExTask.ActionType.PICKUP){
                     weight += vehicleActions.get(idx1).task.weight;
                 } else {
                     weight -= vehicleActions.get(idx1).task.weight;
                 }
-            } else {
+            } else { //task is not one of those which get swapped
                 if (vehicleActions.get(i).actionType == ExTask.ActionType.PICKUP) {
                     weight += vehicleActions.get(i).task.weight;
                 } else {
                     weight -= vehicleActions.get(i).task.weight;
                 }
-                if (weight > v1.capacity()) {
-                    //System.out.println("canSwap said : not allowed 3");
-                    return false;
-                }
+
+            }
+            if (weight > v1.capacity()) {
+                //System.out.println("canSwap said : not allowed 3");
+                return false;
             }
         }
         //System.out.println("canSwap said :  allowed");
