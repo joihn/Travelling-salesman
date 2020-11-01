@@ -5,7 +5,7 @@ import logist.simulation.Vehicle;
 import logist.plan.Plan;
 import logist.task.TaskSet;
 import logist.topology.Topology.City;
-import org.jdom.IllegalNameException;
+
 
 
 public class STL {
@@ -13,7 +13,7 @@ public class STL {
     public CentralPlan A ;
     public CentralPlan Aold;
     public CentralPlan bestASoFar = null;
-    public double p =0.4;  //TODO should we harcode this ?????????????????????????????????????????????????????????????
+    public double p =0.4;  //TODO should we harcode this ??
     public int iterFarFromBest=0;
 
     public STL(TaskSet taskSet, List<Vehicle> allVehicles, long timeout_plan) {
@@ -96,7 +96,7 @@ public class STL {
                 }else if(t.actionType== ExTask.ActionType.DELIVERY){
                     nextCity=t.task.deliveryCity;
                 }else{
-                    throw new IllegalNameException("problem with type of extask");
+                    System.out.println("Problem with type of ExTask instance");
                 }
                 // finding the path to this city
                 List<City> path= currentCity.pathTo(nextCity);
@@ -110,7 +110,7 @@ public class STL {
                 }else if (t.actionType==ExTask.ActionType.DELIVERY){
                     plan.appendDelivery(t.task);
                 }else{
-                    throw new IllegalNameException("problem with appending the action");
+                    System.out.println("Problem appending an action");
                 }
 
             }
