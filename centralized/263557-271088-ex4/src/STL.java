@@ -121,19 +121,18 @@ public class STL {
 
 
     public boolean stillImproving(CentralPlan A){
-
-        double maxIterFarFromBest =10000;
-
+        double maxIterWithoutImprovmement = 1e7;
         if (this.bestASoFar==null) { //first iteration -> return true
             return true;
         }else {                     // all the other iter
-            if (this.iterationsToImprovement>1e7){
-                System.out.println("Converged due to epsilon-criterion");
+            if (this.iterationsToImprovement>maxIterWithoutImprovmement){
+                System.out.println("Converged due to stopping-criterion");
                 return false;
             } else {
                 return true;
             }
             /* Maxime Version
+            double maxIterFarFromBest =10000;
             double closenessOfAToBest = CentralPlan.computeCost(this.bestASoFar)/CentralPlan.computeCost(A);
             //     = 0.99 : super close to best
             //     = 0.4    : far from best
