@@ -16,6 +16,7 @@ public class CentralPlan {
     //initialisation
 
     public CentralPlan(List<Vehicle> allVehicles, TaskSet allTasks){
+
         Vehicle biggestVehicle = pickBiggestVehicle(allVehicles);
         isFeasible = true;
         for(Vehicle vehicle : allVehicles){
@@ -32,6 +33,7 @@ public class CentralPlan {
                     exTask = new ExTask(task, ExTask.ActionType.DELIVERY);
                     vehiclePlan.add(exTask);
                 }
+
                 content.put(vehicle,vehiclePlan);
             }
         }

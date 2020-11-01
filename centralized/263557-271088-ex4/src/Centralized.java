@@ -57,8 +57,8 @@ public class Centralized implements CentralizedBehavior {
 
     @Override
     public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-        long time_start = System.currentTimeMillis();
 
+        long time_start = System.currentTimeMillis();
 
         //TODO check which kind of agent is called (random or smart)
 //		System.out.println("Agent " + agent.id() + " has tasks " + tasks);

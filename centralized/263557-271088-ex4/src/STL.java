@@ -1,10 +1,8 @@
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import logist.simulation.Vehicle;
 import logist.plan.Plan;
-import logist.task.Task;
 import logist.task.TaskSet;
 import logist.topology.Topology.City;
 import org.jdom.IllegalNameException;
@@ -14,8 +12,9 @@ public class STL {
 
     public CentralPlan A ;
     public CentralPlan Aold;
+    public CentralPlan bestASoFar = null;
     public double p =0.4;  //TODO should we harcode this ?????????????????????????????????????????????????????????????
-    public int iterWithNoChange=0;
+    public int iterFarFromBest=0;
 
     public STL(TaskSet taskSet, List<Vehicle> allVehicles) {
         /* pseudo code:
@@ -35,12 +34,12 @@ public class STL {
             System.out.println("WARNING: your problem is not feasible");
         }
         int iter=0;
-        while(!goodEnough(A, Aold)) {
+        while(stillImproving(A)) {
 
             Aold = new CentralPlan(A);
-            System.out.println("will genrate neighbboor, iter: "+iter);
+            //System.out.println("will genrate neighbboor, iter: "+iter);
             List<CentralPlan> N = generateNeighbour(Aold, allVehicles);
-            System.out.println("will do localChoice, iter: "+iter);
+            //System.out.println("will do localChoice, iter: "+iter);
             A = localChoice(N, Aold, p);
             iter++;
         }
@@ -88,7 +87,7 @@ public class STL {
             City currentCity=v.getCurrentCity();
             Plan plan = new Plan(currentCity);
 
-            for (ExTask t : this.A.content.get(v)){
+            for (ExTask t : this.bestASoFar.content.get(v)){
                 //finding where the next city is
                 City nextCity=null;
                 if (t.actionType== ExTask.ActionType.PICKUP){
@@ -122,22 +121,30 @@ public class STL {
 
 
 
-    private boolean goodEnough(CentralPlan A, CentralPlan Aold){
-        double changeRatio= Math.abs(CentralPlan.computeCost(A)-CentralPlan.computeCost(Aold))/CentralPlan.computeCost(Aold);
-        double eps=1e-5; // smaller = more iteration
-        double maxIterWithNoChange=10000;
+    public boolean stillImproving(CentralPlan A){
 
-        if (changeRatio<eps){
-            iterWithNoChange++;
-        }else{
-            iterWithNoChange=0;
-        }
+        double maxIterFarFromBest =5000;
 
-        if (iterWithNoChange>maxIterWithNoChange){
+        if (this.bestASoFar==null) { //first iter
             return true;
-        }else{
-            return false;
+        }else {                     // all the other iter
+            double closenessOfAToBest = CentralPlan.computeCost(this.bestASoFar)/CentralPlan.computeCost(A);
+            //     = 0.99 : super close to best
+            //     = 0.4    : far from best
+            if (closenessOfAToBest<0.6){
+                this.iterFarFromBest++;
+            }else{
+                this.iterFarFromBest=0;
+            }
+
+
+            if (this.iterFarFromBest>maxIterFarFromBest){
+                return false;
+            }else{
+                return true;
+            }
         }
+
 
     }
 
@@ -166,27 +173,38 @@ public class STL {
         Vehicle v1 = selectRandomVehicle(Aold,allVehicles);
 
 
-
+        // CHANGEVEHICLE
         for(Vehicle v2 : allVehicles){
             if (v1==v2){
                 continue; // avoid changing a task with itself
             }
 
-            if(CentralPlan.canChangeVehicle(Aold,v1,v2)){
-                System.out.println("------------------------------------------->    HEHE will change vehicle !!!");
+            if(CentralPlan.canChangeVehicle(Aold,v1,v2)) {
+                //System.out.println("------------------------------------------->    HEHE will change vehicle !!!");
                 CentralPlan Anew = CentralPlan.changeVehicle(Aold, v1, v2);
                 N.add(Anew);
             }
-        }
 
-        for (int idx1=0; idx1<Aold.content.get(v1).size()-1;idx1++){
-            for(int idx2=idx1+1; idx2<Aold.content.get(v1).size();idx2++){
+        }
+        //swapTask // WE GENRATE TOOOO MANY !
+//        for (int idx1=0; idx1<Aold.content.get(v1).size()-1;idx1++){
+//            for(int idx2=idx1+1; idx2<Aold.content.get(v1).size();idx2++){
+
+        boolean swapped=false;
+        int iterSwap=0;
+        while (swapped==false && iterSwap<20 ){  // will try to swap 1 task only // fail maximumm 20 times
+            int idx1= (int) (Math.random()*(Aold.content.get(v1).size()-1));
+            int idx2 = (int) (Math.random()*(Aold.content.get(v1).size() - idx1)+idx1);
+    //        for(int idx2=idx1+1; idx2<Aold.content.get(v1).size();idx2++){
                 if(Aold.canSwap(Aold,v1,idx1,idx2)){
                     CentralPlan Anew = Aold.swapTask(Aold,v1,idx1,idx2);
                     N.add(Anew);
+                    swapped=true;
+                }else{
+                    iterSwap++;
                 }
-            }
         }
+
         return N;
     }
 
@@ -224,6 +242,16 @@ public class STL {
      */
     public CentralPlan localChoice(List<CentralPlan> neighbours, CentralPlan Aold, double p){
         CentralPlan bestNeighbour=CentralPlan.getBestNeighbour(neighbours);
+
+        //save best result so far
+        if (this.bestASoFar==null){
+            this.bestASoFar=bestNeighbour;
+        }
+        if (CentralPlan.computeCost(bestNeighbour)<CentralPlan.computeCost(this.bestASoFar)){
+            bestASoFar= bestNeighbour;
+        }
+
+        //continue searching
         if(Math.random()<p){   //p=0.3 ou 0.5   //p give the new plan //    (1-P) give the old one
             //give the new plan
             return bestNeighbour;
@@ -231,6 +259,8 @@ public class STL {
             //give the old plan
             return Aold;
         }
+
+
     }
 
 
