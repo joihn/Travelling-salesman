@@ -199,7 +199,7 @@ public class STL {
             // if vehicle v1 has only 1 task it will be impossible to swap!
             swapped = true;
         }
-
+        int i = 0;
         while (!swapped){  // will try to swap 1 task only // fail maximumm 20 times
             int idx1 = (int) (Math.random()*(Aold.content.get(v1).size()-1));
             int idx2 = (int) (Math.random()*(Aold.content.get(v1).size() - idx1)+idx1);
@@ -208,6 +208,11 @@ public class STL {
                     CentralPlan Anew = Aold.swapTask(Aold,v1,idx1,idx2);
                     N.add(Anew);
                     swapped=true;
+                } else {
+                    i++;
+                    if (i>50){
+                        System.out.println("Trapped in while loop");
+                    }
                 }
         }
         return N;
