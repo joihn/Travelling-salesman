@@ -17,12 +17,16 @@
 		<set class-name="Centralized"/>
 		<set p="0.0"/>
 	</agent>
-	<agent name="centralized-0.35">
+	<agent name="centralized-0.3">
 		<set class-path="bin/"/>
 		<set class-name="Centralized"/>
-		<set p="0.35"/>
+		<set p="0.3"/>
 	</agent>
-
+	<agent name="centralized-0.4">
+		<set class-path="bin/"/>
+		<set class-name="Centralized"/>
+		<set p="0.4"/>
+	</agent>
 	<agent name="centralized-0.5">
 		<set class-path="bin/"/>
 		<set class-name="Centralized"/>
