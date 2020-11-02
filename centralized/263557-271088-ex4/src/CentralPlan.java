@@ -75,6 +75,9 @@ public class CentralPlan {
                 canChange = true;
             return canChange
          */
+        if (A.content.get(v1).size()==0){  // if giver is empty
+            return false;
+        }
         ExTask firstTask = A.content.get(v1).get(0); ///// create NULL POINTER !!!!!!!!!¨¨
         boolean canChangeVehicle = false;
         if (firstTask.task.weight<v2.capacity()) {
@@ -88,7 +91,7 @@ public class CentralPlan {
         // pass the first task from v1 to v2
         // will be called only for v1 with nonempty task set
         CentralPlan Anew = new CentralPlan(A);
-        ExTask tmpPickup = Anew.content.get(v1).remove(0); // get ExTask object (should be Pickup)
+        ExTask tmpPickup = Anew.content.get(v1).remove(0); // get ExTask object (should be Pickup) // warning create NULL POINTZER !!!!!
         ExTask tmpDeliver = null;
         for (int i=0; i < Anew.content.get(v1).size();i++){
             if (Anew.content.get(v1).get(i).task == tmpPickup.task){

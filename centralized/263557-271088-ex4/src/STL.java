@@ -181,46 +181,76 @@ public class STL {
         Vehicle v1 = selectRandomVehicle(Aold,allVehicles);
 
         // CHANGEVEHICLE
-        
         for(Vehicle v2 : allVehicles){
             if (v1==v2){
                 continue; // avoid changing a task with itself
             }
 
+            int nTaskCarried= Aold.content.get(v1).size()/2;
+            int nTaskTot=0;
+            for(Vehicle vI:allVehicles){
+                nTaskTot +=  Aold.content.get(vI).size()/2;
+            }
+            //change a vehicle
             if(CentralPlan.canChangeVehicle(Aold,v1,v2)) {
                 CentralPlan Anew = CentralPlan.changeVehicle(Aold, v1, v2);
-                N.add(Anew);
+                nTaskCarried--;
+                N.add(new CentralPlan(Anew)); // deep clone it on the fly to avoid distant modif
+
+//                while(Math.random()<((double) nTaskCarried)/(((double) nTaskTot)*1.5)){
+                while(Math.random()<0.0000000001){
+                    if(CentralPlan.canChangeVehicle(Anew,v1,v2)) {
+                        Anew = CentralPlan.changeVehicle(Anew, v1, v2);
+                        nTaskCarried--;
+                        N.add(new CentralPlan(Anew));
+                    }
+                }
             }
+
+
+
 
         }
         //swapTask // WE GENRATE TOOOO MANY !
 //        for (int idx1=0; idx1<Aold.content.get(v1).size()-1;idx1++){
 //            for(int idx2=idx1+1; idx2<Aold.content.get(v1).size();idx2++){
 
-        boolean swapped=false;
-        if (Aold.content.get(v1).size()<=2){
-            // if vehicle v1 has only 1 task it will be impossible to swap!
-            swapped = true;
-        }
-        int i = 0;
-        while (!swapped){  // will try to swap 1 task only // fail maximumm 20 times
-            int idx1 = (int) (Math.random()*(Aold.content.get(v1).size()-1));
-            int idx2 = (int) (Math.random()*(Aold.content.get(v1).size() - idx1)+idx1);
-    //        for(int idx2=idx1+1; idx2<Aold.content.get(v1).size();idx2++){
-                if(Aold.canSwap(Aold,v1,idx1,idx2)){
-                    CentralPlan Anew = Aold.swapTask(Aold,v1,idx1,idx2);
-                    N.add(Anew);
-                    swapped=true;
-                } else {
-                    i++;
-                    if (i>50){
-                        System.out.println("Trapped in while loop");
-                    }
-                }
+
+        if (Aold.content.get(v1).size()>2) {// only if vehicle has at least 3 task = 4 extask
+
+            CentralPlan Anew = swapATask(v1, N, Aold);
+            N.add(new CentralPlan(Anew));
+
+            while (Math.random() < 0.00000001) { //todo change
+                Anew = swapATask(v1, N, Anew);
+                N.add(new CentralPlan(Anew));
+            }
+
         }
         return N;
     }
 
+    public CentralPlan swapATask(Vehicle v1, List<CentralPlan> N, CentralPlan Aold_){
+        int i = 0;
+        boolean swapped=false;
+        CentralPlan Anew=null;
+        while (!swapped){  // will try to swap 1 task only
+            int idx1 = (int) (Math.random()*(Aold_.content.get(v1).size()-1));
+            int idx2 = (int) (Math.random()*(Aold_.content.get(v1).size() - idx1)+idx1);
+            if(Aold_.canSwap(Aold_,v1,idx1,idx2)){
+                Anew = Aold_.swapTask(Aold_,v1,idx1,idx2);
+
+                swapped=true;
+            } else {
+                i++;
+                if (i>50){
+                    System.out.println("Trapped in while loop");
+                    Anew=Aold_;
+                }
+            }
+        }
+        return Anew;
+    }
 
     public Vehicle selectRandomVehicle(CentralPlan Aold, List<Vehicle> allVehicles){
         // select a vehicle with a nonempty task set
@@ -277,7 +307,11 @@ public class STL {
             return bestNeighbour;
         }else{
             //give the old plan
-            return Aold;
+            //return Aold;
+
+            //give a random neighboor
+            int index =(int) (Math.random()* neighbours.size());
+            return neighbours.get(index);
         }
 
     }
