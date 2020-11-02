@@ -11,12 +11,12 @@ public class STL {
     public CentralPlan A ;
     public CentralPlan Aold;
     public CentralPlan bestASoFar = null;
-    public double p =0.4;  //TODO should we harcode this ??
+    public double p ;  //TODO should we harcode this ??
     public double bestCostSoFar;
     public long iterationsToImprovement = 0;
     public int iterFarFromBest=0;
 
-    public STL(TaskSet taskSet, List<Vehicle> allVehicles, long timeout_plan) {
+    public STL(TaskSet taskSet, List<Vehicle> allVehicles, long timeout_plan, double p_) {
         /* pseudo code:
             A = initializeA(taskset, vehicleset)
 
@@ -26,8 +26,9 @@ public class STL {
                 A = localChoice(N,A,p)  // select best neighbour with probability p, else select A
             return A
          */
-        long startTime=System.currentTimeMillis();
 
+        long startTime=System.currentTimeMillis();
+        this.p=p_;
         // initialization
         A = new CentralPlan(allVehicles,taskSet);
         Aold = new CentralPlan(A);

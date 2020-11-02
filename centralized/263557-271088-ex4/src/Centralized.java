@@ -31,7 +31,8 @@ public class Centralized implements CentralizedBehavior {
     private Agent agent;
     private long timeout_setup;
     private long timeout_plan;
-    
+    private double p;
+
     @Override
     public void setup(Topology topology, TaskDistribution distribution,
             Agent agent) {
@@ -44,7 +45,8 @@ public class Centralized implements CentralizedBehavior {
         catch (Exception exc) {
             System.out.println("There was a problem loading the configuration file.");
         }
-        
+        this.p = agent.readProperty("p", Double.class, 0.123); //TODO : pass it further
+
         // the setup method cannot last more than timeout_setup milliseconds
         timeout_setup = ls.get(LogistSettings.TimeoutKey.SETUP);
         // the plan method cannot execute more than timeout_plan milliseconds
@@ -69,8 +71,9 @@ public class Centralized implements CentralizedBehavior {
 //        while (plans.size() < vehicles.size()) {
 //            plans.add(Plan.EMPTY);
 //        }
+        System.out.println("The p is " + this.p);
+        STL solution= new STL(tasks, vehicles, this.timeout_plan, this.p);
 
-        STL solution= new STL(tasks, vehicles, this.timeout_plan);
         List<Plan> plans = solution.reconstructPlan(vehicles);
 
         long time_end = System.currentTimeMillis();

@@ -12,4 +12,32 @@
 		<set class-path="bin/"/>
 		<set class-name="Centralized"/>
 	</agent>
+	<agent name="centralized-0.0">
+		<set class-path="bin/"/>
+		<set class-name="Centralized"/>
+		<set p="0.0"/>
+	</agent>
+	<agent name="centralized-0.35">
+		<set class-path="bin/"/>
+		<set class-name="Centralized"/>
+		<set p="0.35"/>
+	</agent>
+
+	<agent name="centralized-0.5">
+		<set class-path="bin/"/>
+		<set class-name="Centralized"/>
+		<set p="0.5"/>
+	</agent>
+
+	<agent name="centralized-0.75">
+		<set class-path="bin/"/>
+		<set class-name="Centralized"/>
+		<set p="0.75"/>
+	</agent>
+
+	<agent name="centralized-1.0">
+		<set class-path="bin/"/>
+		<set class-name="Centralized"/>
+		<set p="1.0"/>
+	</agent>
 </agents>
