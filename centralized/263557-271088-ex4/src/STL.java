@@ -39,7 +39,7 @@ public class STL {
         while(stillImproving(A) && (System.currentTimeMillis()-startTime+1000)<timeout_plan) {
 
             Aold = new CentralPlan(A);
-            //System.out.println("will generate neighboor, iter: "+iter);
+            //System.out.println("will genrate neighbboor, iter: "+iter);
             List<CentralPlan> N = generateNeighbour(Aold, allVehicles);
             //System.out.println("will do localChoice, iter: "+iter);
             A = localChoice(N, Aold, p);
@@ -83,8 +83,7 @@ public class STL {
     }
      */
     public List<Plan> reconstructPlan( List<Vehicle> allVehicles){
-        double cost = CentralPlan.computeCost(this.bestASoFar);
-        System.out.println("Total cost is : "+ cost );
+
         List<Plan> plans = new ArrayList<Plan>();
         for (Vehicle v : allVehicles){
             City currentCity=v.getCurrentCity();
@@ -290,14 +289,14 @@ public class STL {
         if (this.bestASoFar==null){
             this.bestASoFar=bestNeighbour;
             this.bestCostSoFar = CentralPlan.computeCost(bestNeighbour);
-//            System.out.println("Initial solution with cost " + this.bestCostSoFar);
+            System.out.println("Initial solution with cost " + this.bestCostSoFar);
 
         }
         if (CentralPlan.computeCost(bestNeighbour)<CentralPlan.computeCost(this.bestASoFar)){
             bestASoFar= bestNeighbour;
             this.bestCostSoFar = CentralPlan.computeCost(bestNeighbour);
-//            System.out.println("Found better solution with cost " + this.bestCostSoFar);
-//            System.out.println("Iterations to improvement " + this.iterationsToImprovement);
+            System.out.println("Found better solution with cost " + this.bestCostSoFar);
+            System.out.println("Iterations to improvement " + this.iterationsToImprovement);
             this.iterationsToImprovement = 0;
         }
         this.iterationsToImprovement++;
