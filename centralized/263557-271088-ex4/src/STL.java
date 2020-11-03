@@ -116,6 +116,7 @@ public class STL {
                 }
 
             }
+            System.out.println("Plan for vehicle " + v.id() + " contains " + (this.bestASoFar.content.get(v).size()/2) + " tasks");
             plans.add(plan);
         }
         return plans;

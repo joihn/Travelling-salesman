@@ -2,7 +2,7 @@
 
 <history configuration="config\centralized.xml">
 	<agents>
-		<agent name="centralized-0.3">
+		<agent name="centralized-0.2">
 			<vehicle name="Vehicle 1"/>
 			<vehicle name="Vehicle 2"/>
 			<vehicle name="Vehicle 3"/>
