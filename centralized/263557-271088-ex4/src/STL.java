@@ -133,25 +133,7 @@ public class STL {
             } else {
                 return true;
             }
-            /* Maxime Version
-            double maxIterFarFromBest =10000;
-            double closenessOfAToBest = CentralPlan.computeCost(this.bestASoFar)/CentralPlan.computeCost(A);
-            //     = 0.99 : super close to best
-            //     = 0.4    : far from best
 
-            if (closenessOfAToBest<0.5){
-                this.iterFarFromBest++;
-            }else{
-                this.iterFarFromBest=0;
-            }
-
-            if (this.iterFarFromBest>maxIterFarFromBest){
-                System.out.println("Stopped due to divergence from best Solution");
-                return false;
-            }else{
-                return true;
-            }
-            */
         }
 
     }

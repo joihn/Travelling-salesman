@@ -12,10 +12,10 @@
 		<set class-path="bin/"/>
 		<set class-name="Centralized"/>
 	</agent>
-	<agent name="centralized-0.0">
+	<agent name="centralized-0.2">
 		<set class-path="bin/"/>
 		<set class-name="Centralized"/>
-		<set p="0.0"/>
+		<set p="0.2"/>
 	</agent>
 	<agent name="centralized-0.3">
 		<set class-path="bin/"/>
