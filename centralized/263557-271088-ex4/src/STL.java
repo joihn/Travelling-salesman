@@ -179,20 +179,24 @@ public class STL {
 //        for (int idx1=0; idx1<Aold.content.get(v1).size()-1;idx1++){
 //            for(int idx2=idx1+1; idx2<Aold.content.get(v1).size();idx2++){
 
-        boolean swapped=false;
+        boolean swapping=true;
+        int n = N.size();
         if (Aold.content.get(v1).size()<=2){
             // if vehicle v1 has only 1 task it will be impossible to swap!
-            swapped = true;
+            swapping = false;
         }
         int i = 0;
-        while (!swapped){  // will try to swap 1 task only // fail maximumm 20 times
+        while (swapping){  // will try to swap 1 task only // fail maximumm 20 times
             int idx1 = (int) (Math.random()*(Aold.content.get(v1).size()-1));
             int idx2 = (int) (Math.random()*(Aold.content.get(v1).size() - idx1)+idx1);
     //        for(int idx2=idx1+1; idx2<Aold.content.get(v1).size();idx2++){
                 if(Aold.canSwap(Aold,v1,idx1,idx2)){
                     CentralPlan Anew = Aold.swapTask(Aold,v1,idx1,idx2);
                     N.add(Anew);
-                    swapped=true;
+                    n--;
+                    if (n==0){
+                        swapping = false;
+                    }
                 } else {
                     i++;
                     if (i>50){
