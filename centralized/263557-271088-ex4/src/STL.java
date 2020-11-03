@@ -11,7 +11,7 @@ public class STL {
     public CentralPlan A ;
     public CentralPlan Aold;
     public CentralPlan bestASoFar = null;
-    public double p ;  //TODO should we harcode this ??
+    public double p ;
     public double bestCostSoFar;
     public long iterationsToImprovement = 0;
     public int iterFarFromBest=0;
@@ -146,7 +146,7 @@ public class STL {
             loop v2:
                 if (canChangeVehicle(v1,v2))
                 // assume v1 has at least 1 task
-                // check on capacity of v2 to take the first task of v1 // TODO
+                // check on capacity of v2 to take the first task of v1
                     A = ChangeVehicle(v1,v2)
                     N.append(A)
 
@@ -200,8 +200,8 @@ public class STL {
                     }
                 } else {
                     i++;
-                    if (i>50){
-                        System.out.println("Trapped in while loop");
+                    if(i>50){
+                        swapping = false;
                     }
                 }
         }
@@ -227,7 +227,6 @@ public class STL {
 
     //getOptimalPlan()
 
-    //TODO implemnt pseudo code
     /*
     Void localchoice(List<Hmap> n, p, Aold){
         Hmap bestNeighboor=getBestNeighboor(n)
