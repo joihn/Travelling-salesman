@@ -21,11 +21,11 @@
 *.pdf
 *.zip
 
-rabbits/instructions.txt
-rabbits/report_rabbits.tex
+0-rabbits/instructions.txt
+0-rabbits/report_rabbits.tex
 
-reactive/history.xml
-reactive/reactive.iml
+1-reactive/history.xml
+1-reactive/reactive.iml
 
 assignments/
 
