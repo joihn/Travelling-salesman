@@ -32,7 +32,7 @@ public class Centralized implements CentralizedBehavior {
     private long timeout_setup;
     private long timeout_plan;
     private double p;
-
+    
     @Override
     public void setup(Topology topology, TaskDistribution distribution,
             Agent agent) {
@@ -55,6 +55,11 @@ public class Centralized implements CentralizedBehavior {
         this.topology = topology;
         this.distribution = distribution;
         this.agent = agent;
+
+
+
+
+
     }
 
     @Override
