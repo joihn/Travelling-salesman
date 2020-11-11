@@ -1,5 +1,6 @@
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
+import logist.task.Task;
 import logist.task.TaskSet;
 import logist.topology.Topology.City;
 
@@ -16,8 +17,41 @@ public class STL {
     public long iterationsToImprovement = 0;
     public int iterFarFromBest=0;
 
-    public STL(TaskSet taskSet, List<Vehicle> allVehicles, long timeout_plan, double p_) {
-        /* pseudo code:
+
+    // Classic start
+//    public STL(TaskSet taskSet, List<Vehicle> allVehicles, long timeout_plan, double p_) {
+//        /* pseudo code:
+//            A = initializeA(taskset, vehicleset)
+//
+//            while(!goodEnough()) // combine cost improvement between A and Aold
+//                Aold = A;
+//                N = generateNeighbours(Aold) // generate all neighbors by copy!
+//                A = localChoice(N,A,p)  // select best neighbour with probability p, else select A
+//            return A
+//         */
+//
+//        long startTime=System.currentTimeMillis();
+//        this.p=p_;
+//        // initialization
+//        A = new CentralPlan(allVehicles,taskSet);
+//        Aold = new CentralPlan(A);
+//        if (!A.isFeasible){
+//            System.out.println("WARNING: your problem is not feasible");
+//        }
+//        int iter=0;
+//        while(stillImproving(A) && (System.currentTimeMillis()-startTime+1000)<timeout_plan) {
+//
+//            Aold = new CentralPlan(A);
+//            //System.out.println("will genrate neighbboor, iter: "+iter);
+//            List<CentralPlan> N = generateNeighbour(Aold, allVehicles);
+//            //System.out.println("will do localChoice, iter: "+iter);
+//            A = localChoice(N, Aold, p);
+//            iter++;
+//        }
+//    }
+
+    public STL(List<Task> taskList, List<Vehicle> allVehicles, long timeout_plan, double p_){
+               /* pseudo code:
             A = initializeA(taskset, vehicleset)
 
             while(!goodEnough()) // combine cost improvement between A and Aold
@@ -27,10 +61,11 @@ public class STL {
             return A
          */
 
+        // same constructor as with TaskSets, but with Lists
         long startTime=System.currentTimeMillis();
         this.p=p_;
         // initialization
-        A = new CentralPlan(allVehicles,taskSet);
+        A = new CentralPlan(allVehicles,taskList);
         Aold = new CentralPlan(A);
         if (!A.isFeasible){
             System.out.println("WARNING: your problem is not feasible");
@@ -46,6 +81,44 @@ public class STL {
             iter++;
         }
     }
+
+
+    // WARM START constructor
+    public STL(List<Vehicle> allVehicles, long timeout_plan, double p_, CentralPlan AInit, Task taskToAdd) {
+
+
+        /* pseudo code:
+            A = initializeA(taskset, vehicleset)
+
+            while(!goodEnough()) // combine cost improvement between A and Aold
+                Aold = A;
+                N = generateNeighbours(Aold) // generate all neighbors by copy!
+                A = localChoice(N,A,p)  // select best neighbour with probability p, else select A
+            return A
+         */
+
+        long startTime=System.currentTimeMillis();
+        this.p=p_;
+        // initialization
+//        A = new CentralPlan(allVehicles,taskSet); //TODO implement task adding !
+        A = new CentralPlan(AInit, taskToAdd); // warm start of optimization
+        Aold = new CentralPlan(A);
+        if (!A.isFeasible){
+            System.out.println("WARNING: your problem is not feasible");
+        }
+        int iter=0;
+        while(stillImproving(A) && (System.currentTimeMillis()-startTime+1000)<timeout_plan) {
+
+            Aold = new CentralPlan(A);
+            //System.out.println("will genrate neighbboor, iter: "+iter);
+            List<CentralPlan> N = generateNeighbour(Aold, allVehicles);
+            //System.out.println("will do localChoice, iter: "+iter);
+            A = localChoice(N, Aold, p);
+            iter++;
+        }
+    }
+
+
     /*
     List<Plan> reconstructPlan(CentralPlan A, List<vehicle> vehicles){
         List<Plan> plans = new ArrayList<Plan>();

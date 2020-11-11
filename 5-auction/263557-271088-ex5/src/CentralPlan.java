@@ -15,7 +15,7 @@ public class CentralPlan {
 
     //initialisation
 
-    public CentralPlan(List<Vehicle> allVehicles, TaskSet allTasks){
+    public CentralPlan(List<Vehicle> allVehicles, List<Task> allTasks){
 
         Vehicle biggestVehicle = pickBiggestVehicle(allVehicles);
         isFeasible = true;
@@ -34,9 +34,43 @@ public class CentralPlan {
                     vehiclePlan.add(exTask);
                 }
 
-                content.put(vehicle,vehiclePlan);
+                this.content.put(vehicle,vehiclePlan);
             }
         }
+    }
+    public CentralPlan(CentralPlan AInit, Task taskToAdd){   // HOT START !!
+        //___________deep copy_______________
+        this.isFeasible = AInit.isFeasible;
+        this.content = new HashMap<Vehicle,List<ExTask>>();
+
+        for (Vehicle v: AInit.content.keySet()){ // deep copy
+            //List<ExTask> tempList = new ArrayList<ExTask>(AInit.content.get(v));
+
+            this.content.put(v, new ArrayList<ExTask>( AInit.content.get(v)) );
+        }
+        //___________hot add_______________
+        List<Vehicle> allVehicles = new ArrayList<Vehicle>();
+        allVehicles.addAll(AInit.content.keySet());
+        Vehicle biggestVehicle = pickBiggestVehicle(allVehicles);
+
+        if (biggestVehicle.capacity()<taskToAdd.weight){
+            isFeasible = false;
+        }
+
+
+        List<ExTask> biggestVehicleNewPlan = new ArrayList<ExTask>();
+        // copy the old plan
+        biggestVehicleNewPlan = AInit.content.get(biggestVehicle);
+
+        //add extra task
+        ExTask exTask = new ExTask(taskToAdd, ExTask.ActionType.DELIVERY);
+        biggestVehicleNewPlan.add(0, exTask);
+
+        exTask = new ExTask(taskToAdd, ExTask.ActionType.PICKUP);
+        biggestVehicleNewPlan.add(0, exTask);
+
+        this.content.put(biggestVehicle, biggestVehicleNewPlan);
+
     }
 
     public CentralPlan(CentralPlan Aold){   // constructor for deep copying a centralplan
