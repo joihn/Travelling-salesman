@@ -32,8 +32,9 @@ public class Auction implements AuctionBehavior{
     private long timeout_bid;
     private double p;
     private double profitRatio;
-    private List<CentralPlan> initListAccept;
-    private List<CentralPlan> initListDeny;
+    private List<CentralPlan> warmStartListAccept;
+    private List<CentralPlan> warmStartListDeny;
+
 
 
     private List<Task> wonTasks;
@@ -67,7 +68,26 @@ public class Auction implements AuctionBehavior{
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
         this.profitRatio=1; // todo: maybe increase to 1.1
 
-        Task lolTask = ((DefaultTaskDistribution) distribution).createTask();
+        int nScenarios = 5;  // TODO dont hardcode
+        int horizon = 4; // TODO don't hardcode
+
+        this.warmStartListAccept = new ArrayList<CentralPlan>();
+        this.warmStartListDeny = new ArrayList<CentralPlan>();
+        for (int j=0; j<nScenarios;j++){
+            List<Task> randomTasks = new ArrayList<Task>();
+            do{
+                Task newRandomTask = ((DefaultTaskDistribution) distribution).createTask();
+                if (newRandomTask.weight < CentralPlan.pickBiggestVehicle(agent.vehicles()).capacity()){
+                    randomTasks.add(newRandomTask);
+                }
+            }while(randomTasks.size()<horizon);
+            // TODO maybe avoid inifinite loop
+            CentralPlan initialPlan = new CentralPlan(agent.vehicles(),randomTasks);
+            this.warmStartListAccept.add(initialPlan);
+            this.warmStartListDeny.add(initialPlan);
+        }
+
+
 
 
 
@@ -111,7 +131,11 @@ public class Auction implements AuctionBehavior{
         }
         if (winner==agent.id()){ // we won !
                 this.wonTasks.add(previous);
-                CentralPlan AInitfreshlyCreated = CentralPlan.
+                List<CentralPlan> newWarmupList = new ArrayList<CentralPlan>();
+                for (CentralPlan warmup : this.warmStartListAccept){
+                    newWarmupList.add(new CentralPlan(warmup,previous));
+                }
+                this.warmStartListAccept = newWarmupList;
         }
 
 
