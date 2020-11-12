@@ -1,12 +1,10 @@
 //the list of imports
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import logist.LogistSettings;
-import logist.Measures;
 import logist.behavior.AuctionBehavior;
 import logist.agent.Agent;
 import logist.config.Parsers;
@@ -32,7 +30,7 @@ public class Auction implements AuctionBehavior{
     private long timeout_plan;
     private long timeout_bid;
     private double p;
-    private double profitRatio;
+    private double profitMargin;
     private List<CentralPlan> warmStartListAcceptOld;
     private List<CentralPlan> warmStartListDenyOld;
     private List<CentralPlan> warmStartList;
@@ -66,7 +64,7 @@ public class Auction implements AuctionBehavior{
         // the plan method cannot execute more than timeout_plan milliseconds
         this.timeout_plan = ls.get(LogistSettings.TimeoutKey.PLAN);
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
-        this.profitRatio=1; // todo: maybe increase to 1.1
+        this.profitMargin =1; // todo: maybe increase to 1.1
 
         int nScenarios = 10;  // TODO dont hardcode
         int horizon = 10; // TODO don't hardcode
@@ -138,17 +136,19 @@ public class Auction implements AuctionBehavior{
             double hisBid=bids[Math.abs(this.agent.id()-1)];
             double delta = hisBid-ourBid ; //positive if we won, neg if we lost
             double couldHaveBidded = 0;
+            double oldMarginalCost= ourBid-this.profitMargin;
+
             if (delta > 0) { // increase a lot if we won
-                couldHaveBidded= ourBid + delta*0.75;
+                this.profitMargin += delta*0.5;
             } else {
                 // decrease only a few if we didn't win
-                couldHaveBidded= ourBid + delta*0.4;
+                this.profitMargin += delta*0.75;
             }
 
-            this.profitRatio = couldHaveBidded/ourBid * this.profitRatio;
+            //this.profitMargin = couldHaveBidded/ourBid * this.profitMargin;
 
-            if (this.profitRatio<1){
-                this.profitRatio=1;
+            if (this.profitMargin <0){
+                this.profitMargin = 0;
             }
 
 
@@ -178,8 +178,8 @@ public class Auction implements AuctionBehavior{
 
             double marginalCost= estimateMarginalCost(task);
             System.out.println("                                                             marginalCost: "+ marginalCost);
-            System.out.println("                                                             profitRatio: "+ this.profitRatio);
-            long bid = (long) (marginalCost*this.profitRatio);
+            System.out.println("                                                             profitRatio: "+ this.profitMargin);
+            long bid = (long) (marginalCost+this.profitMargin);
             return bid;
         }
 
