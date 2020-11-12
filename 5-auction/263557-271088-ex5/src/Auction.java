@@ -44,10 +44,9 @@ public class Auction implements AuctionBehavior{
     public void setup(Topology topology, TaskDistribution distribution,
                       Agent agent) {
 
-
         LogistSettings ls = null;
         try {
-            ls = Parsers.parseSettings("config" + File.separator + "settings_default.xml");
+            ls = Parsers.parseSettings("config" + File.separator + "settings_auction.xml");
         }
         catch (Exception exc) {
             System.out.println("There was a problem loading the configuration file.");
@@ -69,11 +68,13 @@ public class Auction implements AuctionBehavior{
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
         this.profitRatio=1; // todo: maybe increase to 1.1
 
-        int nScenarios = 5;  // TODO dont hardcode
-        int horizon = 4; // TODO don't hardcode
+        int nScenarios = 10;  // TODO dont hardcode
+        int horizon = 10; // TODO don't hardcode
 
         this.warmStartListAcceptOld = new ArrayList<CentralPlan>();
         this.warmStartListDenyOld = new ArrayList<CentralPlan>();
+        this.warmStartList = new ArrayList<CentralPlan>();
+
         for (int j=0; j<nScenarios;j++){
             List<Task> randomTasks = new ArrayList<Task>();
             do{
@@ -86,6 +87,7 @@ public class Auction implements AuctionBehavior{
             CentralPlan initialPlan = new CentralPlan(agent.vehicles(),randomTasks);
             this.warmStartListAcceptOld.add(initialPlan);
             this.warmStartListDenyOld.add(initialPlan);
+            this.warmStartList.add(initialPlan);
         }
 
 
@@ -117,11 +119,32 @@ public class Auction implements AuctionBehavior{
  */
 
 
+
+        if (winner == this.agent.id()){
+            System.out.println("                             we WON +++++");
+            System.out.println("                              us:"+ bids[this.agent.id()]);
+            System.out.println("                              opp:" + bids[Math.abs(this.agent.id()-1)]);
+
+
+        }else{
+            System.out.println("we LOST ----");
+            System.out.println("us :"+ bids[this.agent.id()]);
+            System.out.println("opp :" + bids[Math.abs(this.agent.id()-1)]);
+        }
+        System.out.println("-----------------------------------------------------------------------------------------------------------");
+
         if (bids[0]!=null && bids[1]!=null ){ // nobody said  "null"
             double ourBid=bids[this.agent.id()];
             double hisBid=bids[Math.abs(this.agent.id()-1)];
             double delta = hisBid-ourBid ; //positive if we won, neg if we lost
-            double couldHaveBidded= ourBid + delta/2;
+            double couldHaveBidded = 0;
+            if (delta > 0) { // increase a lot if we won
+                couldHaveBidded= ourBid + delta*0.75;
+            } else {
+                // decrease only a few if we didn't win
+                couldHaveBidded= ourBid + delta*0.4;
+            }
+
             this.profitRatio = couldHaveBidded/ourBid * this.profitRatio;
 
             if (this.profitRatio<1){
@@ -152,7 +175,10 @@ public class Auction implements AuctionBehavior{
         {
             return null;
         } else {
+
             double marginalCost= estimateMarginalCost(task);
+            System.out.println("                                                             marginalCost: "+ marginalCost);
+            System.out.println("                                                             profitRatio: "+ this.profitRatio);
             long bid = (long) (marginalCost*this.profitRatio);
             return bid;
         }
@@ -195,11 +221,11 @@ public class Auction implements AuctionBehavior{
 
             marginalCost = (Math.max(scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar,0));
             if ((scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar)<0){
-                System.out.println("the marginal cost is neg ü!!!! ");
+//                System.out.println("the marginal cost is neg !!!! "); //todo check this REALLY !!!!!
             }
             marginalCostTot+=marginalCost;
         }
-        return marginalCostTot/this.warmStartList.size();
+        return marginalCostTot/this.warmStartList.size()*1.1;
     }
 
 

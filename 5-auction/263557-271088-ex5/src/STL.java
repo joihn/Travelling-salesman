@@ -201,12 +201,13 @@ public class STL {
 
 
     public boolean stillImproving(CentralPlan A){
-        double maxIterWithoutImprovmement = 1e7;
+//        double maxIterWithoutImprovmement = 1e7;
+        double maxIterWithoutImprovmement = 1e5; //TODO
         if (this.bestASoFar==null) { //first iteration -> return true
             return true;
         }else {                     // all the other iter
             if (this.iterationsToImprovement>maxIterWithoutImprovmement){
-                System.out.println("Converged due to stopping-criterion");
+//                System.out.println("Converged due to stopping-criterion");
                 return false;
             } else {
                 return true;
