@@ -83,7 +83,7 @@ public class STL {
     }
 
 
-    // WARM START constructor
+    // WARM START constructor                                                               // can be null :)
     public STL(List<Vehicle> allVehicles, long timeout_plan, double p_, CentralPlan AInit, Task taskToAdd) {
 
 
@@ -100,8 +100,12 @@ public class STL {
         long startTime=System.currentTimeMillis();
         this.p=p_;
         // initialization
-//        A = new CentralPlan(allVehicles,taskSet); //TODO implement task adding !
-        A = new CentralPlan(AInit, taskToAdd); // warm start of optimization
+        if (taskToAdd==null){
+            A = new CentralPlan(AInit);
+        }else{
+            A = new CentralPlan(AInit, taskToAdd); // warm start of optimization
+
+        }
         Aold = new CentralPlan(A);
         if (!A.isFeasible){
             System.out.println("WARNING: your problem is not feasible");
@@ -197,12 +201,13 @@ public class STL {
 
 
     public boolean stillImproving(CentralPlan A){
-        double maxIterWithoutImprovmement = 1e7;
+//        double maxIterWithoutImprovmement = 1e7;
+        double maxIterWithoutImprovmement = 1e5; //TODO
         if (this.bestASoFar==null) { //first iteration -> return true
             return true;
         }else {                     // all the other iter
             if (this.iterationsToImprovement>maxIterWithoutImprovmement){
-                System.out.println("Converged due to stopping-criterion");
+//                System.out.println("Converged due to stopping-criterion");
                 return false;
             } else {
                 return true;

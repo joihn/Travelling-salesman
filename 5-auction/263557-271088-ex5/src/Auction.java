@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Random;
 
 import logist.LogistSettings;
-import logist.Measures;
 import logist.behavior.AuctionBehavior;
 import logist.agent.Agent;
 import logist.config.Parsers;
@@ -31,9 +30,10 @@ public class Auction implements AuctionBehavior{
     private long timeout_plan;
     private long timeout_bid;
     private double p;
-    private double profitRatio;
-    private List<CentralPlan> initListAccept;
-    private List<CentralPlan> initListDeny;
+    private double profitMargin;
+    private List<CentralPlan> warmStartListAcceptOld;
+    private List<CentralPlan> warmStartListDenyOld;
+    private List<CentralPlan> warmStartList;
 
 
     private List<Task> wonTasks;
@@ -42,10 +42,9 @@ public class Auction implements AuctionBehavior{
     public void setup(Topology topology, TaskDistribution distribution,
                       Agent agent) {
 
-
         LogistSettings ls = null;
         try {
-            ls = Parsers.parseSettings("config" + File.separator + "settings_default.xml");
+            ls = Parsers.parseSettings("config" + File.separator + "settings_auction.xml");
         }
         catch (Exception exc) {
             System.out.println("There was a problem loading the configuration file.");
@@ -65,9 +64,31 @@ public class Auction implements AuctionBehavior{
         // the plan method cannot execute more than timeout_plan milliseconds
         this.timeout_plan = ls.get(LogistSettings.TimeoutKey.PLAN);
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
-        this.profitRatio=1; // todo: maybe increase to 1.1
+        this.profitMargin =1; // todo: maybe increase to 1.1
 
-        Task lolTask = ((DefaultTaskDistribution) distribution).createTask();
+        int nScenarios = 10;  // TODO dont hardcode
+        int horizon = 10; // TODO don't hardcode
+
+        this.warmStartListAcceptOld = new ArrayList<CentralPlan>();
+        this.warmStartListDenyOld = new ArrayList<CentralPlan>();
+        this.warmStartList = new ArrayList<CentralPlan>();
+
+        for (int j=0; j<nScenarios;j++){
+            List<Task> randomTasks = new ArrayList<Task>();
+            do{
+                Task newRandomTask = ((DefaultTaskDistribution) distribution).createTask();
+                if (newRandomTask.weight < CentralPlan.pickBiggestVehicle(agent.vehicles()).capacity()){
+                    randomTasks.add(newRandomTask);
+                }
+            }while(randomTasks.size()<horizon);
+            // TODO maybe avoid inifinite loop
+            CentralPlan initialPlan = new CentralPlan(agent.vehicles(),randomTasks);
+            this.warmStartListAcceptOld.add(initialPlan);
+            this.warmStartListDenyOld.add(initialPlan);
+            this.warmStartList.add(initialPlan);
+        }
+
+
 
 
 
@@ -96,22 +117,52 @@ public class Auction implements AuctionBehavior{
  */
 
 
+
+        if (winner == this.agent.id()){
+            System.out.println("                             we WON +++++");
+            System.out.println("                              us:"+ bids[this.agent.id()]);
+            System.out.println("                              opp:" + bids[Math.abs(this.agent.id()-1)]);
+
+
+        }else{
+            System.out.println("we LOST ----");
+            System.out.println("us :"+ bids[this.agent.id()]);
+            System.out.println("opp :" + bids[Math.abs(this.agent.id()-1)]);
+        }
+        System.out.println("-----------------------------------------------------------------------------------------------------------");
+
         if (bids[0]!=null && bids[1]!=null ){ // nobody said  "null"
             double ourBid=bids[this.agent.id()];
             double hisBid=bids[Math.abs(this.agent.id()-1)];
             double delta = hisBid-ourBid ; //positive if we won, neg if we lost
-            double couldHaveBidded= ourBid + delta/2;
-            this.profitRatio = couldHaveBidded/ourBid * this.profitRatio;
+            double couldHaveBidded = 0;
+            double oldMarginalCost= ourBid-this.profitMargin;
 
-            if (this.profitRatio<1){
-                this.profitRatio=1;
+            if (delta > 0) { // increase a lot if we won
+                this.profitMargin += delta*0.5;
+            } else {
+                // decrease only a few if we didn't win
+                this.profitMargin += delta*0.75;
+            }
+
+            //this.profitMargin = couldHaveBidded/ourBid * this.profitMargin;
+
+            if (this.profitMargin <0){
+                this.profitMargin = 0;
             }
 
 
         }
         if (winner==agent.id()){ // we won !
                 this.wonTasks.add(previous);
-                CentralPlan AInitfreshlyCreated = CentralPlan.
+                this.warmStartList=this.warmStartListAcceptOld;
+//                List<CentralPlan> newWarmupList = new ArrayList<CentralPlan>();
+//                for (CentralPlan warmup : this.warmStartListAccept){
+//                    newWarmupList.add(new CentralPlan(warmup,previous));
+//                }
+//                this.warmStartListAccept = newWarmupList;
+        }else{
+            this.warmStartList=this.warmStartListDenyOld;
         }
 
 
@@ -125,7 +176,13 @@ public class Auction implements AuctionBehavior{
             return null;
         } else {
 
+            double marginalCost= estimateMarginalCost(task);
+            System.out.println("                                                             marginalCost: "+ marginalCost);
+            System.out.println("                                                             profitRatio: "+ this.profitMargin);
+            long bid = (long) (marginalCost+this.profitMargin);
+            return bid;
         }
+
 /*____________________________________________________template____________________________________________________
         long distanceTask = task.pickupCity.distanceUnitsTo(task.deliveryCity);
         long distanceSum = distanceTask
@@ -149,7 +206,27 @@ public class Auction implements AuctionBehavior{
 
 
     }
+    private double estimateMarginalCost(Task task) {
 
+        List<STL> scenarioList = new ArrayList<STL>();
+
+        double marginalCost;
+        double marginalCostTot=0;
+        for (int i=0; i<this.warmStartList.size(); i++){
+            CentralPlan scenario = this.warmStartList.get(i);
+            STL scenarioAccept = new STL(this.agent.vehicles(), this.timeout_bid, this.p, scenario, task);
+            this.warmStartListAcceptOld.set(i,scenarioAccept.bestASoFar);
+            STL scenarioDeny = new STL(this.agent.vehicles(), this.timeout_bid, this.p, scenario, null);
+            this.warmStartListDenyOld.set(i,scenarioDeny.bestASoFar);
+
+            marginalCost = (Math.max(scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar,0));
+            if ((scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar)<0){
+//                System.out.println("the marginal cost is neg !!!! "); //todo check this REALLY !!!!!
+            }
+            marginalCostTot+=marginalCost;
+        }
+        return marginalCostTot/this.warmStartList.size()*1.1;
+    }
 
 
 

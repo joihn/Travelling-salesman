@@ -85,7 +85,7 @@ public class CentralPlan {
     }
 
 
-    private Vehicle pickBiggestVehicle(List<Vehicle> allVehicles){
+    public static Vehicle pickBiggestVehicle(List<Vehicle> allVehicles){
         Vehicle biggestVehicle = null;
         double maxCapacity = 0;
         for(Vehicle vehicle : allVehicles){
