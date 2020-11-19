@@ -223,9 +223,9 @@ public class Auction implements AuctionBehavior{
         List<Double> marginalCostList = new ArrayList<Double>();
         for (int i=0; i<this.warmStartList.size(); i++){
             CentralPlan scenario = this.warmStartList.get(i);
-            STL scenarioDeny = new STL(this.agent.vehicles(), this.timeout_bid/(2*nScenarios)-100, this.p, scenario, null);
+            STL scenarioDeny = new STL(this.agent.vehicles(), this.timeout_bid/(2*this.nScenarios)-100, this.p, scenario, null);
             this.warmStartListDenyOld.set(i,scenarioDeny.bestASoFar);
-            STL scenarioAccept = new STL(this.agent.vehicles(), this.timeout_bid/(2*nScenarios)-100, this.p, scenario, task);
+            STL scenarioAccept = new STL(this.agent.vehicles(), this.timeout_bid/(2*this.nScenarios)-100, this.p, scenario, task);
             this.warmStartListAcceptOld.set(i,scenarioAccept.bestASoFar);
 
 

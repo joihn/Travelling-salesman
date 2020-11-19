@@ -112,7 +112,7 @@ public class STL {
             System.out.println("WARNING: your problem is not feasible");
         }
         int iter=0;
-        while(stillImproving(A) && (System.currentTimeMillis()-startTime+1000)<timeout_plan) {
+        while(stillImproving(A) && (System.currentTimeMillis()-startTime+500)<timeout_plan) {
 
             Aold = new CentralPlan(A);
             //System.out.println("will genrate neighbboor, iter: "+iter);
@@ -121,8 +121,8 @@ public class STL {
             A = localChoice(N, Aold, p);
             iter++;
         }
-        if ((System.currentTimeMillis()-startTime+1000)<timeout_plan){
-            System.out.println("Optimization interupted due to bid timeout");
+        if ((System.currentTimeMillis()-startTime+500)>timeout_plan){
+            System.out.println("Optimization interupted due to bid timeout, we had " + timeout_plan + " ms for this specific scenario and it was not enough :( ");
         }
 
     }
