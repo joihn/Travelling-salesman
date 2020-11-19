@@ -63,9 +63,9 @@ public class Auction implements AuctionBehavior{
         // the plan method cannot execute more than timeout_plan milliseconds
         this.timeout_plan = ls.get(LogistSettings.TimeoutKey.PLAN);
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
-        this.profitMargin =300; // TODO grid search
+        this.profitMargin =0; // TODO grid search
         //System.out.println("Timeout bid is: " + this.timeout_bid);
-        this.nScenarios = 5;  // TODO grid search
+        this.nScenarios = 7;  // TODO grid search
         this.horizon = 4; // TODO grid search
 
         this.warmStartListAcceptOld = new ArrayList<CentralPlan>();
@@ -131,7 +131,7 @@ public class Auction implements AuctionBehavior{
             System.out.println("us :"+ bids[this.agent.id()]);
             System.out.println("opp :" + bids[Math.abs(this.agent.id()-1)]);
         }
-        System.out.println("-----------------------------------------------------------------------------------------------------------  ");
+        System.out.println("----------------------------------------------------------------------------------------------------------- with sigma ");
 
         if (bids[0]!=null && bids[1]!=null ){ // nobody said  "null"
             double ourBid=bids[this.agent.id()];
@@ -241,7 +241,7 @@ public class Auction implements AuctionBehavior{
         double mean = tot/(double) marginalCostList.size();
 
 
-        return mean + std(marginalCostList, mean);
+        return mean + 0*std(marginalCostList, mean); // TODO remove this
     }
 
 

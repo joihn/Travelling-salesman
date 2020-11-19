@@ -123,6 +123,8 @@ public class STL {
         }
         if (!((System.currentTimeMillis()-startTime+500)<timeout_plan)){
             System.out.println("Optimization interupted due to bid timeout");
+        }else if (taskToAdd!=null){
+            System.out.println("adding a new task, stopped because converged :), it took  "+ (System.currentTimeMillis()-startTime) );
         }
 
     }
@@ -207,7 +209,7 @@ public class STL {
 
     public boolean stillImproving(CentralPlan A){
 //        double maxIterWithoutImprovmement = 1e7;
-        double maxIterWithoutImprovmement = 1e5; //TODO
+        double maxIterWithoutImprovmement = 1e6; //TODO
         if (this.bestASoFar==null) { //first iteration -> return true
             return true;
         }else {                     // all the other iter

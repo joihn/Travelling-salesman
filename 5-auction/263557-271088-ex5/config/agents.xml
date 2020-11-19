@@ -12,6 +12,10 @@
 		<set class-path="bin/"/>
 		<set class-name="AuctionSmart.Auction"/>
 	</agent>
+	<agent name="auction-nosigma">
+		<set class-path="bin/"/>
+		<set class-name="AuctionSmartNoSigma.Auction"/>
+	</agent>
 	<agent name="auction-JELENA">
 		<set class-path="bin/"/>
 		<set class-name="jelenaPACK.CentralizedAuctionAgent"/>
