@@ -10,7 +10,7 @@
 <!--	</agent>-->
 	<agent name="auction-main">
 		<set class-path="bin/"/>
-		<set class-name="Auction"/>
+		<set class-name="AuctionSmart.Auction"/>
 	</agent>
 	
 </agents>

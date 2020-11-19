@@ -1,7 +1,8 @@
+package AuctionSmart;
+
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
-import logist.task.TaskSet;
 import logist.topology.Topology.City;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class STL {
 
 
     // Classic start
-//    public STL(TaskSet taskSet, List<Vehicle> allVehicles, long timeout_plan, double p_) {
+//    public AuctionSmart.STL(TaskSet taskSet, List<Vehicle> allVehicles, long timeout_plan, double p_) {
 //        /* pseudo code:
 //            A = initializeA(taskset, vehicleset)
 //
@@ -33,17 +34,17 @@ public class STL {
 //        long startTime=System.currentTimeMillis();
 //        this.p=p_;
 //        // initialization
-//        A = new CentralPlan(allVehicles,taskSet);
-//        Aold = new CentralPlan(A);
+//        A = new AuctionSmart.CentralPlan(allVehicles,taskSet);
+//        Aold = new AuctionSmart.CentralPlan(A);
 //        if (!A.isFeasible){
 //            System.out.println("WARNING: your problem is not feasible");
 //        }
 //        int iter=0;
 //        while(stillImproving(A) && (System.currentTimeMillis()-startTime+1000)<timeout_plan) {
 //
-//            Aold = new CentralPlan(A);
+//            Aold = new AuctionSmart.CentralPlan(A);
 //            //System.out.println("will genrate neighbboor, iter: "+iter);
-//            List<CentralPlan> N = generateNeighbour(Aold, allVehicles);
+//            List<AuctionSmart.CentralPlan> N = generateNeighbour(Aold, allVehicles);
 //            //System.out.println("will do localChoice, iter: "+iter);
 //            A = localChoice(N, Aold, p);
 //            iter++;
@@ -124,7 +125,7 @@ public class STL {
 
 
     /*
-    List<Plan> reconstructPlan(CentralPlan A, List<vehicle> vehicles){
+    List<Plan> reconstructPlan(AuctionSmart.CentralPlan A, List<vehicle> vehicles){
         List<Plan> plans = new ArrayList<Plan>();
 
         for v in Vehicles
@@ -149,9 +150,9 @@ public class STL {
                     plan.appendMove(nextCity))
 
                 //appending the action
-                if ExTask.actionType =="deliver"
+                if AuctionSmart.ExTask.actionType =="deliver"
                     plan.appendDelivery(Task)
-                elif ExTask.actionType== "pickup"
+                elif AuctionSmart.ExTask.actionType== "pickup"
                     plan.appendPickup(Task)
                 else:
                    print WARING
@@ -175,7 +176,7 @@ public class STL {
                 }else if(t.actionType== ExTask.ActionType.DELIVERY){
                     nextCity=t.task.deliveryCity;
                 }else{
-                    System.out.println("Problem with type of ExTask instance");
+                    System.out.println("Problem with type of AuctionSmart.ExTask instance");
                 }
                 // finding the path to this city
                 List<City> path= currentCity.pathTo(nextCity);

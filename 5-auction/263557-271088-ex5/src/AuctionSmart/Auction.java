@@ -1,4 +1,4 @@
-//the list of imports
+package AuctionSmart;//the list of imports
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,6 @@ import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
-import logist.topology.Topology.City;
 
 import logist.task.DefaultTaskDistribution;;
 
@@ -66,8 +65,8 @@ public class Auction implements AuctionBehavior{
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
         this.profitMargin =300; // TODO grid search
 
-        this.nScenarios = 10;  // TODO grid search
-        this.horizon = 10; // TODO grid search
+        this.nScenarios = 14;  // TODO grid search
+        this.horizon = 4; // TODO grid search
 
         this.warmStartListAcceptOld = new ArrayList<CentralPlan>();
         this.warmStartListDenyOld = new ArrayList<CentralPlan>();
@@ -159,9 +158,9 @@ public class Auction implements AuctionBehavior{
         if (winner==agent.id()){ // we won !
                 this.wonTasks.add(previous);
                 this.warmStartList=this.warmStartListAcceptOld;
-//                List<CentralPlan> newWarmupList = new ArrayList<CentralPlan>();
-//                for (CentralPlan warmup : this.warmStartListAccept){
-//                    newWarmupList.add(new CentralPlan(warmup,previous));
+//                List<AuctionSmart.CentralPlan> newWarmupList = new ArrayList<AuctionSmart.CentralPlan>();
+//                for (AuctionSmart.CentralPlan warmup : this.warmStartListAccept){
+//                    newWarmupList.add(new AuctionSmart.CentralPlan(warmup,previous));
 //                }
 //                this.warmStartListAccept = newWarmupList;
         }else{
@@ -221,6 +220,7 @@ public class Auction implements AuctionBehavior{
 
         double marginalCost;
         double marginalCostTot=0;
+        List<Double> marginalCostList = new ArrayList<Double>();
         for (int i=0; i<this.warmStartList.size(); i++){
             CentralPlan scenario = this.warmStartList.get(i);
             STL scenarioAccept = new STL(this.agent.vehicles(), this.timeout_bid, this.p, scenario, task);
@@ -230,13 +230,45 @@ public class Auction implements AuctionBehavior{
 
             marginalCost = (Math.max(scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar,0));
             if ((scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar)<0){
-//                System.out.println("the marginal cost is neg !!!! "); //todo check this REALLY !!!!!
+                System.out.println("the marginal cost is neg !!!! "); //todo check this REALLY !!!!!
             }
-            marginalCostTot+=marginalCost;
+            marginalCostList.add(marginalCost);
         }
-        return marginalCostTot/this.warmStartList.size()*1.1;
+
+        double tot=0;
+        for (double elem: marginalCostList){
+            tot+=elem;
+        }
+        double mean = tot/(double) marginalCostList.size();
+
+
+        return mean + std(marginalCostList, mean);
     }
 
+
+
+    public static double std (List<Double> table, double mean)
+    {
+        // Step 1:
+        double temp = 0;
+
+        for (int i = 0; i < table.size(); i++)
+        {
+            double val = table.get(i);
+
+            // Step 2:
+            double squrDiffToMean = Math.pow(val - mean, 2);
+
+            // Step 3:
+            temp += squrDiffToMean;
+        }
+
+        // Step 4:
+        double meanOfDiffs = (double) temp / (double) (table.size() -1 );
+
+        // Step 5:
+        return Math.sqrt(meanOfDiffs);
+    }
 
 
     @Override
