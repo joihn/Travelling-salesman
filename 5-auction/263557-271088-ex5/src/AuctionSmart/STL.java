@@ -97,7 +97,7 @@ public class STL {
                 A = localChoice(N,A,p)  // select best neighbour with probability p, else select A
             return A
          */
-
+        //System.out.println("Timeout for a scenario" + timeout_plan);
         long startTime=System.currentTimeMillis();
         this.p=p_;
         // initialization
@@ -121,8 +121,8 @@ public class STL {
             A = localChoice(N, Aold, p);
             iter++;
         }
-        if ((System.currentTimeMillis()-startTime+500)>timeout_plan){
-            System.out.println("Optimization interupted due to bid timeout, we had " + timeout_plan + " ms for this specific scenario and it was not enough :( ");
+        if (!((System.currentTimeMillis()-startTime+500)<timeout_plan)){
+            System.out.println("Optimization interupted due to bid timeout");
         }
 
     }
