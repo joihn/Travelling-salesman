@@ -1,6 +1,7 @@
+package AuctionSmart;
+
 import logist.simulation.Vehicle;
 import logist.task.Task;
-import logist.task.TaskSet;
 import logist.topology.Topology;
 
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class CentralPlan {
         this.content = new HashMap<Vehicle,List<ExTask>>();
 
         for (Vehicle v: AInit.content.keySet()){ // deep copy
-            //List<ExTask> tempList = new ArrayList<ExTask>(AInit.content.get(v));
+            //List<AuctionSmart.ExTask> tempList = new ArrayList<AuctionSmart.ExTask>(AInit.content.get(v));
 
             this.content.put(v, new ArrayList<ExTask>( AInit.content.get(v)) );
         }
@@ -78,7 +79,7 @@ public class CentralPlan {
         this.content = new HashMap<Vehicle,List<ExTask>>();
 
         for (Vehicle v: Aold.content.keySet()){ // deep copy
-            //List<ExTask> tempList = new ArrayList<ExTask>(Aold.content.get(v));
+            //List<AuctionSmart.ExTask> tempList = new ArrayList<AuctionSmart.ExTask>(Aold.content.get(v));
 
             this.content.put(v, new ArrayList<ExTask>( Aold.content.get(v)) );
         }
@@ -122,7 +123,7 @@ public class CentralPlan {
         // pass the first task from v1 to v2
         // will be called only for v1 with nonempty task set
         CentralPlan Anew = new CentralPlan(A);
-        ExTask tmpPickup = Anew.content.get(v1).remove(0); // get ExTask object (should be Pickup)
+        ExTask tmpPickup = Anew.content.get(v1).remove(0); // get AuctionSmart.ExTask object (should be Pickup)
         ExTask tmpDeliver = null;
         for (int i=0; i < Anew.content.get(v1).size();i++){
             if (Anew.content.get(v1).get(i).task == tmpPickup.task){
@@ -200,7 +201,7 @@ public class CentralPlan {
     public CentralPlan swapTask(CentralPlan A, Vehicle v1, int idx1, int idx2){
         CentralPlan Anew = new CentralPlan(A);
 
-        ExTask tmp = Anew.content.get(v1).get(idx1); // get ExTask object (should be Pickup)
+        ExTask tmp = Anew.content.get(v1).get(idx1); // get AuctionSmart.ExTask object (should be Pickup)
         Anew.content.get(v1).set(idx1,Anew.content.get(v1).get(idx2));
         Anew.content.get(v1).set(idx2,tmp);
         return Anew;

@@ -1,3 +1,5 @@
+package AuctionSmart;
+
 import logist.task.Task;
 
 public class ExTask {

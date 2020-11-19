@@ -1,4 +1,4 @@
-//the list of imports
+package AuctionSmart;//the list of imports
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,6 @@ import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
-import logist.topology.Topology.City;
 
 import logist.task.DefaultTaskDistribution;;
 
@@ -24,8 +23,8 @@ public class Auction implements AuctionBehavior{
     private TaskDistribution distribution;
     private Agent agent;
     private Random random;
-    private Vehicle vehicle;
-    private City currentCity;
+
+
     private long timeout_setup;
     private long timeout_plan;
     private long timeout_bid;
@@ -34,7 +33,8 @@ public class Auction implements AuctionBehavior{
     private List<CentralPlan> warmStartListAcceptOld;
     private List<CentralPlan> warmStartListDenyOld;
     private List<CentralPlan> warmStartList;
-
+    private int nScenarios;
+    private int horizon;
 
     private List<Task> wonTasks;
 
@@ -53,10 +53,9 @@ public class Auction implements AuctionBehavior{
         this.topology = topology;
         this.distribution = distribution;
         this.agent = agent;
-        this.vehicle = agent.vehicles().get(0); //TODO modifying, we dont' want only 1 vehicle !
-        this.currentCity = vehicle.homeCity();
+
         this.p=0.3;
-        long seed = -9019554669489983951L * currentCity.hashCode() * agent.id();
+        long seed = -9019554669489983951L * agent.vehicles().get(0).homeCity().hashCode() * agent.id();
         this.random = new Random(seed);
         this.wonTasks= new ArrayList<Task>();
 
@@ -64,10 +63,10 @@ public class Auction implements AuctionBehavior{
         // the plan method cannot execute more than timeout_plan milliseconds
         this.timeout_plan = ls.get(LogistSettings.TimeoutKey.PLAN);
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
-        this.profitMargin =1; // todo: maybe increase to 1.1
+        this.profitMargin =300; // TODO grid search
 
-        int nScenarios = 10;  // TODO dont hardcode
-        int horizon = 10; // TODO don't hardcode
+        this.nScenarios = 14;  // TODO grid search
+        this.horizon = 4; // TODO grid search
 
         this.warmStartListAcceptOld = new ArrayList<CentralPlan>();
         this.warmStartListDenyOld = new ArrayList<CentralPlan>();
@@ -75,21 +74,24 @@ public class Auction implements AuctionBehavior{
 
         for (int j=0; j<nScenarios;j++){
             List<Task> randomTasks = new ArrayList<Task>();
+            int iter=0;
             do{
                 Task newRandomTask = ((DefaultTaskDistribution) distribution).createTask();
                 if (newRandomTask.weight < CentralPlan.pickBiggestVehicle(agent.vehicles()).capacity()){
                     randomTasks.add(newRandomTask);
                 }
+                if (iter>1e4){ // avoid infinite loop
+                    System.out.println("!!!!!!! broke out of inf loop !!!!!!");
+                    break;
+                }
+                iter++;
             }while(randomTasks.size()<horizon);
-            // TODO maybe avoid inifinite loop
+
             CentralPlan initialPlan = new CentralPlan(agent.vehicles(),randomTasks);
             this.warmStartListAcceptOld.add(initialPlan);
             this.warmStartListDenyOld.add(initialPlan);
             this.warmStartList.add(initialPlan);
         }
-
-
-
 
 
 
@@ -129,7 +131,7 @@ public class Auction implements AuctionBehavior{
             System.out.println("us :"+ bids[this.agent.id()]);
             System.out.println("opp :" + bids[Math.abs(this.agent.id()-1)]);
         }
-        System.out.println("-----------------------------------------------------------------------------------------------------------");
+        System.out.println("-----------------------------------------------------------------------------------------------------------  ");
 
         if (bids[0]!=null && bids[1]!=null ){ // nobody said  "null"
             double ourBid=bids[this.agent.id()];
@@ -138,11 +140,11 @@ public class Auction implements AuctionBehavior{
             double couldHaveBidded = 0;
             double oldMarginalCost= ourBid-this.profitMargin;
 
-            if (delta > 0) { // increase a lot if we won
-                this.profitMargin += delta*0.5;
+            if (delta > 0) { //  we won
+                this.profitMargin += delta*0.1;
             } else {
-                // decrease only a few if we didn't win
-                this.profitMargin += delta*0.75;
+                // we loosw
+                this.profitMargin += delta*0.1;
             }
 
             //this.profitMargin = couldHaveBidded/ourBid * this.profitMargin;
@@ -156,9 +158,9 @@ public class Auction implements AuctionBehavior{
         if (winner==agent.id()){ // we won !
                 this.wonTasks.add(previous);
                 this.warmStartList=this.warmStartListAcceptOld;
-//                List<CentralPlan> newWarmupList = new ArrayList<CentralPlan>();
-//                for (CentralPlan warmup : this.warmStartListAccept){
-//                    newWarmupList.add(new CentralPlan(warmup,previous));
+//                List<AuctionSmart.CentralPlan> newWarmupList = new ArrayList<AuctionSmart.CentralPlan>();
+//                for (AuctionSmart.CentralPlan warmup : this.warmStartListAccept){
+//                    newWarmupList.add(new AuctionSmart.CentralPlan(warmup,previous));
 //                }
 //                this.warmStartListAccept = newWarmupList;
         }else{
@@ -171,15 +173,21 @@ public class Auction implements AuctionBehavior{
     @Override
     public Long askPrice(Task task) { //= compute Bid
 
-        if (vehicle.capacity() < task.weight) //check biggest vihcile instead !
+        Vehicle biggestVehicle = CentralPlan.pickBiggestVehicle(this.agent.vehicles());
+
+        if (biggestVehicle.capacity() < task.weight)
         {
             return null;
         } else {
-
+            long time_start = System.currentTimeMillis();
             double marginalCost= estimateMarginalCost(task);
             System.out.println("                                                             marginalCost: "+ marginalCost);
-            System.out.println("                                                             profitRatio: "+ this.profitMargin);
+            System.out.println("                                                             profitMargin: "+ this.profitMargin);
             long bid = (long) (marginalCost+this.profitMargin);
+
+            long time_end = System.currentTimeMillis();
+
+            System.out.println("                                                                                                             nScenario: " + this.nScenarios + "; horizon: " + this.horizon    +"; time: " + (time_end - time_start)/1000 );
             return bid;
         }
 
@@ -212,6 +220,7 @@ public class Auction implements AuctionBehavior{
 
         double marginalCost;
         double marginalCostTot=0;
+        List<Double> marginalCostList = new ArrayList<Double>();
         for (int i=0; i<this.warmStartList.size(); i++){
             CentralPlan scenario = this.warmStartList.get(i);
             STL scenarioAccept = new STL(this.agent.vehicles(), this.timeout_bid, this.p, scenario, task);
@@ -221,13 +230,45 @@ public class Auction implements AuctionBehavior{
 
             marginalCost = (Math.max(scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar,0));
             if ((scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar)<0){
-//                System.out.println("the marginal cost is neg !!!! "); //todo check this REALLY !!!!!
+                System.out.println("the marginal cost is neg !!!! "); //todo check this REALLY !!!!!
             }
-            marginalCostTot+=marginalCost;
+            marginalCostList.add(marginalCost);
         }
-        return marginalCostTot/this.warmStartList.size()*1.1;
+
+        double tot=0;
+        for (double elem: marginalCostList){
+            tot+=elem;
+        }
+        double mean = tot/(double) marginalCostList.size();
+
+
+        return mean + std(marginalCostList, mean);
     }
 
+
+
+    public static double std (List<Double> table, double mean)
+    {
+        // Step 1:
+        double temp = 0;
+
+        for (int i = 0; i < table.size(); i++)
+        {
+            double val = table.get(i);
+
+            // Step 2:
+            double squrDiffToMean = Math.pow(val - mean, 2);
+
+            // Step 3:
+            temp += squrDiffToMean;
+        }
+
+        // Step 4:
+        double meanOfDiffs = (double) temp / (double) (table.size() -1 );
+
+        // Step 5:
+        return Math.sqrt(meanOfDiffs);
+    }
 
 
     @Override
