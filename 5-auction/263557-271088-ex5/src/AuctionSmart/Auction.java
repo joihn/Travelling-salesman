@@ -64,8 +64,8 @@ public class Auction implements AuctionBehavior{
         this.timeout_plan = ls.get(LogistSettings.TimeoutKey.PLAN);
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
         this.profitMargin =300; // TODO grid search
-        System.out.println("Timeout bid is: " + this.timeout_bid);
-        this.nScenarios = 14;  // TODO grid search
+        //System.out.println("Timeout bid is: " + this.timeout_bid);
+        this.nScenarios = 5;  // TODO grid search
         this.horizon = 4; // TODO grid search
 
         this.warmStartListAcceptOld = new ArrayList<CentralPlan>();
@@ -210,24 +210,22 @@ public class Auction implements AuctionBehavior{
 			#if = 1, then no profit, but no loss
 	bid= profitRatio * marginalCostUs
 */
-
-
-
     }
+
     private double estimateMarginalCost(Task task) {
 
         List<STL> scenarioList = new ArrayList<STL>();
-
+        System.out.println("time to optimize:"+ this.timeout_bid/(double)this.nScenarios);
         double marginalCost;
         double marginalCostTot=0;
         List<Double> marginalCostList = new ArrayList<Double>();
         for (int i=0; i<this.warmStartList.size(); i++){
             CentralPlan scenario = this.warmStartList.get(i);
-            STL scenarioDeny = new STL(this.agent.vehicles(), this.timeout_bid/(2*this.nScenarios)-100, this.p, scenario, null);
+            long timePerScenario = this.timeout_bid/this.nScenarios;
+            STL scenarioDeny = new STL(this.agent.vehicles(), (long)(0.25*(double)timePerScenario-100), this.p, scenario, null);
             this.warmStartListDenyOld.set(i,scenarioDeny.bestASoFar);
-            STL scenarioAccept = new STL(this.agent.vehicles(), this.timeout_bid/(2*this.nScenarios)-100, this.p, scenario, task);
+            STL scenarioAccept = new STL(this.agent.vehicles(),(long)(0.75*(double)timePerScenario-100), this.p, scenario, task);
             this.warmStartListAcceptOld.set(i,scenarioAccept.bestASoFar);
-
 
             marginalCost = (Math.max(scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar,0));
             if ((scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar)<0){
