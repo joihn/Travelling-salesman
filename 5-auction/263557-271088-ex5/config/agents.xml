@@ -4,10 +4,10 @@
 	<!-- A list of agents and their behavior classes -->
 	
 	<!-- #### AUCTION AGENTS ### -->
-	<agent name="auction-template">
-		<set class-path="bin/"/>
-		<set class-name="template.AuctionTemplate"/>
-	</agent>
+<!--	<agent name="auction-template">-->
+<!--		<set class-path="bin/"/>-->
+<!--		<set class-name="template.AuctionTemplate"/>-->
+<!--	</agent>-->
 	<agent name="auction-main">
 		<set class-path="bin/"/>
 		<set class-name="Auction"/>
