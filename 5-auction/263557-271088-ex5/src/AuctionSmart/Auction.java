@@ -64,7 +64,7 @@ public class Auction implements AuctionBehavior{
         this.timeout_plan = ls.get(LogistSettings.TimeoutKey.PLAN);
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
         this.profitMargin =300; // TODO grid search
-
+        System.out.println("Timeout bid is: " + this.timeout_bid);
         this.nScenarios = 14;  // TODO grid search
         this.horizon = 4; // TODO grid search
 
@@ -223,10 +223,11 @@ public class Auction implements AuctionBehavior{
         List<Double> marginalCostList = new ArrayList<Double>();
         for (int i=0; i<this.warmStartList.size(); i++){
             CentralPlan scenario = this.warmStartList.get(i);
-            STL scenarioAccept = new STL(this.agent.vehicles(), this.timeout_bid, this.p, scenario, task);
-            this.warmStartListAcceptOld.set(i,scenarioAccept.bestASoFar);
-            STL scenarioDeny = new STL(this.agent.vehicles(), this.timeout_bid, this.p, scenario, null);
+            STL scenarioDeny = new STL(this.agent.vehicles(), this.timeout_bid/(2*nScenarios)-100, this.p, scenario, null);
             this.warmStartListDenyOld.set(i,scenarioDeny.bestASoFar);
+            STL scenarioAccept = new STL(this.agent.vehicles(), this.timeout_bid/(2*nScenarios)-100, this.p, scenario, task);
+            this.warmStartListAcceptOld.set(i,scenarioAccept.bestASoFar);
+
 
             marginalCost = (Math.max(scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar,0));
             if ((scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar)<0){

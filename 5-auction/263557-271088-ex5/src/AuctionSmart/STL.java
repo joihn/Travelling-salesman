@@ -121,6 +121,10 @@ public class STL {
             A = localChoice(N, Aold, p);
             iter++;
         }
+        if ((System.currentTimeMillis()-startTime+1000)<timeout_plan){
+            System.out.println("Optimization interupted due to bid timeout");
+        }
+
     }
 
 
