@@ -24,7 +24,6 @@ public class Auction implements AuctionBehavior{
     private Agent agent;
     private Random random;
 
-
     private long timeout_setup;
     private long timeout_plan;
     private long timeout_bid;
@@ -54,7 +53,7 @@ public class Auction implements AuctionBehavior{
         this.distribution = distribution;
         this.agent = agent;
 
-        this.p=0.3;
+        this.p=0.3;  // exploration parameter for centralized planning
         long seed = -9019554669489983951L * agent.vehicles().get(0).homeCity().hashCode() * agent.id();
         this.random = new Random(seed);
         this.wonTasks= new ArrayList<Task>();
@@ -99,10 +98,6 @@ public class Auction implements AuctionBehavior{
 
     @Override
     public void auctionResult(Task previous, int winner, Long[] bids) {
-    //        if (winner == agent.id()) {
-    //            currentCity = previous.deliveryCity;
-    //        }
-
 
     /*
         if anyOfTheBid = null:
@@ -116,10 +111,10 @@ public class Auction implements AuctionBehavior{
 
             if profitRatio<1: # we want gain !!!
                 profitRatio=1
- */
+    */
 
-
-
+        // Display result of the auction
+        System.out.println("Auction result for task: "+ previous.id);
         if (winner == this.agent.id()){
             System.out.println("                             we WON +++++");
             System.out.println("                              us:"+ bids[this.agent.id()]);
@@ -131,42 +126,32 @@ public class Auction implements AuctionBehavior{
             System.out.println("us :"+ bids[this.agent.id()]);
             System.out.println("opp :" + bids[Math.abs(this.agent.id()-1)]);
         }
-        System.out.println("----------------------------------------------------------------------------------------------------------- with sigma ");
+        System.out.println("-----------------------------------------------------------------------------------------");
 
+        // update the profit margin
         if (bids[0]!=null && bids[1]!=null ){ // nobody said  "null"
             double ourBid=bids[this.agent.id()];
-            double hisBid=bids[Math.abs(this.agent.id()-1)];
-            double delta = hisBid-ourBid ; //positive if we won, neg if we lost
-            double couldHaveBidded = 0;
-            double oldMarginalCost= ourBid-this.profitMargin;
+            double oppBid=bids[Math.abs(this.agent.id()-1)];
 
-            if (delta > 0) { //  we won
-                this.profitMargin += delta*0.1;
-            } else {
-                // we loosw
-                this.profitMargin += delta*0.1;
-            }
+            double delta = oppBid-ourBid; // delta > 0 if task is won, delta < 0 otherwise
 
-            //this.profitMargin = couldHaveBidded/ourBid * this.profitMargin;
+            this.profitMargin += delta*0.1;
+            // increase profit margin
 
+            // assure that profit margin is nonnegative
             if (this.profitMargin <0){
                 this.profitMargin = 0;
             }
-
-
         }
-        if (winner==agent.id()){ // we won !
+
+        // update warm start lists
+        if (winner==agent.id()){ // we wo
                 this.wonTasks.add(previous);
                 this.warmStartList=this.warmStartListAcceptOld;
-//                List<AuctionSmart.CentralPlan> newWarmupList = new ArrayList<AuctionSmart.CentralPlan>();
-//                for (AuctionSmart.CentralPlan warmup : this.warmStartListAccept){
-//                    newWarmupList.add(new AuctionSmart.CentralPlan(warmup,previous));
-//                }
-//                this.warmStartListAccept = newWarmupList;
         }else{
+            // TODO double check if this is necessary...
             this.warmStartList=this.warmStartListDenyOld;
         }
-
 
     }
 
@@ -234,18 +219,18 @@ public class Auction implements AuctionBehavior{
             marginalCostList.add(marginalCost);
         }
 
-        double tot=0;
-        for (double elem: marginalCostList){
-            tot+=elem;
+        // calculate the mean marginal cost
+        double mean=0;
+        for (double mc: marginalCostList){
+            mean += mc/marginalCostList.size();
         }
-        double mean = tot/(double) marginalCostList.size();
-
-
-        return mean + 0*std(marginalCostList, mean); // TODO remove this
+        return mean; // 0*std(marginalCostList, mean); // TODO remove this
     }
 
 
 
+    // TODO std is probably not needed
+    /*
     public static double std (List<Double> table, double mean)
     {
         // Step 1:
@@ -268,38 +253,25 @@ public class Auction implements AuctionBehavior{
         // Step 5:
         return Math.sqrt(meanOfDiffs);
     }
+    */
 
 
     @Override
     public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-/*____________________________________________________template____________________________________________________
-//		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
-
-
-        Plan planVehicle1 = naivePlan(vehicle, tasks);
-
-        List<Plan> plans = new ArrayList<Plan>();
-        plans.add(planVehicle1);
-        while (plans.size() < vehicles.size())
-            plans.add(Plan.EMPTY);
-
-        return plans;
- */
-
-
+        // Generate a centralized plan for all obtained tasks
         long time_start = System.currentTimeMillis();
         System.out.println("Probabilty p is " + this.p);
         List<Task> taskList = new ArrayList<Task>();
         for(Task task : tasks){
             taskList.add(task);
         }
-        STL solution= new STL(taskList, vehicles, this.timeout_plan, this.p); //TODO maybe a warm start
+        STL solution= new STL(taskList, vehicles, this.timeout_plan, this.p);
 
         List<Plan> plans = solution.reconstructPlan(vehicles);
 
         long time_end = System.currentTimeMillis();
         long duration = time_end - time_start;
-        System.out.println("The plan was generated in " + duration + " milliseconds.");
+        System.out.println("Delivery plan was generated in " + duration + " milliseconds.");
 
         return plans;
 

@@ -207,6 +207,7 @@ public class STL {
     }
 
 
+
     public boolean stillImproving(CentralPlan A){
 //        double maxIterWithoutImprovmement = 1e7;
         double maxIterWithoutImprovmement = 1e6; //TODO
