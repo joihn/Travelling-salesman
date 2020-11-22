@@ -8,6 +8,10 @@
 		<set class-path="bin/"/>
 		<set class-name="Random.randomAgent"/>
 	</agent>
+	<agent name="auction-SemiRandom">
+		<set class-path="bin/"/>
+		<set class-name="Random.semiRandomAgent"/>
+	</agent>
 	<agent name="auction-Baseline">
 		<set class-path="bin/"/>
 		<set class-name="AuctionSmart.Auction"/>
