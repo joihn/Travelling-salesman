@@ -34,6 +34,7 @@ public class Auction implements AuctionBehavior{
     private List<CentralPlan> warmStartList;
     private int nScenarios;
     private int horizon;
+    private double adaptationRatio;
     private long timePerGlobalScenario;
     private List<Task> wonTasks;
 
@@ -65,6 +66,7 @@ public class Auction implements AuctionBehavior{
         //System.out.println("Timeout bid is: " + this.timeout_bid);
         this.timePerGlobalScenario=(long) (double) agent.readProperty("timePerGlobalScenario", Double.class, 10000.0);
 
+        this.adaptationRatio = (double) agent.readProperty("adaptationRatio", Double.class, 0.1);
         if (this.timeout_bid<timePerGlobalScenario) // if the user give a REALLY small bidding time
         {
             this.nScenarios = 1;
@@ -101,8 +103,6 @@ public class Auction implements AuctionBehavior{
             this.warmStartListDenyOld.add(initialPlan);
             this.warmStartList.add(initialPlan);
         }
-
-
 
     }
 
@@ -145,7 +145,7 @@ public class Auction implements AuctionBehavior{
 
             double delta = oppBid-ourBid; // delta > 0 if task is won, delta < 0 otherwise
 
-            this.profitMargin += delta*0.1;
+            this.profitMargin += delta*this.adaptationRatio;
             // increase profit margin
 
             // assure that profit margin is nonnegative
@@ -174,6 +174,7 @@ public class Auction implements AuctionBehavior{
         {
             return null;
         } else {
+            // TODO remove all the prints here...
             long time_start = System.currentTimeMillis();
             double marginalCost= estimateMarginalCost(task);
             System.out.println("                                                             marginalCost: "+ marginalCost);

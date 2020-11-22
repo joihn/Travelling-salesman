@@ -15,29 +15,16 @@
 	<agent name="auction-Baseline">
 		<set class-path="bin/"/>
 		<set class-name="AuctionSmart.Auction"/>
-		<set timePerGlobalScenario="10000"/>
-		<set horizon="5"/>
+		<set timePerGlobalScenario="5000"/>
+		<set horizon="4"/>
+		<set adaptationRatio="0.1"/>
 	</agent>
-	<agent name="auction-15000">
+	<agent name="auction-AR0.2">
 		<set class-path="bin/"/>
 		<set class-name="AuctionSmart.Auction"/>
-		<set timePerGlobalScenario="15000"/>
-		<set horizon="5"/>
+		<set timePerGlobalScenario="5000"/>
+		<set horizon="4"/>
+		<set adaptationRatio="0.2"/>
 	</agent>
-	<agent name="auction-20000">
-		<set class-path="bin/"/>
-		<set class-name="AuctionSmart.Auction"/>
-		<set timePerGlobalScenario="20000"/>
-		<set horizon="5"/>
-	</agent>
-	<agent name="auction-25000">
-		<set class-path="bin/"/>
-		<set class-name="AuctionSmart.Auction"/>
-		<set timePerGlobalScenario="25000"/>
-		<set horizon="5"/>
-	</agent>
-	<agent name="auction-JELENA">
-		<set class-path="bin/"/>
-		<set class-name="jelenaPACK.CentralizedAuctionAgent"/>
-	</agent>
+
 </agents>

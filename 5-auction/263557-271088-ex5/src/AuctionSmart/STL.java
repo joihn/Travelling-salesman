@@ -121,12 +121,11 @@ public class STL {
             A = localChoice(N, Aold, p);
             iter++;
         }
-        if (!((System.currentTimeMillis()-startTime+500)<timeout_plan)){
-            System.out.println("Optimization interupted due to bid timeout");
-        }else if (taskToAdd!=null){
-            System.out.println("adding a new task, stopped because converged :), it took  "+ (System.currentTimeMillis()-startTime) );
-        }
-
+//        if (!((System.currentTimeMillis()-startTime+500)<timeout_plan)){
+//            System.out.println("Optimization interupted due to bid timeout");
+//        }else if (taskToAdd!=null){
+//            System.out.println("adding a new task, stopped because converged :), it took  "+ (System.currentTimeMillis()-startTime) );
+//        }
     }
 
 
