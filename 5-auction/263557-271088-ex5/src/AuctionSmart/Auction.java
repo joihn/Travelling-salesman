@@ -34,13 +34,12 @@ public class Auction implements AuctionBehavior{
     private List<CentralPlan> warmStartList;
     private int nScenarios;
     private int horizon;
-
+    private int timePerGlobalScenario;
     private List<Task> wonTasks;
 
     @Override
     public void setup(Topology topology, TaskDistribution distribution,
                       Agent agent) {
-
         LogistSettings ls = null;
         try {
             ls = Parsers.parseSettings("config" + File.separator + "settings_auction.xml");
@@ -64,28 +63,33 @@ public class Auction implements AuctionBehavior{
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
         this.profitMargin =0; // TODO grid search
         //System.out.println("Timeout bid is: " + this.timeout_bid);
-        int TIMEFOR1SCENARIO=1800;
-        this.nScenarios = (int) (timeout_bid/(TIMEFOR1SCENARIO*2*1.2));  // TODO grid search
+        this.timePerGlobalScenario=5*2*1000;
+        this.nScenarios = (int) (timeout_bid/(this.timePerGlobalScenario));  // TODO grid search
+
         System.out.println("n scenario: "+ this.nScenarios);
+
         this.horizon = 4; // TODO grid search
 
         this.warmStartListAcceptOld = new ArrayList<CentralPlan>();
         this.warmStartListDenyOld = new ArrayList<CentralPlan>();
         this.warmStartList = new ArrayList<CentralPlan>();
 
+
+
+
+
+
+        //initilase list of potential future (nScenria of length horizon)
         for (int j=0; j<nScenarios;j++){
             List<Task> randomTasks = new ArrayList<Task>();
-            int iter=0;
+
             do{
                 Task newRandomTask = ((DefaultTaskDistribution) distribution).createTask();
                 if (newRandomTask.weight < CentralPlan.pickBiggestVehicle(agent.vehicles()).capacity()){
                     randomTasks.add(newRandomTask);
                 }
-                if (iter>1e4){ // avoid infinite loop
-                    System.out.println("!!!!!!! broke out of inf loop !!!!!!");
-                    break;
-                }
-                iter++;
+
+
             }while(randomTasks.size()<horizon);
 
             CentralPlan initialPlan = new CentralPlan(agent.vehicles(),randomTasks);
@@ -202,16 +206,27 @@ public class Auction implements AuctionBehavior{
     private double estimateMarginalCost(Task task) {
 
         List<STL> scenarioList = new ArrayList<STL>();
-        System.out.println("time to optimize:"+ this.timeout_bid/(double)this.nScenarios);
+        System.out.println("this.timePerGlobalScenario :"+ this.timePerGlobalScenario);
         double marginalCost;
-        double marginalCostTot=0;
         List<Double> marginalCostList = new ArrayList<Double>();
         for (int i=0; i<this.warmStartList.size(); i++){
             CentralPlan scenario = this.warmStartList.get(i);
-            long timePerScenario = this.timeout_bid/this.nScenarios;
-            STL scenarioDeny = new STL(this.agent.vehicles(), (long)(0.25*(double)timePerScenario-100), this.p, scenario, null);
+
+            int safetyTime = 100;
+            double wAccept=0.0;
+            double wDeny=0.0;
+            if (this.wonTasks.size()==0){ // if init, comput time is split in half
+                wAccept=0.5;
+                wDeny=0.5;
+            }else{
+                wAccept=0.8;
+                wDeny=0.2;      // we already computed a good old optimization before
+            }
+
+            STL scenarioDeny = new STL(this.agent.vehicles(), (long)(wDeny*this.timePerGlobalScenario - safetyTime), this.p, scenario, null);
             this.warmStartListDenyOld.set(i,scenarioDeny.bestASoFar);
-            STL scenarioAccept = new STL(this.agent.vehicles(),(long)(0.75*(double)timePerScenario-100), this.p, scenario, task);
+
+            STL scenarioAccept = new STL(this.agent.vehicles(),(long)(wAccept*this.timePerGlobalScenario -safetyTime), this.p, scenario, task);
             this.warmStartListAcceptOld.set(i,scenarioAccept.bestASoFar);
 
             marginalCost = (Math.max(scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar,0));
