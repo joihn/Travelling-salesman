@@ -71,7 +71,7 @@ public class Auction implements AuctionBehavior{
             this.timePerGlobalScenario = this.timeout_bid;
         } else {
             this.nScenarios = (int) (this.timeout_bid/this.timePerGlobalScenario);
-            this.timePerGlobalScenario = (long) this.timeout_bid/this.nScenarios;
+            this.timePerGlobalScenario = (long) (this.timeout_bid/this.nScenarios);
         }
 
         System.out.println("n scenario: "+ this.nScenarios);
