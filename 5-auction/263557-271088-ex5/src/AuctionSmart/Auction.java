@@ -34,7 +34,7 @@ public class Auction implements AuctionBehavior{
     private List<CentralPlan> warmStartList;
     private int nScenarios;
     private int horizon;
-    private int timePerGlobalScenario;
+    private long timePerGlobalScenario;
     private List<Task> wonTasks;
 
     @Override
@@ -63,11 +63,15 @@ public class Auction implements AuctionBehavior{
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
         this.profitMargin =0; // TODO grid search
         //System.out.println("Timeout bid is: " + this.timeout_bid);
-        this.timePerGlobalScenario=(int) (double) agent.readProperty("timePerGlobalScenario", Double.class, 10000.0);
+        this.timePerGlobalScenario=(long) (double) agent.readProperty("timePerGlobalScenario", Double.class, 10000.0);
 
         if (this.timeout_bid<timePerGlobalScenario) // if the user give a REALLY small bidding time
         {
-            this.nScenarios = (int) (this.timeout_bid/(this.timePerGlobalScenario));  // TODO grid search
+            this.nScenarios = 1;
+            this.timePerGlobalScenario = this.timeout_bid;
+        } else {
+            this.nScenarios = (int) (this.timeout_bid/this.timePerGlobalScenario);
+            this.timePerGlobalScenario = (long) this.timeout_bid/this.nScenarios;
         }
 
         System.out.println("n scenario: "+ this.nScenarios);
@@ -77,10 +81,6 @@ public class Auction implements AuctionBehavior{
         this.warmStartListAcceptOld = new ArrayList<CentralPlan>();
         this.warmStartListDenyOld = new ArrayList<CentralPlan>();
         this.warmStartList = new ArrayList<CentralPlan>();
-
-
-
-
 
 
         //initilase list of potential future (nScenria of length horizon)
