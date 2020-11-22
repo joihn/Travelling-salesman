@@ -72,7 +72,7 @@ public class STL {
             System.out.println("WARNING: your problem is not feasible");
         }
         int iter=0;
-        while(stillImproving(A) && (System.currentTimeMillis()-startTime+1000)<timeout_plan) {
+        while(stillImproving(A, true) && (System.currentTimeMillis()-startTime+1000)<timeout_plan) {
 
             Aold = new CentralPlan(A);
             //System.out.println("will genrate neighbboor, iter: "+iter);
@@ -112,7 +112,7 @@ public class STL {
             System.out.println("WARNING: your problem is not feasible");
         }
         int iter=0;
-        while(stillImproving(A) && (System.currentTimeMillis()-startTime+500)<timeout_plan) {
+        while(stillImproving(A, false) && (System.currentTimeMillis()-startTime+500)<timeout_plan) {
 
             Aold = new CentralPlan(A);
             //System.out.println("will genrate neighbboor, iter: "+iter);
@@ -207,9 +207,13 @@ public class STL {
     }
 
 
-    public boolean stillImproving(CentralPlan A){
-//        double maxIterWithoutImprovmement = 1e7;
-        double maxIterWithoutImprovmement = 1e6; //TODO
+    public boolean stillImproving(CentralPlan A, boolean finalPlan){
+        double maxIterWithoutImprovmement = 0;
+        if (finalPlan){
+             maxIterWithoutImprovmement = 1e7;
+        }else{
+            maxIterWithoutImprovmement = 1e6; //TODO
+        }
         if (this.bestASoFar==null) { //first iteration -> return true
             return true;
         }else {                     // all the other iter

@@ -1,4 +1,4 @@
-package template;
+package Random;
 
 //the list of imports
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import logist.topology.Topology.City;
  *
  */
 @SuppressWarnings("unused")
-public class AuctionTemplate implements AuctionBehavior {
+public class randomAgent implements AuctionBehavior {
 
 	private Topology topology;
 	private TaskDistribution distribution;

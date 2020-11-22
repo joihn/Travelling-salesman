@@ -65,7 +65,9 @@ public class Auction implements AuctionBehavior{
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
         this.profitMargin =0; // TODO grid search
         //System.out.println("Timeout bid is: " + this.timeout_bid);
-        this.nScenarios = 7;  // TODO grid search
+autoNscer        int TIMEFOR1SCENARIO=1800;
+        this.nScenarios = (int) (timeout_bid/(TIMEFOR1SCENARIO*2*1.2));  // TODO grid search
+        System.out.println("n scenario: "+ this.nScenarios);
         this.horizon = 4; // TODO grid search
 
         this.warmStartListAcceptOld = new ArrayList<CentralPlan>();
@@ -131,7 +133,7 @@ public class Auction implements AuctionBehavior{
             System.out.println("us :"+ bids[this.agent.id()]);
             System.out.println("opp :" + bids[Math.abs(this.agent.id()-1)]);
         }
-        System.out.println("----------------------------------------------------------------------------------------------------------- with sigma ");
+        System.out.println("-----------------------------------------------------------------------------------------------------------  ");
 
         if (bids[0]!=null && bids[1]!=null ){ // nobody said  "null"
             double ourBid=bids[this.agent.id()];
