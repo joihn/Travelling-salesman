@@ -210,9 +210,9 @@ public class STL {
     public boolean stillImproving(CentralPlan A, boolean finalPlan){
         double maxIterWithoutImprovmement = 0;
         if (finalPlan){
-             maxIterWithoutImprovmement = 1e7;
+             maxIterWithoutImprovmement = 5e7;
         }else{
-            maxIterWithoutImprovmement = 1e6; //TODO
+            maxIterWithoutImprovmement = 6e6; //TODO
         }
         if (this.bestASoFar==null) { //first iteration -> return true
             return true;

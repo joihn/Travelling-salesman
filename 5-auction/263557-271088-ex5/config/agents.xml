@@ -8,11 +8,30 @@
 		<set class-path="bin/"/>
 		<set class-name="Random.randomAgent"/>
 	</agent>
-	<agent name="auction-main">
+	<agent name="auction-Baseline">
 		<set class-path="bin/"/>
 		<set class-name="AuctionSmart.Auction"/>
+		<set timePerGlobalScenario="10000"/>
+		<set horizon="5"/>
 	</agent>
-
+	<agent name="auction-15000">
+		<set class-path="bin/"/>
+		<set class-name="AuctionSmart.Auction"/>
+		<set timePerGlobalScenario="15000"/>
+		<set horizon="5"/>
+	</agent>
+	<agent name="auction-20000">
+		<set class-path="bin/"/>
+		<set class-name="AuctionSmart.Auction"/>
+		<set timePerGlobalScenario="20000"/>
+		<set horizon="5"/>
+	</agent>
+	<agent name="auction-25000">
+		<set class-path="bin/"/>
+		<set class-name="AuctionSmart.Auction"/>
+		<set timePerGlobalScenario="25000"/>
+		<set horizon="5"/>
+	</agent>
 	<agent name="auction-JELENA">
 		<set class-path="bin/"/>
 		<set class-name="jelenaPACK.CentralizedAuctionAgent"/>

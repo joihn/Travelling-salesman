@@ -63,12 +63,16 @@ public class Auction implements AuctionBehavior{
         this.timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
         this.profitMargin =0; // TODO grid search
         //System.out.println("Timeout bid is: " + this.timeout_bid);
-        this.timePerGlobalScenario=5*2*1000;
-        this.nScenarios = (int) (timeout_bid/(this.timePerGlobalScenario));  // TODO grid search
+        this.timePerGlobalScenario=(int) (double) agent.readProperty("timePerGlobalScenario", Double.class, 10000.0);
+
+        if (this.timeout_bid<timePerGlobalScenario) // if the user give a REALLY small bidding time
+        {
+            this.nScenarios = (int) (this.timeout_bid/(this.timePerGlobalScenario));  // TODO grid search
+        }
 
         System.out.println("n scenario: "+ this.nScenarios);
 
-        this.horizon = 4; // TODO grid search
+        this.horizon = (int) (double) agent.readProperty("horizon", Double.class, 4.0);
 
         this.warmStartListAcceptOld = new ArrayList<CentralPlan>();
         this.warmStartListDenyOld = new ArrayList<CentralPlan>();
