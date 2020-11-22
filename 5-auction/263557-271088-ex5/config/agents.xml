@@ -4,10 +4,10 @@
 	<!-- A list of agents and their behavior classes -->
 	
 	 #### AUCTION AGENTS ###
-	<agent name="auction-Random">
-		<set class-path="bin/"/>
-		<set class-name="Random.randomAgent"/>
-	</agent>
+<!--	<agent name="auction-Random">-->
+<!--		<set class-path="bin/"/>-->
+<!--		<set class-name="Random.randomAgent"/>-->
+<!--	</agent>-->
 	<agent name="auction-Baseline">
 		<set class-path="bin/"/>
 		<set class-name="AuctionSmart.Auction"/>
@@ -32,8 +32,8 @@
 		<set timePerGlobalScenario="25000"/>
 		<set horizon="5"/>
 	</agent>
-	<agent name="auction-JELENA">
-		<set class-path="bin/"/>
-		<set class-name="jelenaPACK.CentralizedAuctionAgent"/>
-	</agent>
+<!--	<agent name="auction-JELENA">-->
+<!--		<set class-path="bin/"/>-->
+<!--		<set class-name="jelenaPACK.CentralizedAuctionAgent"/>-->
+<!--	</agent>-->
 </agents>
