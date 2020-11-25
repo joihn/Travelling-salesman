@@ -4,27 +4,27 @@
 	<!-- A list of agents and their behavior classes -->
 	
 	 #### AUCTION AGENTS ###
-	<agent name="auction-Random">
+	<agent name="auction-random">
 		<set class-path="bin/"/>
 		<set class-name="Random.randomAgent"/>
 	</agent>
-	<agent name="auction-SemiRandom">
+	<agent name="auction-semiRandom">
 		<set class-path="bin/"/>
 		<set class-name="Random.semiRandomAgent"/>
 	</agent>
-	<agent name="auction-Baseline">
+	<agent name="auction-main-11">
 		<set class-path="bin/"/>
 		<set class-name="AuctionSmart.Auction"/>
 		<set timePerGlobalScenario="5000"/>
 		<set horizon="4"/>
 		<set adaptationRatio="0.1"/>
 	</agent>
-	<agent name="auction-AR0.2">
-		<set class-path="bin/"/>
-		<set class-name="AuctionSmart.Auction"/>
-		<set timePerGlobalScenario="5000"/>
-		<set horizon="4"/>
-		<set adaptationRatio="0.2"/>
-	</agent>
+<!--	<agent name="auction-AR0.2">-->
+<!--		<set class-path="bin/"/>-->
+<!--		<set class-name="AuctionSmart.Auction"/>-->
+<!--		<set timePerGlobalScenario="5000"/>-->
+<!--		<set horizon="4"/>-->
+<!--		<set adaptationRatio="0.2"/>-->
+<!--	</agent>-->
 
 </agents>

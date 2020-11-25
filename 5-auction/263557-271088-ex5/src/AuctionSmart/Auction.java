@@ -126,17 +126,17 @@ public class Auction implements AuctionBehavior{
         // Display result of the auction
         System.out.println("Auction result for task: "+ previous.id);
         if (winner == this.agent.id()){
-            System.out.println("                             we WON +++++");
+            System.out.println("                             we WON + ");
             System.out.println("                              us:"+ bids[this.agent.id()]);
             System.out.println("                              opp:" + bids[Math.abs(this.agent.id()-1)]);
 
 
         }else{
-            System.out.println("we LOST ----");
+            System.out.println("we LOST - ");
             System.out.println("us :"+ bids[this.agent.id()]);
             System.out.println("opp :" + bids[Math.abs(this.agent.id()-1)]);
         }
-        System.out.println("-----------------------------------------------------------------------------------------");
+        System.out.println("-------------------------------------------------------------------------------------------------------------");
 
         // update the profit margin
         if (bids[0]!=null && bids[1]!=null ){ // nobody said  "null"
@@ -159,7 +159,7 @@ public class Auction implements AuctionBehavior{
                 this.wonTasks.add(previous);
                 this.warmStartList=this.warmStartListAcceptOld;
         }else{
-            // TODO double check if this is necessary...
+
             this.warmStartList=this.warmStartListDenyOld;
         }
 
@@ -177,13 +177,13 @@ public class Auction implements AuctionBehavior{
             // TODO remove all the prints here...
             long time_start = System.currentTimeMillis();
             double marginalCost= estimateMarginalCost(task);
-            System.out.println("                                                             marginalCost: "+ marginalCost);
-            System.out.println("                                                             profitMargin: "+ this.profitMargin);
+            System.out.println("                                                    marginalCost: "+ marginalCost);
+            System.out.println("                                                    profitMargin: "+ this.profitMargin);
             long bid = (long) (marginalCost+this.profitMargin);
 
             long time_end = System.currentTimeMillis();
 
-            System.out.println("                                                                                                             nScenario: " + this.nScenarios + "; horizon: " + this.horizon    +"; time: " + (time_end - time_start)/1000 );
+            System.out.println("                                                                                             nScenario: " + this.nScenarios + "; horizon: " + this.horizon );
             return bid;
         }
 
@@ -236,7 +236,7 @@ public class Auction implements AuctionBehavior{
 
             marginalCost = (Math.max(scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar,0));
             if ((scenarioAccept.bestCostSoFar-scenarioDeny.bestCostSoFar)<0){
-                System.out.println("the marginal cost is neg !!!! "); //todo check this REALLY !!!!!
+                System.out.println("the marginal cost is neg !!!! ");
             }
             marginalCostList.add(marginalCost);
         }
@@ -246,36 +246,10 @@ public class Auction implements AuctionBehavior{
         for (double mc: marginalCostList){
             mean += mc/marginalCostList.size();
         }
-        return mean; // 0*std(marginalCostList, mean); // TODO remove this
+        return mean; // 0*std(marginalCostList, mean);
     }
 
 
-
-    // TODO std is probably not needed
-    /*
-    public static double std (List<Double> table, double mean)
-    {
-        // Step 1:
-        double temp = 0;
-
-        for (int i = 0; i < table.size(); i++)
-        {
-            double val = table.get(i);
-
-            // Step 2:
-            double squrDiffToMean = Math.pow(val - mean, 2);
-
-            // Step 3:
-            temp += squrDiffToMean;
-        }
-
-        // Step 4:
-        double meanOfDiffs = (double) temp / (double) (table.size() -1 );
-
-        // Step 5:
-        return Math.sqrt(meanOfDiffs);
-    }
-    */
 
 
     @Override
