@@ -1,6 +1,9 @@
 # Travelling-salesman
 This project aims at resolving 4 variants of the [travelling salesman problem](https://en.wikipedia.org/wiki/Travelling_salesman_problem), a famous NP-Hard problem.
 
+
+
+![front](./image/img1.png?raw=true "front")
 ## 1 - Rabbits Intro
 Short Introduction to the simulation platform, simulation a rabbit population VS grass population.
 [Report PDF](./1-rabbits-intro/gardoni-dubach-in/doc/263557-271088-in.pdf)
@@ -15,8 +18,9 @@ The intelligent agent represents a vehicle. It knows in advance the list of task
 [Report PDF](./3-deliberative/263557-271088-ex3/doc/IA_proj_3_Deliberative.pdf)
 ## 4 - Deliberative
 The IA represents a company, having multiple deferent vehicle (some big vehicle, which consume a lot, some more economical small vehicle).
-[Report PDF](./4-centralized/263557-271088-ex4/doc/IA_proj_4_Centralized.pdf)
+
 It knows in advance the list of task that package that have to be delivered, and while taking into account the weight of each, has to find the best way of delivering all those package.
+[Report PDF](./4-centralized/263557-271088-ex4/doc/IA_proj_4_Centralized.pdf)
 
 ## 5 – Market 
 The IA represent a company, having multiple different vehicles. 
