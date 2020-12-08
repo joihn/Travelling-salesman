@@ -3,23 +3,19 @@ This project aims at resolving 4 variants of the [travelling salesman problem](h
 
 ## 1 - Rabbits Intro
 Short Introduction to the simulation platform, simulation a rabbit population VS grass population.
-
-
-<a href="./1-rabbits-intro/gardoni-dubach-in/doc/263557-271088-in.pdf" type="application/pdf">Report PDF</a>
-
-[lol](./1-rabbits-intro/gardoni-dubach-in/doc/263557-271088-in.pdf)
+[Report](./1-rabbits-intro/gardoni-dubach-in/doc/263557-271088-in.pdf)
 ## 2 - Reactive
 The intelligent agent represents a unique vehicle, trying to maximize profit. He travels trough a country looking for package to be delivered from town A to town B.
 When he package appears, the reward for delivering is communicated and the agents will choose whether he wants to deliver it.
 
 The solution is obtained by training Q-table offline (only the task probably of apparition is known), then blindly applying the table online.
-
+[Report](.\2-reactive\doc\263557-271088-ex2.pdf)
 ## 3 - Centralized
 The intelligent agent represents a vehicle. It knows in advance the list of task that have to be delivered, and while taking into account the weight of each task and it's own capacity, has to find the best way of delivering all those package.
-
+[Report](.\3-deliberative\263557-271088-ex3\doc\IA_proj_3_Deliberative.pdf)
 ## 4 - Deliberative
 The IA represents a company, having multiple deferent vehicle (some big vehicle, which consume a lot, some more economical small vehicle).
-
+[Report](.\4-centralized\263557-271088-ex4\doc\IA_proj_4_Centralized.pdf)
 It knows in advance the list of task that package that have to be delivered, and while taking into account the weight of each, has to find the best way of delivering all those package.
 
 ## 5 – Market 
@@ -33,8 +29,7 @@ the core of this project is:
  - Estimating the energy needed to deliver to package (for example if we already have a package with the same destination, not much additional energy is needed ? )
  - Infer a bid from the needed energy
  - Trying to model the opponent in order to maximize our profit while still getting the client.
-
-
+[Report](.\5-auction\263557-271088-ex5\doc\263557-271088-ex5.pdf)
 
 The project was successfully done in close collaboration with Marcel Dubach, for the EPFL master class *CS-430 Intelligent agents*
 
