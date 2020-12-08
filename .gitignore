@@ -17,7 +17,6 @@
 *.classpath
 *.project
 *.DS_Store
-*.pdf
 *.zip
 
 0-rabbits/instructions.txt
