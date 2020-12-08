@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <output url="file://$MODULE_DIR$/bin" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/bin" />
+    </content>
+    <content url="file://$MODULE_DIR$/bin" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="jdk" jdkName="JavaSE-1.6" jdkType="JavaSDK" />
+    <orderEntry type="library" name="LogistLibrary" level="project" />
+    <orderEntry type="library" name="logist" level="project" />
+    <orderEntry type="library" name="api" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/../../logist" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../logist" />
+        </SOURCES>
+        <jarDirectory url="file://$MODULE_DIR$/../../logist" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/../../logist" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
+  </component>
+  <component name="TemplatesService">
+    <option name="TEMPLATE_FOLDERS">
+      <list>
+        <option value="$MODULE_DIR$/bin" />
+      </list>
+    </option>
+  </component>
+</module>
